@@ -17,5 +17,4 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
 		Error apiError = new Error(HttpStatus.INTERNAL_SERVER_ERROR, ex.getLocalizedMessage(), "error occurred");
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
-
 }

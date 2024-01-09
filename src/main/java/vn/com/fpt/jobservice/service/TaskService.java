@@ -13,5 +13,5 @@ public interface TaskService {
 
   TaskEntity createTask(TaskEntity task) throws Exception;
 
-  ResponseEntity<?> deleteTaskById(Long id) throws Exception;
+  ResponseEntity<Object> deleteTaskById(Long id) throws RuntimeException;
 }

@@ -48,21 +48,19 @@ public class TaskServiceImpl implements TaskService {
       throw new Exception("Task existed with id " + task.getId());
     }
     task.setId(null);
-    System.out.println(task);
     TaskEntity newTaskEntity = taskRepository.save(task);
     log.debug("createTask - END");
     return newTaskEntity;
   }
 
   @Override
-  public ResponseEntity<?> deleteTaskById(Long id) throws Exception {
+  public ResponseEntity<Object> deleteTaskById(Long id) throws RuntimeException {
     log.debug("deleteTaskById - START");
     TaskEntity taskEntity = taskRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Tasks", "id", id));
 
     taskRepository.delete(taskEntity);
 
-    taskRepository.deleteById(id);
     log.debug("deleteTaskById - END");
     return ResponseEntity.ok().build();
   }

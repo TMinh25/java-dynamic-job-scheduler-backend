@@ -2,6 +2,7 @@ package vn.com.fpt.jobservice.entity;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.Date;
 
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -23,7 +24,7 @@ public abstract class BaseEntity implements Serializable {
 
 	@CreatedDate
 	@Column(name = "created_at")
-	protected Instant  createdAt;
+	protected Date createdAt;
 
 	@CreatedBy
 	@Column(name = "created_by")

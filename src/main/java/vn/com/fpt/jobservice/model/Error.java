@@ -13,6 +13,10 @@ public class Error {
 	private String message;
 	private List<String> errors;
 
+	public HttpStatus getStatus() {
+		return status;
+	}
+
 	public Error(HttpStatus status, String message, List<String> errors) {
 		super();
 		this.status = status;
