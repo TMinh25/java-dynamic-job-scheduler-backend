@@ -1,0 +1,20 @@
+package vn.com.fpt.jobservice.model;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import vn.com.fpt.jobservice.utils.TaskStatus;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class TaskHistoryModel {
+  private Long id;
+  private String taskId;
+  private Long step;
+  private String errorMessage;
+  private Integer retryCount;
+  private TaskStatus status;
+}
