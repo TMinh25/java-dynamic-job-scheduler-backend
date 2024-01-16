@@ -20,6 +20,5 @@ public class BatchRenewalContract extends BaseJob {
       log.info("executeInternal " + this.className);
     } catch (Exception e) {
     }
-    throw new JobExecutionException("kajnsdkanskdj.job execution");
   }
 }

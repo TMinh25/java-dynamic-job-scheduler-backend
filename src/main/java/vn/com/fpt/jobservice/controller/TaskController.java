@@ -78,11 +78,4 @@ public class TaskController {
   public ResponseEntity<Object> interuptJob(@PathVariable(value = "id") String id) {
     return taskService.interuptJob(id);
   }
-
-  @DeleteMapping("/unscheduleAll")
-  public ResponseEntity<Object> unscheduleAll() throws SchedulerException {
-    // jobService.unscheduleAll();
-    jobService.clear();
-    return ResponseEntity.ok().build();
-  }
 }

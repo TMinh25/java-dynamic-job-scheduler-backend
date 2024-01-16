@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Service;
 
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.entity.TaskType;
@@ -126,7 +125,7 @@ public class TaskServiceImpl implements TaskService {
             jobClassName);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error(e.getMessage());
       return false;
     }
     return true;

@@ -41,7 +41,4 @@ public interface JobService {
 
   boolean interuptJob(String jobName);
 
-  void unscheduleAll() throws SchedulerException;
-
-  void clear() throws SchedulerException;
 }

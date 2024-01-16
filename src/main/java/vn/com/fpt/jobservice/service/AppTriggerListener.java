@@ -25,7 +25,6 @@ public class AppTriggerListener implements TriggerListener {
 
     @Override
     public void triggerFired(Trigger trigger, JobExecutionContext context) {
-        System.out.println(trigger);
         log.info("AppTriggerListener.triggerFired()");
     }
 

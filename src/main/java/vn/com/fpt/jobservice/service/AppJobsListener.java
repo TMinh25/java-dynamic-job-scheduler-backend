@@ -31,7 +31,7 @@ public class AppJobsListener implements JobListener {
 
     @Override
     public void jobToBeExecuted(JobExecutionContext context) {
-        System.out.println(
+        log.info(
                 "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
         log.info("AppJobsListener.jobToBeExecuted()");
 

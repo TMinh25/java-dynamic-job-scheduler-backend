@@ -11,8 +11,10 @@ import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean;
 
+import lombok.extern.slf4j.Slf4j;
 import vn.com.fpt.jobservice.configuration.PersistableCronTriggerFactoryBean;
 
+@Slf4j
 public class JobUtils {
 
     /**
@@ -74,7 +76,7 @@ public class JobUtils {
         try {
             factoryBean.afterPropertiesSet();
         } catch (ParseException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
         return factoryBean.getObject();
     }
