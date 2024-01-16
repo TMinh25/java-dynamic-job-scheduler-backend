@@ -11,20 +11,26 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 @Entity
-@Table(name = "task_types")
+@Table(name = "task_types", uniqueConstraints = @UniqueConstraint(columnNames = "name"))
 @Data
-@EqualsAndHashCode(callSuper = true)
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = { "createdAt", "modifiedAt" }, allowGetters = true)
-public class TaskType extends BaseEntity {
+public class TaskType {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "name")
+  @Column(name = "name", unique = true)
   private String name;
+
+  public TaskType() {
+  }
+
+  public TaskType(String name) {
+    this.name = name;
+  }
 }

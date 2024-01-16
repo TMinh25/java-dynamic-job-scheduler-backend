@@ -1,7 +1,6 @@
 package vn.com.fpt.jobservice.service.impl;
 
-import java.util.Optional;
-
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,36 +11,49 @@ import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.entity.TaskHistory;
 import vn.com.fpt.jobservice.exception.ResourceNotFoundException;
 import vn.com.fpt.jobservice.model.PagedResponse;
-import vn.com.fpt.jobservice.repository.TaskHistoryRepository;
-import vn.com.fpt.jobservice.repository.TaskRepository;
+import vn.com.fpt.jobservice.repositories.TaskHistoryRepository;
+import vn.com.fpt.jobservice.repositories.TaskRepository;
+import vn.com.fpt.jobservice.service.JobService;
 import vn.com.fpt.jobservice.service.TaskHistoryService;
+import vn.com.fpt.jobservice.utils.TaskStatus;
+import vn.com.fpt.jobservice.utils.Utils;
+import java.util.List;
 
 @Service
 @Slf4j
 public class TaskHistoryServiceImpl implements TaskHistoryService {
   @Autowired
-  private TaskRepository tasks;
+  private TaskRepository taskRepo;
   @Autowired
-  private TaskHistoryRepository taskHistories;
+  private TaskHistoryRepository taskHistoryRepo;
+  @Autowired
+  private JobService jobService;
 
   @Override
-  public PagedResponse<TaskHistory> readAllHistoryOfTask(Pageable pageable, String taskId) {
-    log.debug("readAllHistoryOfTask - START");
-    Page<TaskHistory> histories = taskHistories.findByTaskId(pageable, taskId);
-    log.debug("readAllHistoryOfTask - END");
-    return new PagedResponse<>(histories);
+  public List<TaskHistory> readAllHistoryOfTask(String taskId) {
+    log.info("readAllHistoryOfTask - START");
+    List<TaskHistory> histories = taskHistoryRepo.findByTaskId(taskId);
+    log.info("readAllHistoryOfTask - END");
+    return histories;
   }
 
   @Override
   public TaskHistory insertNewHistoryOfTask(String taskId, TaskHistory history) {
-    log.debug("insertNewHistoryOfTask - START");
-    Optional<Task> task = tasks.findById(taskId);
-    if (taskId == null || taskId.isEmpty() || !task.isPresent()) {
-      throw new ResourceNotFoundException("Task", "taskId", taskId);
-    }
-    history.setTask(task.get());
-    TaskHistory taskHistory = taskHistories.save(history);
-    log.debug("insertNewHistoryOfTask - END");
-    return taskHistory;
+    Task task = taskRepo.findById(taskId)
+        .orElseThrow(() -> new ResourceNotFoundException("Task", "taskId", taskId));
+    history.setTask(task);
+    log.info("insertNewHistoryOfTask - END");
+    return taskHistoryRepo.save(history);
+  }
+
+  @Override
+  public TaskHistory updateProcessingHistoryOfTask(String taskId, TaskHistory history) {
+    log.info("updateHistoryOfTask - START");
+    TaskHistory taskHistory = taskHistoryRepo.findFirstByTaskIdAndStatus(taskId, TaskStatus.PROCESSING)
+        .orElseThrow(() -> new ResourceNotFoundException("TaskHistories", "taskId", taskId));
+
+    BeanUtils.copyProperties(history, taskHistory, Utils.getNullPropertyNames(history));
+    log.info("updateHistoryOfTask - END");
+    return taskHistoryRepo.save(taskHistory);
   }
 }

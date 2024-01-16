@@ -2,6 +2,7 @@ package vn.com.fpt.jobservice.entity;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.UUID;
 
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.UuidGenerator;
@@ -15,6 +16,8 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -24,17 +27,12 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
+import vn.com.fpt.jobservice.model.TaskModel;
 import vn.com.fpt.jobservice.service.TaskSchedulerService;
 import vn.com.fpt.jobservice.utils.TaskStatus;
 
 @Entity
 @Table(name = "tasks")
-// @SecondaryTable(name = "task_types", pkJoinColumns =
-// @PrimaryKeyJoinColumn(name = "task_type_id"))
-// @SecondaryTable(name = "tickets", pkJoinColumns = @PrimaryKeyJoinColumn(name
-// = "ticket_id"))
-// @SecondaryTable(name = "phases", pkJoinColumns = @PrimaryKeyJoinColumn(name =
-// "phase_id"))
 @Data
 @Slf4j
 @EqualsAndHashCode(callSuper = true)
@@ -50,8 +48,9 @@ public class Task extends BaseEntity {
   private String name;
 
   @NotNull
-  @Column(name = "task_type_id")
-  private Long taskTypeId;
+  @ManyToOne
+  @JoinColumn(name = "task_type", referencedColumnName = "name", nullable = false)
+  private TaskType taskType;
 
   @ColumnDefault("'{}'")
   @Column(name = "task_input_data")
@@ -97,12 +96,16 @@ public class Task extends BaseEntity {
   @Column(name = "prev_invocation")
   private Date prevInvocation;
 
+  @Column(name = "job_uuid", unique = true)
+  private String jobUUID;
+
   @PrePersist
   public void taskCreate() {
+    this.active = true;
+    this.jobUUID = String.format("%s_%s", taskType.getName(), UUID.randomUUID().toString());
     try {
-      log.info("Calculating next avocation", id);
+      log.info("Calculating next invocation", id);
       this.nextInvocation = TaskSchedulerService.calculateNextExecutionTime(cronExpression);
-      this.active = true;
       if (this.maxRetries == null) {
         this.maxRetries = 1;
       }
@@ -114,7 +117,7 @@ public class Task extends BaseEntity {
   @PreUpdate
   public void taskUpdate() {
     try {
-      log.info("Calculating next avocation", id);
+      log.info("Calculating next invocation", id);
       this.nextInvocation = TaskSchedulerService.calculateNextExecutionTime(cronExpression);
       if (this.maxRetries == null) {
         this.maxRetries = 1;
@@ -122,5 +125,29 @@ public class Task extends BaseEntity {
     } catch (ParseException e) {
       log.error("Error calculating next execution time: ", e);
     }
+  }
+
+  public TaskModel toModel() {
+    return TaskModel.builder()
+        .id(this.id)
+        .name(this.name)
+        .taskType(this.taskType)
+        .taskInputData(this.taskInputData)
+        .ticketId(this.ticketId)
+        .phaseId(this.phaseId)
+        .retryCount(this.retryCount)
+        .maxRetries(this.maxRetries)
+        .startStep(this.startStep)
+        .cronExpression(this.cronExpression)
+        .nextInvocation(this.nextInvocation)
+        .prevInvocation(this.prevInvocation)
+        .status(this.status)
+        .active(this.active)
+        .jobUUID(this.jobUUID)
+        .build();
+  }
+
+  public boolean canScheduleJob() {
+    return this.active && (this.retryCount < this.maxRetries);
   }
 }

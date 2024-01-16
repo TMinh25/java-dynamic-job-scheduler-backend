@@ -13,6 +13,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.OrderBy;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -32,7 +33,7 @@ public abstract class BaseEntity implements Serializable {
 
 	@LastModifiedDate
 	@Column(name = "modified_at")
-	protected Instant  modifiedAt;
+	protected Instant modifiedAt;
 
 	@LastModifiedBy
 	@Column(name = "modified_by")
