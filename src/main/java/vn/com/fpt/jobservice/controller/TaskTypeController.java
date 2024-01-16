@@ -21,7 +21,7 @@ import jakarta.validation.Valid;
 import vn.com.fpt.jobservice.entity.TaskType;
 import vn.com.fpt.jobservice.exception.ResourceNotFoundException;
 import vn.com.fpt.jobservice.model.TaskTypeModel;
-import vn.com.fpt.jobservice.repository.TaskTypeRepository;
+import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
 
 @RestController
 @RequestMapping("/task-types")
@@ -38,7 +38,7 @@ public class TaskTypeController {
   public TaskType readTaskById(@PathVariable(value = "id") Long id) throws Exception {
     Optional<TaskType> entity = taskTypeRepo.findById(id);
     if (entity.isEmpty()) {
-      throw new Exception("Task not found!");
+      throw new Exception("Task type not found!");
     }
     return entity.get();
   }
@@ -51,12 +51,11 @@ public class TaskTypeController {
 
   @PatchMapping("/{id}")
   public TaskType updateTask(
-      @PathVariable(value = "id") Long taskId,
+      @PathVariable(value = "id") Long taskTypeId,
       @Valid @RequestBody TaskTypeModel taskTypeDetails) throws Exception {
-    TaskType task = taskTypeRepo.findById(taskId)
-        .orElseThrow(() -> new ResourceNotFoundException("TaskType", "id", taskId));
+    TaskType task = taskTypeRepo.findById(taskTypeId)
+        .orElseThrow(() -> new ResourceNotFoundException("TaskType", "id", taskTypeId));
 
-    task.setName(taskTypeDetails.getName());
     TaskType updatedTask = taskTypeRepo.save(task);
     return updatedTask;
   }

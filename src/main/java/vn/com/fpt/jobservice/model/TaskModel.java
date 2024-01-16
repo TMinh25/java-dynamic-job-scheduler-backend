@@ -2,11 +2,16 @@ package vn.com.fpt.jobservice.model;
 
 import java.util.Date;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import vn.com.fpt.jobservice.entity.Task;
+import vn.com.fpt.jobservice.entity.TaskType;
+import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
+import vn.com.fpt.jobservice.utils.AutomationTaskType;
 import vn.com.fpt.jobservice.utils.TaskStatus;
 
 @Data
@@ -14,9 +19,12 @@ import vn.com.fpt.jobservice.utils.TaskStatus;
 @AllArgsConstructor
 @Builder
 public class TaskModel {
+  @Autowired
+  TaskTypeRepository taskTypeRepository;
+
   private String id;
   private String name;
-  private Long taskTypeId;
+  private TaskType taskType;
   private String taskInputData;
   private Long ticketId;
   private Long phaseId;
@@ -28,20 +36,25 @@ public class TaskModel {
   private Boolean active;
   private Date nextInvocation;
   private Date prevInvocation;
+  private String jobUUID;
 
   public Task toEntity() {
     Task taskEntity = new Task();
     taskEntity.setId(this.getId());
-    taskEntity.setTaskTypeId(this.getTaskTypeId());
+    taskEntity.setName(this.getName());
+    taskEntity.setTaskType(this.getTaskType());
     taskEntity.setTaskInputData(this.getTaskInputData());
     taskEntity.setTicketId(this.getTicketId());
     taskEntity.setPhaseId(this.getPhaseId());
     taskEntity.setRetryCount(this.getRetryCount());
     taskEntity.setMaxRetries(this.getMaxRetries());
-    taskEntity.setStatus(this.getStatus());
     taskEntity.setStartStep(this.getStartStep());
-    taskEntity.setName(this.getName());
     taskEntity.setCronExpression(this.getCronExpression());
+    taskEntity.setNextInvocation(this.getNextInvocation());
+    taskEntity.setPrevInvocation(this.getPrevInvocation());
+    taskEntity.setStatus(this.getStatus());
+    taskEntity.setActive(this.getActive());
+    taskEntity.setJobUUID(this.getJobUUID());
     return taskEntity;
   }
 }

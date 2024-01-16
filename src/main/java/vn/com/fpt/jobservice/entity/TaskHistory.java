@@ -4,6 +4,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -18,6 +19,7 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import vn.com.fpt.jobservice.utils.TaskStatus;
+import java.util.Date;
 
 @Entity
 @Table(name = "task_histories")
@@ -46,4 +48,30 @@ public class TaskHistory extends BaseEntity {
   @Enumerated(EnumType.STRING)
   @Column(name = "status")
   private TaskStatus status;
+
+  @Column(name = "started_at")
+  private Date startedAt;
+
+  @Column(name = "ended_at")
+  private Date endedAt;
+
+  public TaskHistory() {
+  }
+
+  public TaskHistory(
+      Task task,
+      Long step,
+      String errorMessage,
+      Integer retryCount,
+      TaskStatus status,
+      Date startedAt,
+      Date endedAt) {
+    this.task = task;
+    this.step = step;
+    this.errorMessage = errorMessage;
+    this.retryCount = retryCount;
+    this.status = status;
+    this.startedAt = startedAt;
+    this.endedAt = endedAt;
+  }
 }

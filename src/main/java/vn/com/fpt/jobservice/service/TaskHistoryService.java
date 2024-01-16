@@ -1,12 +1,13 @@
 package vn.com.fpt.jobservice.service;
 
-import org.springframework.data.domain.Pageable;
+import java.util.List;
 
 import vn.com.fpt.jobservice.entity.TaskHistory;
-import vn.com.fpt.jobservice.model.PagedResponse;
 
 public interface TaskHistoryService {
-  PagedResponse<TaskHistory> readAllHistoryOfTask(Pageable pageable, String taskId);
+  List<TaskHistory> readAllHistoryOfTask(String taskId);
 
-  TaskHistory insertNewHistoryOfTask(String taskId, TaskHistory history) throws Exception;
+  TaskHistory insertNewHistoryOfTask(String taskId, TaskHistory history);
+
+  TaskHistory updateProcessingHistoryOfTask(String taskId, TaskHistory history);
 }

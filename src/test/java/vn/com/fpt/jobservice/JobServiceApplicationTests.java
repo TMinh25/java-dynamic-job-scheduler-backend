@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import io.jsonwebtoken.io.IOException;
 import vn.com.fpt.jobservice.entity.Task;
-import vn.com.fpt.jobservice.repository.TaskRepository;
+import vn.com.fpt.jobservice.repositories.TaskRepository;
 
 @SpringBootTest
 class JobServiceApplicationTests {
