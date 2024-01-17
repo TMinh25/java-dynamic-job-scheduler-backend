@@ -15,35 +15,35 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfiguration {
 
-	public static final String[] EXCLUDED_PATHS = {
-			"/health",
-			"/actuator/**",
-			"/swagger-ui/**",
-			"/webjars/**",
-			"/v*/api-docs/**",
-			"/tasks/**",
-			"/task-types/**",
-			"/task-histories/**",
-	};
+    public static final String[] EXCLUDED_PATHS = {
+            "/health",
+            "/actuator/**",
+            "/swagger-ui/**",
+            "/webjars/**",
+            "/v*/api-docs/**",
+            "/tasks/**",
+            "/task-types/**",
+            "/task-histories/**",
+    };
 
-	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		return http
-				.authorizeHttpRequests(authz -> authz.requestMatchers(EXCLUDED_PATHS).permitAll().anyRequest().authenticated())
-				.sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.addFilterBefore(new AuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
-				.httpBasic((httpBasicConfig) -> httpBasicConfig.disable())
-				.headers(header -> header.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
-				.formLogin(login -> login.disable())
-				.logout(logout -> logout.disable())
-				.cors(cors -> cors.disable())
-				.csrf(csrf -> csrf.disable())
-				.build();
-	}
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        return http
+                .authorizeHttpRequests(authz -> authz.requestMatchers(EXCLUDED_PATHS).permitAll().anyRequest().authenticated())
+                .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(new AuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .httpBasic((httpBasicConfig) -> httpBasicConfig.disable())
+                .headers(header -> header.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
+                .formLogin(login -> login.disable())
+                .logout(logout -> logout.disable())
+                .cors(cors -> cors.disable())
+                .csrf(csrf -> csrf.disable())
+                .build();
+    }
 
-	@Bean
-	public WebSecurityCustomizer webSecurityCustomizer() {
-		return (web) -> web.ignoring().requestMatchers(HttpMethod.OPTIONS, "/**")
-				.requestMatchers(EXCLUDED_PATHS);
-	}
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().requestMatchers(HttpMethod.OPTIONS, "/**")
+                .requestMatchers(EXCLUDED_PATHS);
+    }
 }

@@ -1,31 +1,26 @@
 package vn.com.fpt.jobservice.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
 import vn.com.fpt.jobservice.entity.TaskHistory;
 import vn.com.fpt.jobservice.service.TaskHistoryService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/task-histories")
 public class TaskHistoryController {
-	@Autowired
-	TaskHistoryService taskHistoryService;
+    @Autowired
+    TaskHistoryService taskHistoryService;
 
-	@GetMapping("/{id}")
-	public List<TaskHistory> readAllTasks(@PathVariable(value = "id") String taskId) {
-		return taskHistoryService.readAllHistoryOfTask(taskId);
-	}
+    @GetMapping("/{id}")
+    public List<TaskHistory> readAllTasks(@PathVariable(value = "id") String taskId) {
+        return taskHistoryService.readAllHistoryOfTask(taskId);
+    }
 
-	@PostMapping("/{id}")
-	public TaskHistory insertHistoryOfTask(@PathVariable(value = "id") String taskId, TaskHistory taskHistory)
-			throws Exception {
-		return taskHistoryService.insertNewHistoryOfTask(taskId, taskHistory);
-	}
+    @PostMapping("/{id}")
+    public TaskHistory insertHistoryOfTask(@PathVariable(value = "id") String taskId, TaskHistory taskHistory)
+            throws Exception {
+        return taskHistoryService.insertNewHistoryOfTask(taskId, taskHistory);
+    }
 }

@@ -1,8 +1,6 @@
 package vn.com.fpt.jobservice.utils;
 
-import java.text.ParseException;
-import java.util.Date;
-
+import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.Trigger;
@@ -10,9 +8,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.quartz.JobDetailFactoryBean;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.scheduling.quartz.SimpleTriggerFactoryBean;
-
-import lombok.extern.slf4j.Slf4j;
 import vn.com.fpt.jobservice.configuration.PersistableCronTriggerFactoryBean;
+
+import java.text.ParseException;
+import java.util.Date;
 
 @Slf4j
 public class JobUtils {
@@ -26,7 +25,6 @@ public class JobUtils {
      * @param context   Spring application context.
      * @param jobName   Job name.
      * @param jobGroup  Job group.
-     *
      * @return JobDetail object
      */
     public static JobDetail createJob(
@@ -60,7 +58,6 @@ public class JobUtils {
      * @param cronExpression     Cron expression.
      * @param misFireInstruction Misfire instruction (what to do in case of misfire
      *                           happens).
-     *
      * @return Trigger
      */
     public static Trigger createCronTrigger(
@@ -88,7 +85,6 @@ public class JobUtils {
      * @param startTime          Trigger start time.
      * @param misFireInstruction Misfire instruction (what to do in case of misfire
      *                           happens).
-     *
      * @return Trigger
      */
     public static Trigger createSingleTrigger(String triggerName, Date startTime, int misFireInstruction) {

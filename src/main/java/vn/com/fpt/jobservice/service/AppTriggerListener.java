@@ -1,11 +1,10 @@
 package vn.com.fpt.jobservice.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobExecutionContext;
 import org.quartz.Trigger;
 import org.quartz.TriggerListener;
 import org.springframework.stereotype.Component;
-
-import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
@@ -18,20 +17,20 @@ public class AppTriggerListener implements TriggerListener {
 
     @Override
     public void triggerFired(Trigger trigger, JobExecutionContext context) {
-        log.info("AppTriggerListener.triggerFired()");
+        log.debug("AppTriggerListener.triggerFired()");
     }
 
     @Override
     public boolean vetoJobExecution(Trigger trigger, JobExecutionContext context) {
-        log.info("AppTriggerListener.vetoJobExecution()");
+        log.debug("AppTriggerListener.vetoJobExecution()");
         return false;
     }
 
     @Override
     public void triggerMisfired(Trigger trigger) {
-        log.info("AppTriggerListener.triggerMisfired()");
+        log.debug("AppTriggerListener.triggerMisfired()");
         String jobName = trigger.getJobKey().getName();
-        log.info("Job name: " + jobName + " is misfired");
+        log.debug("Job name: " + jobName + " is misfired");
     }
 
     @Override
@@ -39,6 +38,6 @@ public class AppTriggerListener implements TriggerListener {
             Trigger trigger,
             JobExecutionContext context,
             Trigger.CompletedExecutionInstruction triggerInstructionCode) {
-        log.info("AppTriggerListener.triggerComplete()");
+        log.debug("AppTriggerListener.triggerComplete()");
     }
 }
