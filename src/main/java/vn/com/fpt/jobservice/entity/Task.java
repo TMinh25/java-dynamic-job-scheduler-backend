@@ -35,7 +35,7 @@ public class Task extends BaseEntity {
     @UuidGenerator
     private String id;
 
-    @Column(name = "name")
+    @Column(name = "name", columnDefinition="varchar(255) collate utf8mb4_unicode_ci")
     private String name;
 
     @NotNull
