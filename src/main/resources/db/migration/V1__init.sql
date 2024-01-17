@@ -1,18 +1,16 @@
--- org.quartz.jobstore.driverdelegateclass = org.quartz.impl.jdbcjobstore.postgresqldelegate
+drop table if exists QRTZ_FIRED_TRIGGERS;
+drop table if exists QRTZ_PAUSED_TRIGGER_GRPS;
+drop table if exists QRTZ_SCHEDULER_STATE;
+drop table if exists QRTZ_LOCKS;
+drop table if exists QRTZ_SIMPLE_TRIGGERS;
+drop table if exists QRTZ_CRON_TRIGGERS;
+drop table if exists QRTZ_SIMPROP_TRIGGERS;
+drop table if exists QRTZ_BLOB_TRIGGERS;
+drop table if exists QRTZ_TRIGGERS;
+drop table if exists QRTZ_JOB_DETAILS;
+drop table if exists QRTZ_CALENDARS;
 
-drop table if exists qrtz_fired_triggers;
-drop table if exists qrtz_paused_trigger_grps;
-drop table if exists qrtz_scheduler_state;
-drop table if exists qrtz_locks;
-drop table if exists qrtz_simple_triggers;
-drop table if exists qrtz_cron_triggers;
-drop table if exists qrtz_simprop_triggers;
-drop table if exists qrtz_blob_triggers;
-drop table if exists qrtz_triggers;
-drop table if exists qrtz_job_details;
-drop table if exists qrtz_calendars;
-
-create table qrtz_job_details
+create table QRTZ_JOB_DETAILS
   (
     sched_name varchar(120) not null,
     job_name  varchar(200) not null,
@@ -27,7 +25,7 @@ create table qrtz_job_details
     primary key (sched_name,job_name,job_group)
 );
 
-create table qrtz_triggers
+create table QRTZ_TRIGGERS
   (
     sched_name varchar(120) not null,
     trigger_name varchar(200) not null,
@@ -47,10 +45,10 @@ create table qrtz_triggers
     job_data blob null,
     primary key (sched_name,trigger_name,trigger_group),
     foreign key (sched_name,job_name,job_group)
-	references qrtz_job_details(sched_name,job_name,job_group)
+	references QRTZ_JOB_DETAILS(sched_name,job_name,job_group)
 );
 
-create table qrtz_simple_triggers
+create table QRTZ_SIMPLE_TRIGGERS
   (
     sched_name varchar(120) not null,
     trigger_name varchar(200) not null,
@@ -60,10 +58,10 @@ create table qrtz_simple_triggers
     times_triggered bigint not null,
     primary key (sched_name,trigger_name,trigger_group),
     foreign key (sched_name,trigger_name,trigger_group)
-	references qrtz_triggers(sched_name,trigger_name,trigger_group)
+	references QRTZ_TRIGGERS(sched_name,trigger_name,trigger_group)
 );
 
-create table qrtz_cron_triggers
+create table QRTZ_CRON_TRIGGERS
   (
     sched_name varchar(120) not null,
     trigger_name varchar(200) not null,
@@ -72,10 +70,10 @@ create table qrtz_cron_triggers
     time_zone_id varchar(80),
     primary key (sched_name,trigger_name,trigger_group),
     foreign key (sched_name,trigger_name,trigger_group)
-	references qrtz_triggers(sched_name,trigger_name,trigger_group)
+	references QRTZ_TRIGGERS(sched_name,trigger_name,trigger_group)
 );
 
-create table qrtz_simprop_triggers
+create table QRTZ_SIMPROP_TRIGGERS
   (
     sched_name varchar(120) not null,
     trigger_name varchar(200) not null,
@@ -93,10 +91,10 @@ create table qrtz_simprop_triggers
     bool_prop_2 bool null,
     primary key (sched_name,trigger_name,trigger_group),
     foreign key (sched_name,trigger_name,trigger_group)
-    references qrtz_triggers(sched_name,trigger_name,trigger_group)
+    references QRTZ_TRIGGERS(sched_name,trigger_name,trigger_group)
 );
 
-create table qrtz_blob_triggers
+create table QRTZ_BLOB_TRIGGERS
   (
     sched_name varchar(120) not null,
     trigger_name varchar(200) not null,
@@ -104,10 +102,10 @@ create table qrtz_blob_triggers
     blob_data blob null,
     primary key (sched_name,trigger_name,trigger_group),
     foreign key (sched_name,trigger_name,trigger_group)
-        references qrtz_triggers(sched_name,trigger_name,trigger_group)
+        references QRTZ_TRIGGERS(sched_name,trigger_name,trigger_group)
 );
 
-create table qrtz_calendars
+create table QRTZ_CALENDARS
   (
     sched_name varchar(120) not null,
     calendar_name  varchar(200) not null,
@@ -116,14 +114,14 @@ create table qrtz_calendars
 );
 
 
-create table qrtz_paused_trigger_grps
+create table QRTZ_PAUSED_TRIGGER_GRPS
   (
     sched_name varchar(120) not null,
     trigger_group  varchar(200) not null,
     primary key (sched_name,trigger_group)
 );
 
-create table qrtz_fired_triggers
+create table QRTZ_FIRED_TRIGGERS
   (
     sched_name varchar(120) not null,
     entry_id varchar(95) not null,
@@ -141,7 +139,7 @@ create table qrtz_fired_triggers
     primary key (sched_name,entry_id)
 );
 
-create table qrtz_scheduler_state
+create table QRTZ_SCHEDULER_STATE
   (
     sched_name varchar(120) not null,
     instance_name varchar(200) not null,
@@ -150,35 +148,35 @@ create table qrtz_scheduler_state
     primary key (sched_name,instance_name)
 );
 
-create table qrtz_locks
+create table QRTZ_LOCKS
   (
     sched_name varchar(120) not null,
     lock_name  varchar(40) not null,
     primary key (sched_name,lock_name)
 );
 
-create index idx_qrtz_j_req_recovery on qrtz_job_details(sched_name,requests_recovery);
-create index idx_qrtz_j_grp on qrtz_job_details(sched_name,job_group);
+create index idx_qrtz_j_req_recovery on QRTZ_JOB_DETAILS(sched_name,requests_recovery);
+create index idx_qrtz_j_grp on QRTZ_JOB_DETAILS(sched_name,job_group);
 
-create index idx_qrtz_t_j on qrtz_triggers(sched_name,job_name,job_group);
-create index idx_qrtz_t_jg on qrtz_triggers(sched_name,job_group);
-create index idx_qrtz_t_c on qrtz_triggers(sched_name,calendar_name);
-create index idx_qrtz_t_g on qrtz_triggers(sched_name,trigger_group);
-create index idx_qrtz_t_state on qrtz_triggers(sched_name,trigger_state);
-create index idx_qrtz_t_n_state on qrtz_triggers(sched_name,trigger_name,trigger_group,trigger_state);
-create index idx_qrtz_t_n_g_state on qrtz_triggers(sched_name,trigger_group,trigger_state);
-create index idx_qrtz_t_next_fire_time on qrtz_triggers(sched_name,next_fire_time);
-create index idx_qrtz_t_nft_st on qrtz_triggers(sched_name,trigger_state,next_fire_time);
-create index idx_qrtz_t_nft_misfire on qrtz_triggers(sched_name,misfire_instr,next_fire_time);
-create index idx_qrtz_t_nft_st_misfire on qrtz_triggers(sched_name,misfire_instr,next_fire_time,trigger_state);
-create index idx_qrtz_t_nft_st_misfire_grp on qrtz_triggers(sched_name,misfire_instr,next_fire_time,trigger_group,trigger_state);
+create index idx_qrtz_t_j on QRTZ_TRIGGERS(sched_name,job_name,job_group);
+create index idx_qrtz_t_jg on QRTZ_TRIGGERS(sched_name,job_group);
+create index idx_qrtz_t_c on QRTZ_TRIGGERS(sched_name,calendar_name);
+create index idx_qrtz_t_g on QRTZ_TRIGGERS(sched_name,trigger_group);
+create index idx_qrtz_t_state on QRTZ_TRIGGERS(sched_name,trigger_state);
+create index idx_qrtz_t_n_state on QRTZ_TRIGGERS(sched_name,trigger_name,trigger_group,trigger_state);
+create index idx_qrtz_t_n_g_state on QRTZ_TRIGGERS(sched_name,trigger_group,trigger_state);
+create index idx_qrtz_t_next_fire_time on QRTZ_TRIGGERS(sched_name,next_fire_time);
+create index idx_qrtz_t_nft_st on QRTZ_TRIGGERS(sched_name,trigger_state,next_fire_time);
+create index idx_qrtz_t_nft_misfire on QRTZ_TRIGGERS(sched_name,misfire_instr,next_fire_time);
+create index idx_qrtz_t_nft_st_misfire on QRTZ_TRIGGERS(sched_name,misfire_instr,next_fire_time,trigger_state);
+create index idx_qrtz_t_nft_st_misfire_grp on QRTZ_TRIGGERS(sched_name,misfire_instr,next_fire_time,trigger_group,trigger_state);
 
-create index idx_qrtz_ft_trig_inst_name on qrtz_fired_triggers(sched_name,instance_name);
-create index idx_qrtz_ft_inst_job_req_rcvry on qrtz_fired_triggers(sched_name,instance_name,requests_recovery);
-create index idx_qrtz_ft_j_g on qrtz_fired_triggers(sched_name,job_name,job_group);
-create index idx_qrtz_ft_jg on qrtz_fired_triggers(sched_name,job_group);
-create index idx_qrtz_ft_t_g on qrtz_fired_triggers(sched_name,trigger_name,trigger_group);
-create index idx_qrtz_ft_tg on qrtz_fired_triggers(sched_name,trigger_group);
+create index idx_qrtz_ft_trig_inst_name on QRTZ_FIRED_TRIGGERS(sched_name,instance_name);
+create index idx_qrtz_ft_inst_job_req_rcvry on QRTZ_FIRED_TRIGGERS(sched_name,instance_name,requests_recovery);
+create index idx_qrtz_ft_j_g on QRTZ_FIRED_TRIGGERS(sched_name,job_name,job_group);
+create index idx_qrtz_ft_jg on QRTZ_FIRED_TRIGGERS(sched_name,job_group);
+create index idx_qrtz_ft_t_g on QRTZ_FIRED_TRIGGERS(sched_name,trigger_name,trigger_group);
+create index idx_qrtz_ft_tg on QRTZ_FIRED_TRIGGERS(sched_name,trigger_group);
 
 
 commit;
