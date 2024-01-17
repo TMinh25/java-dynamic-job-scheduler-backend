@@ -11,13 +11,13 @@ import vn.com.fpt.jobservice.entity.TaskType;
 @AllArgsConstructor
 @Builder
 public class TaskTypeModel {
-	private Long id;
-	private String name;
+    private Long id;
+    private String name;
 
-	public TaskType toEntity() {
-		TaskType taskTypeEntity = new TaskType();
-		taskTypeEntity.setId(this.getId());
-		taskTypeEntity.setName(this.getName());
-		return taskTypeEntity;
-	}
+    public TaskType toEntity() {
+        TaskType taskTypeEntity = new TaskType();
+        taskTypeEntity.setId(this.getId());
+        taskTypeEntity.setName(this.getName());
+        return taskTypeEntity;
+    }
 }

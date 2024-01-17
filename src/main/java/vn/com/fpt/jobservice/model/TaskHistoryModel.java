@@ -11,10 +11,10 @@ import vn.com.fpt.jobservice.utils.TaskStatus;
 @AllArgsConstructor
 @Builder
 public class TaskHistoryModel {
-  private Long id;
-  private String taskId;
-  private Long step;
-  private String errorMessage;
-  private Integer retryCount;
-  private TaskStatus status;
+    private Long id;
+    private String taskId;
+    private Long step;
+    private String errorMessage;
+    private Integer retryCount;
+    private TaskStatus status;
 }

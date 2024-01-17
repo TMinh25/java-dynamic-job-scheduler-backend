@@ -1,24 +1,26 @@
 package vn.com.fpt.jobservice.jobs;
 
+import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import lombok.extern.slf4j.Slf4j;
-import vn.com.fpt.jobservice.service.TaskService;
 
 @Slf4j
 public class BatchRenewalContract extends BaseJob {
-  @Autowired
-  TaskService taskService;
 
-  @Override
-  public void executeInternal(JobExecutionContext context) throws JobExecutionException {
-    super.executeInternal(context);
-    try {
-      Thread.sleep(3000);
-      log.info("executeInternal " + this.className);
-    } catch (Exception e) {
+    @Override
+    public void executeInternal(JobExecutionContext context) throws JobExecutionException {
+        super.executeInternal(context);
+        try {
+            Thread.sleep(3000);
+
+            // ObjectMapper objectMapper = new ObjectMapper();
+            // RequestDetailsModel taskInputData = objectMapper.readValue(
+            //     this.task.getTaskInputData(),
+            //     RequestDetailsModel.class);
+
+            jobInfo(task.getTaskInputData());
+        } catch (Exception e) {
+            throw new JobExecutionException(e.getMessage());
+        }
     }
-  }
 }

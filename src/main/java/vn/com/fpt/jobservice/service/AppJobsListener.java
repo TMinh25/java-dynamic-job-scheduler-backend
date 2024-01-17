@@ -1,18 +1,17 @@
 package vn.com.fpt.jobservice.service;
 
-import java.util.Date;
-
+import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.JobListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-
-import lombok.extern.slf4j.Slf4j;
 import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.entity.TaskHistory;
 import vn.com.fpt.jobservice.exception.ResourceNotFoundException;
 import vn.com.fpt.jobservice.utils.TaskStatus;
+
+import java.util.Date;
 
 @Configuration
 @Slf4j
@@ -31,9 +30,7 @@ public class AppJobsListener implements JobListener {
 
     @Override
     public void jobToBeExecuted(JobExecutionContext context) {
-        log.info(
-                "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-        log.info("AppJobsListener.jobToBeExecuted()");
+        log.debug("AppJobsListener.jobToBeExecuted()");
 
         Date executionDate = new Date();
 
@@ -56,12 +53,12 @@ public class AppJobsListener implements JobListener {
 
     @Override
     public void jobExecutionVetoed(JobExecutionContext context) {
-        log.info("AppJobsListener.jobExecutionVetoed()");
+        log.debug("AppJobsListener.jobExecutionVetoed()");
     }
 
     @Override
     public void jobWasExecuted(JobExecutionContext context, JobExecutionException jobException) {
-        log.info("AppJobsListener.jobWasExecuted()");
+        log.debug("AppJobsListener.jobWasExecuted()");
         Task task = null;
         TaskHistory taskHistory = new TaskHistory();
         try {
