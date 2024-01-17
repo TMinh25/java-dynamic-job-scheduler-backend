@@ -40,114 +40,107 @@ import vn.com.fpt.jobservice.utils.TaskStatus;
 @JsonIgnoreProperties(value = { "createdAt", "modifiedAt" }, allowGetters = true)
 public class Task extends BaseEntity {
 
-  @Id
-  @UuidGenerator
-  private String id;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1490775644920845503L;
 
-  @Column(name = "name")
-  private String name;
+	@Id
+	@UuidGenerator
+	private String id;
 
-  @NotNull
-  @ManyToOne
-  @JoinColumn(name = "task_type", referencedColumnName = "name", nullable = false)
-  private TaskType taskType;
+	@Column(name = "name")
+	private String name;
 
-  @ColumnDefault("'{}'")
-  @Column(name = "task_input_data")
-  private String taskInputData;
+	@NotNull
+	@ManyToOne
+	@JoinColumn(name = "task_type", referencedColumnName = "name", nullable = false)
+	private TaskType taskType;
 
-  @NotNull
-  @Column(name = "ticket_id")
-  private Long ticketId;
+	@ColumnDefault("'{}'")
+	@Column(name = "task_input_data")
+	private String taskInputData;
 
-  @NotNull
-  @Column(name = "phase_id")
-  private Long phaseId;
+	@NotNull
+	@Column(name = "ticket_id")
+	private Long ticketId;
 
-  @ColumnDefault("0")
-  @Column(name = "retry_count")
-  private Integer retryCount;
+	@NotNull
+	@Column(name = "phase_id")
+	private Long phaseId;
 
-  @ColumnDefault("1")
-  @Column(name = "max_retries")
-  private Integer maxRetries;
+	@ColumnDefault("0")
+	@Column(name = "retry_count")
+	private Integer retryCount;
 
-  @Enumerated(EnumType.STRING)
-  @ColumnDefault("'PENDING'")
-  @Column(name = "status")
-  private TaskStatus status;
+	@ColumnDefault("1")
+	@Column(name = "max_retries")
+	private Integer maxRetries;
 
-  @ColumnDefault("0")
-  @Column(name = "start_step")
-  private Integer startStep;
+	@Enumerated(EnumType.STRING)
+	@ColumnDefault("'PENDING'")
+	@Column(name = "status")
+	private TaskStatus status;
 
-  @Column(name = "cron_expression")
-  private String cronExpression;
+	@ColumnDefault("0")
+	@Column(name = "start_step")
+	private Integer startStep;
 
-  @ColumnDefault("b'1'") // true
-  @Column(name = "active")
-  private Boolean active;
+	@Column(name = "cron_expression")
+	private String cronExpression;
 
-  @Temporal(TemporalType.TIMESTAMP)
-  @Column(name = "next_invocation")
-  private Date nextInvocation;
+	@ColumnDefault("b'1'") // true
+	@Column(name = "active")
+	private Boolean active;
 
-  @Temporal(TemporalType.TIMESTAMP)
-  @Column(name = "prev_invocation")
-  private Date prevInvocation;
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "next_invocation")
+	private Date nextInvocation;
 
-  @Column(name = "job_uuid", unique = true)
-  private String jobUUID;
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "prev_invocation")
+	private Date prevInvocation;
 
-  @PrePersist
-  public void taskCreate() {
-    this.active = true;
-    this.jobUUID = String.format("%s_%s", taskType.getName(), UUID.randomUUID().toString());
-    try {
-      log.info("Calculating next invocation", id);
-      this.nextInvocation = TaskSchedulerService.calculateNextExecutionTime(cronExpression);
-      if (this.maxRetries == null) {
-        this.maxRetries = 1;
-      }
-    } catch (ParseException e) {
-      log.error("Error calculating next execution time: ", e);
-    }
-  }
+	@Column(name = "job_uuid", unique = true)
+	private String jobUUID;
 
-  @PreUpdate
-  public void taskUpdate() {
-    try {
-      log.info("Calculating next invocation", id);
-      this.nextInvocation = TaskSchedulerService.calculateNextExecutionTime(cronExpression);
-      if (this.maxRetries == null) {
-        this.maxRetries = 1;
-      }
-    } catch (ParseException e) {
-      log.error("Error calculating next execution time: ", e);
-    }
-  }
+	@PrePersist
+	public void taskCreate() {
+		this.active = true;
+		this.jobUUID = String.format("%s_%s", taskType.getName(), UUID.randomUUID().toString());
+		try {
+			log.info("Calculating next invocation", id);
+			this.nextInvocation = TaskSchedulerService.calculateNextExecutionTime(cronExpression);
+			if (this.maxRetries == null) {
+				this.maxRetries = 1;
+			}
+		} catch (ParseException e) {
+			log.error("Error calculating next execution time: ", e);
+		}
+	}
 
-  public TaskModel toModel() {
-    return TaskModel.builder()
-        .id(this.id)
-        .name(this.name)
-        .taskType(this.taskType)
-        .taskInputData(this.taskInputData)
-        .ticketId(this.ticketId)
-        .phaseId(this.phaseId)
-        .retryCount(this.retryCount)
-        .maxRetries(this.maxRetries)
-        .startStep(this.startStep)
-        .cronExpression(this.cronExpression)
-        .nextInvocation(this.nextInvocation)
-        .prevInvocation(this.prevInvocation)
-        .status(this.status)
-        .active(this.active)
-        .jobUUID(this.jobUUID)
-        .build();
-  }
+	@PreUpdate
+	public void taskUpdate() {
+		try {
+			log.info("Calculating next invocation", id);
+			this.nextInvocation = TaskSchedulerService.calculateNextExecutionTime(cronExpression);
+			if (this.maxRetries == null) {
+				this.maxRetries = 1;
+			}
+		} catch (ParseException e) {
+			log.error("Error calculating next execution time: ", e);
+		}
+	}
 
-  public boolean canScheduleJob() {
-    return this.active && (this.retryCount < this.maxRetries);
-  }
+	public TaskModel toModel() {
+		return TaskModel.builder().id(this.id).name(this.name).taskType(this.taskType).taskInputData(this.taskInputData)
+				.ticketId(this.ticketId).phaseId(this.phaseId).retryCount(this.retryCount).maxRetries(this.maxRetries)
+				.startStep(this.startStep).cronExpression(this.cronExpression).nextInvocation(this.nextInvocation)
+				.prevInvocation(this.prevInvocation).status(this.status).active(this.active).jobUUID(this.jobUUID)
+				.build();
+	}
+
+	public boolean canScheduleJob() {
+		return this.active && (this.retryCount < this.maxRetries);
+	}
 }

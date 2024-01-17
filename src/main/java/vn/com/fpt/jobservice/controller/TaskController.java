@@ -3,7 +3,6 @@ package vn.com.fpt.jobservice.controller;
 import java.util.List;
 import java.util.Map;
 
-import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -28,54 +27,53 @@ import vn.com.fpt.jobservice.service.TaskService;
 @RequestMapping("/tasks")
 public class TaskController {
 
-  @Autowired
-  TaskService taskService;
+	@Autowired
+	TaskService taskService;
 
-  @Autowired
-  JobService jobService;
+	@Autowired
+	JobService jobService;
 
-  @GetMapping()
-  public PagedResponse<Task> searchTasks(
-      Pageable pageable,
-      @RequestParam(value = "search", required = false, defaultValue = "") String searchQuery) {
-    return taskService.searchTasks(pageable, searchQuery);
-  }
+	@GetMapping()
+	public PagedResponse<Task> searchTasks(Pageable pageable,
+			@RequestParam(value = "search", required = false, defaultValue = "") String searchQuery) {
+		return taskService.searchTasks(pageable, searchQuery);
+	}
 
-  @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-  public Task createTask(@RequestBody TaskModel taskModel) throws Exception {
-    Task task = taskModel.toEntity();
-    return taskService.createTask(task);
-  }
+	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+	public Task createTask(@RequestBody TaskModel taskModel) throws Exception {
+		Task task = taskModel.toEntity();
+		return taskService.createTask(task);
+	}
 
-  @GetMapping("/{id}")
-  public Task readTaskById(@PathVariable(value = "id") String id) throws Exception {
-    return taskService.readTaskById(id).get();
-  }
+	@GetMapping("/{id}")
+	public Task readTaskById(@PathVariable(value = "id") String id) throws Exception {
+		return taskService.readTaskById(id).get();
+	}
 
-  @DeleteMapping("/{id}")
-  public ResponseEntity<Object> deleteTaskById(@PathVariable(value = "id") String id) throws Exception {
-    return taskService.deleteTaskById(id);
-  }
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Object> deleteTaskById(@PathVariable(value = "id") String id) throws Exception {
+		return taskService.deleteTaskById(id);
+	}
 
-  @PatchMapping("/{id}")
-  public Task patchActivateTask(@PathVariable(value = "id") String id, @RequestBody TaskModel taskModel)
-      throws Exception {
-    return taskService.updateTaskById(id, taskModel);
-  }
+	@PatchMapping("/{id}")
+	public Task patchActivateTask(@PathVariable(value = "id") String id, @RequestBody TaskModel taskModel)
+			throws Exception {
+		return taskService.updateTaskById(id, taskModel);
+	}
 
-  @GetMapping("/jobs")
-  public List<Map<String, Object>> getAllJobs() {
-    List<Map<String, Object>> list = jobService.getAllJobs();
-    return list;
-  }
+	@GetMapping("/jobs")
+	public List<Map<String, Object>> getAllJobs() {
+		List<Map<String, Object>> list = jobService.getAllJobs();
+		return list;
+	}
 
-  @GetMapping("/trigger/{id}")
-  public ResponseEntity<Object> triggerJob(@PathVariable(value = "id") String id) throws Exception {
-    return taskService.triggerJob(id);
-  }
+	@GetMapping("/trigger/{id}")
+	public ResponseEntity<Object> triggerJob(@PathVariable(value = "id") String id) throws Exception {
+		return taskService.triggerJob(id);
+	}
 
-  @GetMapping("/interupt/{id}")
-  public ResponseEntity<Object> interuptJob(@PathVariable(value = "id") String id) {
-    return taskService.interuptJob(id);
-  }
+	@GetMapping("/interupt/{id}")
+	public ResponseEntity<Object> interuptJob(@PathVariable(value = "id") String id) {
+		return taskService.interuptJob(id);
+	}
 }

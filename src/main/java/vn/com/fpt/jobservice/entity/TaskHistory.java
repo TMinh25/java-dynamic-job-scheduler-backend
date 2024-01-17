@@ -1,10 +1,11 @@
 package vn.com.fpt.jobservice.entity;
 
+import java.util.Date;
+
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -19,7 +20,6 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import vn.com.fpt.jobservice.utils.TaskStatus;
-import java.util.Date;
 
 @Entity
 @Table(name = "task_histories")
@@ -28,50 +28,49 @@ import java.util.Date;
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = { "createdAt", "modifiedAt" }, allowGetters = true)
 public class TaskHistory extends BaseEntity {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
-  @ManyToOne
-  @JoinColumn(name = "task_id")
-  private Task task;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-  @Column(name = "step")
-  private Long step;
+	@ManyToOne
+	@JoinColumn(name = "task_id")
+	private Task task;
 
-  @Column(name = "error_message")
-  private String errorMessage;
+	@Column(name = "step")
+	private Long step;
 
-  @Column(name = "retry_count")
-  private Integer retryCount;
+	@Column(name = "error_message")
+	private String errorMessage;
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "status")
-  private TaskStatus status;
+	@Column(name = "retry_count")
+	private Integer retryCount;
 
-  @Column(name = "started_at")
-  private Date startedAt;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "status")
+	private TaskStatus status;
 
-  @Column(name = "ended_at")
-  private Date endedAt;
+	@Column(name = "started_at")
+	private Date startedAt;
 
-  public TaskHistory() {
-  }
+	@Column(name = "ended_at")
+	private Date endedAt;
 
-  public TaskHistory(
-      Task task,
-      Long step,
-      String errorMessage,
-      Integer retryCount,
-      TaskStatus status,
-      Date startedAt,
-      Date endedAt) {
-    this.task = task;
-    this.step = step;
-    this.errorMessage = errorMessage;
-    this.retryCount = retryCount;
-    this.status = status;
-    this.startedAt = startedAt;
-    this.endedAt = endedAt;
-  }
+	public TaskHistory() {
+	}
+
+	public TaskHistory(Task task, Long step, String errorMessage, Integer retryCount, TaskStatus status, Date startedAt,
+			Date endedAt) {
+		this.task = task;
+		this.step = step;
+		this.errorMessage = errorMessage;
+		this.retryCount = retryCount;
+		this.status = status;
+		this.startedAt = startedAt;
+		this.endedAt = endedAt;
+	}
 }

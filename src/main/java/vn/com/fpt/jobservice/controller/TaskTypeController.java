@@ -26,46 +26,45 @@ import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
 @RestController
 @RequestMapping("/task-types")
 public class TaskTypeController {
-  @Autowired
-  TaskTypeRepository taskTypeRepo;
+	@Autowired
+	TaskTypeRepository taskTypeRepo;
 
-  @GetMapping()
-  public Page<TaskType> readAllTasks(Pageable pageable) {
-    return taskTypeRepo.findAll(pageable);
-  }
+	@GetMapping()
+	public Page<TaskType> readAllTasks(Pageable pageable) {
+		return taskTypeRepo.findAll(pageable);
+	}
 
-  @GetMapping("/{id}")
-  public TaskType readTaskById(@PathVariable(value = "id") Long id) throws Exception {
-    Optional<TaskType> entity = taskTypeRepo.findById(id);
-    if (entity.isEmpty()) {
-      throw new Exception("Task type not found!");
-    }
-    return entity.get();
-  }
+	@GetMapping("/{id}")
+	public TaskType readTaskById(@PathVariable(value = "id") Long id) throws Exception {
+		Optional<TaskType> entity = taskTypeRepo.findById(id);
+		if (entity.isEmpty()) {
+			throw new Exception("Task type not found!");
+		}
+		return entity.get();
+	}
 
-  @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-  public TaskType createTask(@Validated @RequestBody TaskTypeModel taskModel) throws Exception {
-    TaskType taskType = taskModel.toEntity();
-    return taskTypeRepo.save(taskType);
-  }
+	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+	public TaskType createTask(@Validated @RequestBody TaskTypeModel taskModel) throws Exception {
+		TaskType taskType = taskModel.toEntity();
+		return taskTypeRepo.save(taskType);
+	}
 
-  @PatchMapping("/{id}")
-  public TaskType updateTask(
-      @PathVariable(value = "id") Long taskTypeId,
-      @Valid @RequestBody TaskTypeModel taskTypeDetails) throws Exception {
-    TaskType task = taskTypeRepo.findById(taskTypeId)
-        .orElseThrow(() -> new ResourceNotFoundException("TaskType", "id", taskTypeId));
+	@PatchMapping("/{id}")
+	public TaskType updateTask(@PathVariable(value = "id") Long taskTypeId,
+			@Valid @RequestBody TaskTypeModel taskTypeDetails) throws Exception {
+		TaskType task = taskTypeRepo.findById(taskTypeId)
+				.orElseThrow(() -> new ResourceNotFoundException("TaskType", "id", taskTypeId));
 
-    TaskType updatedTask = taskTypeRepo.save(task);
-    return updatedTask;
-  }
+		TaskType updatedTask = taskTypeRepo.save(task);
+		return updatedTask;
+	}
 
-  @DeleteMapping("/{id}")
-  public ResponseEntity<Object> deleteTaskById(@PathVariable(value = "id") Long id) throws Exception {
-    TaskType taskType = taskTypeRepo.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("TaskType", "id", id));
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Object> deleteTaskById(@PathVariable(value = "id") Long id) throws Exception {
+		TaskType taskType = taskTypeRepo.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("TaskType", "id", id));
 
-    taskTypeRepo.delete(taskType);
-    return ResponseEntity.ok().build();
-  }
+		taskTypeRepo.delete(taskType);
+		return ResponseEntity.ok().build();
+	}
 }

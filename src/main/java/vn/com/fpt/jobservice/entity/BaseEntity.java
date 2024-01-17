@@ -13,7 +13,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.OrderBy;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,6 +21,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public abstract class BaseEntity implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2207382926013685994L;
 
 	@CreatedDate
 	@Column(name = "created_at")

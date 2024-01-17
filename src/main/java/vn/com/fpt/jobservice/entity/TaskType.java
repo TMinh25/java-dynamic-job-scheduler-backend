@@ -20,17 +20,17 @@ import lombok.Data;
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = { "createdAt", "modifiedAt" }, allowGetters = true)
 public class TaskType {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-  @Column(name = "name", unique = true)
-  private String name;
+	@Column(name = "name", unique = true)
+	private String name;
 
-  public TaskType() {
-  }
+	public TaskType() {
+	}
 
-  public TaskType(String name) {
-    this.name = name;
-  }
+	public TaskType(String name) {
+		this.name = name;
+	}
 }

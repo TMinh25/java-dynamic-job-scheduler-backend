@@ -15,17 +15,17 @@ import vn.com.fpt.jobservice.service.TaskHistoryService;
 @RestController
 @RequestMapping("/task-histories")
 public class TaskHistoryController {
-  @Autowired
-  TaskHistoryService taskHistoryService;
+	@Autowired
+	TaskHistoryService taskHistoryService;
 
-  @GetMapping("/{id}")
-  public List<TaskHistory> readAllTasks(@PathVariable(value = "id") String taskId) {
-    return taskHistoryService.readAllHistoryOfTask(taskId);
-  }
+	@GetMapping("/{id}")
+	public List<TaskHistory> readAllTasks(@PathVariable(value = "id") String taskId) {
+		return taskHistoryService.readAllHistoryOfTask(taskId);
+	}
 
-  @PostMapping("/{id}")
-  public TaskHistory insertHistoryOfTask(@PathVariable(value = "id") String taskId, TaskHistory taskHistory)
-      throws Exception {
-    return taskHistoryService.insertNewHistoryOfTask(taskId, taskHistory);
-  }
+	@PostMapping("/{id}")
+	public TaskHistory insertHistoryOfTask(@PathVariable(value = "id") String taskId, TaskHistory taskHistory)
+			throws Exception {
+		return taskHistoryService.insertNewHistoryOfTask(taskId, taskHistory);
+	}
 }
