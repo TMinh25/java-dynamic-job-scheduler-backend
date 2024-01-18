@@ -90,10 +90,11 @@ public class TaskServiceImpl implements TaskService {
             task.setStartStep(0);
         }
 
-        TaskType taskType = taskTypeRepository.findByName(task.getTaskType().getName())
-                .orElseThrow(() -> new ResourceNotFoundException("Task type", "name", task.getTaskType().getName()));
+        TaskType taskType = taskTypeRepository.findById(task.getTaskType().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Task type", "id", task.getTaskType().getId()));
 
         task.setTaskType(taskType);
+        task.setName(taskType.getName());
 
         Task newTaskEntity = taskRepository.save(task);
         if (newTaskEntity.canScheduleJob())
@@ -105,8 +106,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public boolean scheduleJob(Task task, TaskType taskType) {
         try {
-            String jobClassName = "vn.com.fpt.jobservice.jobs."
-                    + AutomationTaskType.valueOf(AutomationTaskType.class, taskType.getName());
+            String jobClassName = "vn.com.fpt.jobservice.jobs." + taskType.getClassName();
 
             Class<?> jobClass = Class.forName(jobClassName);
 

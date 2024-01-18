@@ -40,7 +40,7 @@ public class Task extends BaseEntity {
 
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "task_type", referencedColumnName = "name", nullable = false)
+    @JoinColumn(name = "task_type_id", referencedColumnName = "id", nullable = false)
     private TaskType taskType;
 
     @ColumnDefault("'{}'")
@@ -54,6 +54,9 @@ public class Task extends BaseEntity {
     @NotNull
     @Column(name = "phase_id")
     private Long phaseId;
+
+    @Column(name = "phase_name")
+    private String phaseName;
 
     @ColumnDefault("0")
     @Column(name = "retry_count")
@@ -93,7 +96,7 @@ public class Task extends BaseEntity {
     @PrePersist
     public void taskCreate() {
         this.active = true;
-        this.jobUUID = String.format("%s_%s", taskType.getName(), UUID.randomUUID());
+        this.jobUUID = String.format("%s_%s", taskType.getClassName(), UUID.randomUUID());
         try {
             log.debug("Calculating next invocation", id);
             this.nextInvocation = TaskSchedulerService.calculateNextExecutionTime(cronExpression);

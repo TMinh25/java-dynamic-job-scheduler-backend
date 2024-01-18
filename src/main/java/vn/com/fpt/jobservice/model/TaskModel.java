@@ -7,22 +7,22 @@ import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.entity.TaskType;
+import vn.com.fpt.jobservice.exception.ResourceNotFoundException;
 import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
 import vn.com.fpt.jobservice.utils.TaskStatus;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class TaskModel {
-    @Autowired
-    TaskTypeRepository taskTypeRepository;
-
     private String id;
     private String name;
     private TaskType taskType;
+    private Long taskTypeId;
     private String taskInputData;
     private Long ticketId;
     private Long phaseId;
@@ -36,11 +36,19 @@ public class TaskModel {
     private Date prevInvocation;
     private String jobUUID;
 
-    public Task toEntity() {
+    public Task toEntity(TaskTypeRepository taskTypeRepository) {
         Task taskEntity = new Task();
-        taskEntity.setId(this.getId());
+        if (this.getId() != null) {
+            taskEntity.setId(this.getId());
+        } else {
+            taskEntity.setId(UUID.randomUUID().toString());
+        }
         taskEntity.setName(this.getName());
-        taskEntity.setTaskType(this.getTaskType());
+        if (taskTypeId != null) {
+            TaskType taskType = taskTypeRepository.findById(taskTypeId)
+                    .orElseThrow(() -> new ResourceNotFoundException("TaskType", "id", taskTypeId));
+            taskEntity.setTaskType(taskType);
+        }
         taskEntity.setTaskInputData(this.getTaskInputData());
         taskEntity.setTicketId(this.getTicketId());
         taskEntity.setPhaseId(this.getPhaseId());

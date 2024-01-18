@@ -4,24 +4,29 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import vn.com.fpt.jobservice.utils.AutomationTaskType;
 
 @Entity
-@Table(name = "task_types", uniqueConstraints = @UniqueConstraint(columnNames = "name"))
+@Table(name = "task_types", uniqueConstraints = @UniqueConstraint(columnNames = "class_name"))
 @Data
 @EntityListeners(AuditingEntityListener.class)
-@JsonIgnoreProperties(value = {"createdAt", "modifiedAt"}, allowGetters = true)
 public class TaskType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", unique = true)
+    @Column(name = "name", unique = true, columnDefinition = "varchar(255) collate utf8mb4_unicode_ci")
     private String name;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "class_name")
+    private AutomationTaskType className;
 
     public TaskType() {
     }
 
-    public TaskType(String name) {
+    public TaskType(String name, AutomationTaskType className) {
         this.name = name;
+        this.className = className;
     }
 }
