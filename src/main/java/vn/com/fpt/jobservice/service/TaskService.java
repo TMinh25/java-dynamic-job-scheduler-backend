@@ -17,6 +17,8 @@ public interface TaskService {
 
     Optional<Task> readTaskById(String id) throws Exception;
 
+    Task readTaskByTicketIdAndPhaseId(Long ticketId, Long phaseId) throws Exception;
+
     Optional<Task> readTaskByJobUUID(String jobUUID);
 
     Task createTask(Task task) throws Exception;

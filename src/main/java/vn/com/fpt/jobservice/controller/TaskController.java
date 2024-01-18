@@ -66,6 +66,14 @@ public class TaskController {
         return taskService.triggerJob(id);
     }
 
+    @GetMapping("/trigger")
+    public ResponseEntity<Object> triggerJobByPhase(
+            @RequestParam(value = "ticketId", required = true) Long ticketId,
+            @RequestParam(value = "phaseId", required = true) Long phaseId) throws Exception {
+        Task task = taskService.readTaskByTicketIdAndPhaseId(ticketId, phaseId);
+        return taskService.triggerJob(task.getId());
+    }
+
     @GetMapping("/interupt/{id}")
     public ResponseEntity<Object> interuptJob(@PathVariable(value = "id") String id) {
         return taskService.interuptJob(id);

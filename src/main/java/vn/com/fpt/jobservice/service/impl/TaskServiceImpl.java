@@ -20,6 +20,7 @@ import vn.com.fpt.jobservice.service.JobService;
 import vn.com.fpt.jobservice.service.TaskService;
 import vn.com.fpt.jobservice.utils.AutomationTaskType;
 import vn.com.fpt.jobservice.utils.TaskStatus;
+import vn.com.fpt.jobservice.utils.TaskTypeType;
 import vn.com.fpt.jobservice.utils.Utils;
 
 import java.util.Date;
@@ -69,6 +70,16 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    public Task readTaskByTicketIdAndPhaseId(Long ticketId, Long phaseId) throws Exception {
+        log.debug("readTaskById - START");
+        Task entity = taskRepository.findByTicketIdAndPhaseId(ticketId, phaseId)
+                .orElseThrow(() -> new Exception(
+                        String.format("Task not found with ticketId = '%s' and phaseId = '%s'", ticketId, phaseId)));
+        log.debug("readTaskById - END");
+        return entity;
+    }
+
+    @Override
     public Optional<Task> readTaskByJobUUID(String jobUUID) {
         log.debug("readTaskByJobUUID - START");
         Optional<Task> entity = taskRepository.findByJobUUID(jobUUID);
@@ -106,22 +117,25 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public boolean scheduleJob(Task task, TaskType taskType) {
         try {
-            String jobClassName = "vn.com.fpt.jobservice.jobs." + taskType.getClassName();
+            if (taskType.getType() == TaskTypeType.SYSTEM) { // Job mặc định của hệ thống
+                String jobClassName = "vn.com.fpt.jobservice.jobs." + taskType.getClassName();
+                Class<?> jobClass = Class.forName(jobClassName);
 
-            Class<?> jobClass = Class.forName(jobClassName);
+                if (QuartzJobBean.class.isAssignableFrom(jobClass)) {
+                    @SuppressWarnings("unchecked")
+                    Class<? extends QuartzJobBean> quartzJobClass = (Class<? extends QuartzJobBean>) jobClass;
 
-            if (QuartzJobBean.class.isAssignableFrom(jobClass)) {
-                @SuppressWarnings("unchecked")
-                Class<? extends QuartzJobBean> quartzJobClass = (Class<? extends QuartzJobBean>) jobClass;
+                    _jobService.scheduleCronJob(
+                            task.getJobUUID(),
+                            quartzJobClass,
+                            task.getNextInvocation(),
+                            task.getCronExpression());
+                } else {
+                    throw new Exception("Class is not a subclass of QuartzJobBean: " +
+                            jobClassName);
+                }
+            } else if (taskType.getType() == TaskTypeType.CUSTOM) { // Job tự định nghĩa
 
-                _jobService.scheduleCronJob(
-                        task.getJobUUID(),
-                        quartzJobClass,
-                        task.getNextInvocation(),
-                        task.getCronExpression());
-            } else {
-                throw new Exception("Class is not a subclass of QuartzJobBean: " +
-                        jobClassName);
             }
         } catch (Exception e) {
             log.error(e.getMessage());

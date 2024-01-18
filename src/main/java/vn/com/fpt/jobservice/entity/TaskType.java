@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import vn.com.fpt.jobservice.utils.AutomationTaskType;
+import vn.com.fpt.jobservice.utils.TaskTypeType;
 
 @Entity
 @Table(name = "task_types", uniqueConstraints = @UniqueConstraint(columnNames = "class_name"))
@@ -21,6 +22,10 @@ public class TaskType {
     @Enumerated(EnumType.STRING)
     @Column(name = "class_name")
     private AutomationTaskType className;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type")
+    private TaskTypeType type;
 
     public TaskType() {
     }

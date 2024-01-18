@@ -12,13 +12,6 @@ public class BatchRenewalContract extends BaseJob {
         super.executeInternal(context);
         try {
             Thread.sleep(3000);
-
-            // ObjectMapper objectMapper = new ObjectMapper();
-            // RequestDetailsModel taskInputData = objectMapper.readValue(
-            //     this.task.getTaskInputData(),
-            //     RequestDetailsModel.class);
-
-            jobInfo(task.getTaskInputData());
         } catch (Exception e) {
             throw new JobExecutionException(e.getMessage());
         }

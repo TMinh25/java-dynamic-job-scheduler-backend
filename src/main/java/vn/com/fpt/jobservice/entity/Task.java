@@ -18,12 +18,12 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = "tasks")
+@Table(name = "tasks", uniqueConstraints = @UniqueConstraint(name = "unique_phase_ticket", columnNames = { "ticket_id", "phase_id" }))
 @Data
 @Slf4j
 @EqualsAndHashCode(callSuper = true)
 @EntityListeners(AuditingEntityListener.class)
-@JsonIgnoreProperties(value = {"createdAt", "modifiedAt"}, allowGetters = true)
+@JsonIgnoreProperties(value = { "createdAt", "modifiedAt" }, allowGetters = true)
 public class Task extends BaseEntity {
 
     /**
@@ -35,7 +35,7 @@ public class Task extends BaseEntity {
     @UuidGenerator
     private String id;
 
-    @Column(name = "name", columnDefinition="varchar(255) collate utf8mb4_unicode_ci")
+    @Column(name = "name", columnDefinition = "varchar(255) collate utf8mb4_unicode_ci")
     private String name;
 
     @NotNull

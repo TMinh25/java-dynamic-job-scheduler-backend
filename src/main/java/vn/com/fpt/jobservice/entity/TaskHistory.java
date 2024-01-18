@@ -44,11 +44,14 @@ public class TaskHistory {
     @Column(name = "ended_at")
     private Date endedAt;
 
+    @Column(name = "execution_time")
+    private Long executionTime;
+
     public TaskHistory() {
     }
 
     public TaskHistory(Task task, Long step, String errorMessage, Integer retryCount, TaskStatus status, Date startedAt,
-                       Date endedAt) {
+            Date endedAt) {
         this.task = task;
         this.step = step;
         this.errorMessage = errorMessage;
@@ -56,5 +59,13 @@ public class TaskHistory {
         this.status = status;
         this.startedAt = startedAt;
         this.endedAt = endedAt;
+        this.executionTime = Math.abs(endedAt.toInstant().getEpochSecond() - startedAt.toInstant().getEpochSecond());
+    }
+
+    public void calculateExecutionTime() {
+        System.out.println(this.startedAt);
+        System.out.println(this.endedAt);
+        this.executionTime = Math
+                .abs(this.endedAt.toInstant().getEpochSecond() - this.startedAt.toInstant().getEpochSecond());
     }
 }
