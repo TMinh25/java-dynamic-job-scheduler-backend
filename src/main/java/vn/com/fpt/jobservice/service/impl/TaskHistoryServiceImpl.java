@@ -47,6 +47,9 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
                 .orElseThrow(() -> new ResourceNotFoundException("TaskHistories", "taskId", taskId));
 
         BeanUtils.copyProperties(history, taskHistory, Utils.getNullPropertyNames(history));
+        if (taskHistory.getStatus() == TaskStatus.SUCCESS || taskHistory.getStatus() == TaskStatus.ERRORED) {
+            taskHistory.calculateExecutionTime();
+        }
         log.debug("updateHistoryOfTask - END");
         return taskHistoryRepo.save(taskHistory);
     }

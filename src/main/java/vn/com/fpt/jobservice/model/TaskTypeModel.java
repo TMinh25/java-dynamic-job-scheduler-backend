@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import vn.com.fpt.jobservice.entity.TaskType;
+import vn.com.fpt.jobservice.utils.AutomationTaskType;
 
 @Data
 @NoArgsConstructor
@@ -13,6 +14,7 @@ import vn.com.fpt.jobservice.entity.TaskType;
 public class TaskTypeModel {
     private Long id;
     private String name;
+    private AutomationTaskType className;
 
     public TaskType toEntity() {
         TaskType taskTypeEntity = new TaskType();

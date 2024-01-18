@@ -17,4 +17,5 @@ public class TaskHistoryModel {
     private String errorMessage;
     private Integer retryCount;
     private TaskStatus status;
+    private Long executionTime;
 }

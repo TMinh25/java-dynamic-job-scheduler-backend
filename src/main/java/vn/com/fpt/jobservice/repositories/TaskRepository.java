@@ -17,6 +17,8 @@ import java.util.Optional;
 public interface TaskRepository extends JpaRepository<Task, String> {
     List<Task> findByStatusAndNextInvocationBefore(TaskStatus status, Date nextInvocation);
 
+    Optional<Task> findByTicketIdAndPhaseId(Long ticketId, Long phaseId);
+
     Optional<Task> findByJobUUID(String jobUUID);
 
     Page<Task> findAll(Specification<Task> specification, Pageable pageable);
@@ -25,11 +27,13 @@ public interface TaskRepository extends JpaRepository<Task, String> {
         return findAll((Specification<Task>) (root, query, criteriaBuilder) -> {
             Predicate predicate = criteriaBuilder.conjunction();
             if (!searchQuery.isBlank()) {
-                Predicate tPredicate = criteriaBuilder.isTrue(criteriaBuilder.literal(false));
+                Predicate ticketIdPredicate = criteriaBuilder.isTrue(criteriaBuilder.literal(false));
+                Predicate phaseIdPredicate = criteriaBuilder.isTrue(criteriaBuilder.literal(false));
 
                 try {
                     Long longValue = Long.parseLong(searchQuery);
-                    tPredicate = criteriaBuilder.equal(root.get("ticketId"), longValue);
+                    ticketIdPredicate = criteriaBuilder.equal(root.get("ticketId"), longValue);
+                    phaseIdPredicate = criteriaBuilder.equal(root.get("phaseId"), longValue);
                 } catch (Exception e) {
                 }
 
@@ -37,7 +41,8 @@ public interface TaskRepository extends JpaRepository<Task, String> {
                         criteriaBuilder.or(
                                 criteriaBuilder.like(root.get("id"), "%" + searchQuery + "%"),
                                 criteriaBuilder.like(root.get("name"), "%" + searchQuery + "%"),
-                                tPredicate));
+                                ticketIdPredicate,
+                                phaseIdPredicate));
             }
             return predicate;
         }, pageable);
