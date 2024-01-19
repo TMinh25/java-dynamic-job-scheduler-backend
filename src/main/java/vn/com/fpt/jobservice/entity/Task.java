@@ -1,6 +1,8 @@
 package vn.com.fpt.jobservice.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -18,7 +20,8 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = "tasks", uniqueConstraints = @UniqueConstraint(name = "unique_phase_ticket", columnNames = { "ticket_id", "phase_id" }))
+@Table(name = "tasks", uniqueConstraints = @UniqueConstraint(name = "unique_phase_ticket", columnNames = { "ticket_id",
+        "phase_id" }))
 @Data
 @Slf4j
 @EqualsAndHashCode(callSuper = true)
@@ -43,7 +46,7 @@ public class Task extends BaseEntity {
     @JoinColumn(name = "task_type_id", referencedColumnName = "id", nullable = false)
     private TaskType taskType;
 
-    @ColumnDefault("'{}'")
+    @ColumnDefault("'[]'")
     @Column(name = "task_input_data")
     private String taskInputData;
 
@@ -122,11 +125,25 @@ public class Task extends BaseEntity {
     }
 
     public TaskModel toModel() {
-        return TaskModel.builder().id(this.id).name(this.name).taskType(this.taskType).taskInputData(this.taskInputData)
-                .ticketId(this.ticketId).phaseId(this.phaseId).retryCount(this.retryCount).maxRetries(this.maxRetries)
-                .startStep(this.startStep).cronExpression(this.cronExpression).nextInvocation(this.nextInvocation)
-                .prevInvocation(this.prevInvocation).status(this.status).active(this.active).jobUUID(this.jobUUID)
-                .build();
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            Object[] taskInputData;
+            try {
+                taskInputData = objectMapper.readValue(this.taskInputData, Object[].class);
+            } catch (Exception e) {
+                log.error("Can not convert taskInputData to Object[]: " + e.getMessage());
+                taskInputData = new Object[0];
+            }
+            return TaskModel.builder().id(this.id).name(this.name).taskType(this.taskType)
+                    .taskInputData(taskInputData)
+                    .ticketId(this.ticketId).phaseId(this.phaseId).retryCount(this.retryCount)
+                    .maxRetries(this.maxRetries)
+                    .startStep(this.startStep).cronExpression(this.cronExpression).nextInvocation(this.nextInvocation)
+                    .prevInvocation(this.prevInvocation).status(this.status).active(this.active).jobUUID(this.jobUUID)
+                    .build();
+        } catch (Exception e) {
+        }
+        return null;
     }
 
     public boolean canScheduleJob() {
