@@ -40,8 +40,8 @@ public class TaskController {
     }
 
     @GetMapping("/{id}")
-    public Task readTaskById(@PathVariable(value = "id") String id) throws Exception {
-        return taskService.readTaskById(id).get();
+    public TaskModel readTaskById(@PathVariable(value = "id") String id) throws Exception {
+        return taskService.readTaskById(id);
     }
 
     @DeleteMapping("/{id}")

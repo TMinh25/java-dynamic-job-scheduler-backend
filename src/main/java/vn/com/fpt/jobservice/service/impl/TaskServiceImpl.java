@@ -62,11 +62,11 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Optional<Task> readTaskById(String id) throws Exception {
+    public TaskModel readTaskById(String id) throws Exception {
         log.debug("readTaskById - START");
-        Optional<Task> entity = taskRepository.findById(id);
+        Task entity = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task", "id", id));
         log.debug("readTaskById - END");
-        return entity;
+        return entity.toModel();
     }
 
     @Override
@@ -166,6 +166,10 @@ public class TaskServiceImpl implements TaskService {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task", "id", id));
 
+        if (!task.canUpdateTask()) {
+            throw new IllegalStateException("Task is not updatable");
+        }
+
         // Copy non-null properties from taskDetails to task
         BeanUtils.copyProperties(taskDetails, task, Utils.getNullPropertyNames(taskDetails));
         task = taskRepository.save(task);
@@ -180,13 +184,6 @@ public class TaskServiceImpl implements TaskService {
         } else {
             _jobService.pauseJob(jobUUID);
         }
-
-        // if (_jobService.isJobWithNamePresent(jobUUID)) {
-        // _jobService.unscheduleJob(jobUUID);
-        // _jobService.deleteJob(jobUUID);
-        // }
-        // if (task.canScheduleJob())
-        // scheduleJob(task, task.getTaskType());
 
         log.debug("updateTaskById - END");
         return task;

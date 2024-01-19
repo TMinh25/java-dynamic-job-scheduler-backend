@@ -39,7 +39,7 @@ public interface TaskRepository extends JpaRepository<Task, String> {
 
                 predicate = criteriaBuilder.and(
                         criteriaBuilder.or(
-                                criteriaBuilder.like(root.get("id"), "%" + searchQuery + "%"),
+                                // criteriaBuilder.like(root.get("id"), "%" + searchQuery + "%"),
                                 criteriaBuilder.like(root.get("name"), "%" + searchQuery + "%"),
                                 ticketIdPredicate,
                                 phaseIdPredicate));

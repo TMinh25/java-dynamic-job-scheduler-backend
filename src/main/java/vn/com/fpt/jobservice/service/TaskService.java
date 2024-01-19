@@ -15,7 +15,7 @@ public interface TaskService {
 
     PagedResponse<Task> readAllTasks(Pageable pageable);
 
-    Optional<Task> readTaskById(String id) throws Exception;
+    TaskModel readTaskById(String id) throws Exception;
 
     Task readTaskByTicketIdAndPhaseId(Long ticketId, Long phaseId) throws Exception;
 
