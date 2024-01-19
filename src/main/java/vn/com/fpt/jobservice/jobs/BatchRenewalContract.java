@@ -11,7 +11,7 @@ public class BatchRenewalContract extends BaseJob {
     public void executeInternal(JobExecutionContext context) throws JobExecutionException {
         super.executeInternal(context);
         try {
-            Thread.sleep(3000);
+            Thread.sleep(10000);
         } catch (Exception e) {
             throw new JobExecutionException(e.getMessage());
         }

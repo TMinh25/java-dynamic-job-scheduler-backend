@@ -103,6 +103,8 @@ public class Task extends BaseEntity {
         try {
             log.debug("Calculating next invocation", id);
             this.nextInvocation = TaskSchedulerService.calculateNextExecutionTime(cronExpression);
+            this.createdAt = new Date();
+            this.modifiedAt = new Date();
             if (this.maxRetries == null) {
                 this.maxRetries = 1;
             }
@@ -116,6 +118,7 @@ public class Task extends BaseEntity {
         try {
             log.debug("Calculating next invocation", id);
             this.nextInvocation = TaskSchedulerService.calculateNextExecutionTime(cronExpression);
+            this.modifiedAt = new Date();
             if (this.maxRetries == null) {
                 this.maxRetries = 1;
             }
@@ -144,6 +147,10 @@ public class Task extends BaseEntity {
         } catch (Exception e) {
         }
         return null;
+    }
+
+    public boolean canUpdateTask() {
+        return this.status != TaskStatus.SUCCESS;
     }
 
     public boolean canScheduleJob() {

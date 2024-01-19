@@ -36,7 +36,7 @@ public abstract class BaseEntity implements Serializable {
 
     @LastModifiedDate
     @Column(name = "modified_at")
-    protected Instant modifiedAt;
+    protected Date modifiedAt;
 
     @LastModifiedBy
     @Column(name = "modified_by")
