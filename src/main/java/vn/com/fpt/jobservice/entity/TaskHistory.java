@@ -1,11 +1,22 @@
 package vn.com.fpt.jobservice.entity;
 
-import jakarta.persistence.*;
-import lombok.Data;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import vn.com.fpt.jobservice.utils.TaskStatus;
-
 import java.util.Date;
+
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.Data;
+import vn.com.fpt.jobservice.utils.TaskStatus;
 
 @Entity
 @Table(name = "task_histories")
@@ -63,8 +74,6 @@ public class TaskHistory {
     }
 
     public void calculateExecutionTime() {
-        System.out.println(this.startedAt);
-        System.out.println(this.endedAt);
         this.executionTime = Math
                 .abs(this.endedAt.toInstant().getEpochSecond() - this.startedAt.toInstant().getEpochSecond());
     }

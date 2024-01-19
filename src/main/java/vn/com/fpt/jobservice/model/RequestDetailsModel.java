@@ -1,9 +1,9 @@
 package vn.com.fpt.jobservice.model;
 
+import java.util.Map;
+
 import jakarta.annotation.Nullable;
 import lombok.Setter;
-
-import java.util.Map;
 
 @Setter
 public class RequestDetailsModel {

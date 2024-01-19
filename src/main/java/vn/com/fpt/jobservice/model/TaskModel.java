@@ -1,29 +1,31 @@
 package vn.com.fpt.jobservice.model;
 
+import java.util.Arrays;
+import java.util.Date;
+import java.util.UUID;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.entity.TaskType;
 import vn.com.fpt.jobservice.exception.ResourceNotFoundException;
 import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
 import vn.com.fpt.jobservice.utils.TaskStatus;
 
-import java.util.Date;
-import java.util.UUID;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Slf4j
 public class TaskModel {
     private String id;
     private String name;
     private TaskType taskType;
     private Long taskTypeId;
-    private String taskInputData;
+    private Object[] taskInputData;
     private Long ticketId;
     private Long phaseId;
     private Integer retryCount;
@@ -38,6 +40,7 @@ public class TaskModel {
 
     public Task toEntity(TaskTypeRepository taskTypeRepository) {
         Task taskEntity = new Task();
+
         if (this.getId() != null) {
             taskEntity.setId(this.getId());
         } else {
@@ -49,7 +52,17 @@ public class TaskModel {
                     .orElseThrow(() -> new ResourceNotFoundException("TaskType", "id", taskTypeId));
             taskEntity.setTaskType(taskType);
         }
-        taskEntity.setTaskInputData(this.getTaskInputData());
+        try {
+            if (this.getTaskInputData().length > 0) {
+                String taskInputDataString = Arrays.toString(this.getTaskInputData());
+                taskEntity.setTaskInputData(taskInputDataString);
+            } else {
+                taskEntity.setTaskInputData("[]");
+            }
+        } catch (Exception e) {
+            log.error("Can not convert taskInputData to String: " + e.getMessage());
+        }
+
         taskEntity.setTicketId(this.getTicketId());
         taskEntity.setPhaseId(this.getPhaseId());
         taskEntity.setRetryCount(this.getRetryCount());
