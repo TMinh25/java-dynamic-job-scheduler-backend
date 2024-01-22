@@ -95,17 +95,17 @@ public class TaskHistory {
     }
 
     public TaskHistoryModel toModel() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        Map<String, Object> oldData;
-        Map<String, Object> newData;
-        try {
-            oldData = objectMapper.readValue(this.oldData, new TypeReference<Map<String, Object>>() {});
-            newData = objectMapper.readValue(this.newData, new TypeReference<Map<String, Object>>() {});
-        } catch (Exception e) {
-            log.error("Can not convert oldData or newData to Map<String, Object> " + e.getMessage());
-            oldData = new HashMap<String, Object>();
-            newData = new HashMap<String, Object>();
-        }
+        // ObjectMapper objectMapper = new ObjectMapper();
+        // Map<String, Object> oldData;
+        // Map<String, Object> newData;
+        // try {
+        //     oldData = objectMapper.readValue(this.oldData, new TypeReference<Map<String, Object>>() {});
+        //     newData = objectMapper.readValue(this.newData, new TypeReference<Map<String, Object>>() {});
+        // } catch (Exception e) {
+        //     log.error("Can not convert oldData or newData to Map<String, Object> " + e.getMessage());
+        //     oldData = new HashMap<String, Object>();
+        //     newData = new HashMap<String, Object>();
+        // }
 
         return TaskHistoryModel.builder()
                 .id(this.id)
@@ -117,8 +117,8 @@ public class TaskHistory {
                 .startedAt(this.getStartedAt())
                 .endedAt(this.getEndedAt())
                 .executionTime(this.getExecutionTime())
-                .oldData(oldData)
-                .newData(newData)
+                // .oldData(oldData)
+                // .newData(newData)
                 .build();
     }
 

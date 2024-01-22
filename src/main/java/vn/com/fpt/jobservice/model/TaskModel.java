@@ -30,10 +30,11 @@ public class TaskModel {
     private TaskType taskType;
     private Long taskTypeId;
     private Object[] taskInputData;
-    private Long internalIntegrationId;
+    private Long integrationId;
     private Long ticketId;
     private Long phaseId;
     private String phaseName;
+    private Long subProcessId;
     private Integer retryCount;
     private Integer maxRetries;
     private TaskStatus status;
@@ -63,24 +64,11 @@ public class TaskModel {
                     .orElseThrow(() -> new ResourceNotFoundException("TaskType", "id", taskTypeId));
             taskEntity.setTaskType(taskType);
         }
-        if (internalIntegrationId != null) {
-            InternalIntegration internalIntegration = iiRepository.findById(internalIntegrationId).orElseThrow(
-                    () -> new ResourceNotFoundException("InternalIntegration", "id", internalIntegrationId));
-            taskEntity.setInternalIntegration(internalIntegration);
-        }
-        try {
-            if (this.getTaskInputData().length > 0) {
-                String taskInputDataString = Arrays.toString(this.getTaskInputData());
-                taskEntity.setTaskInputData(taskInputDataString);
-            } else {
-                taskEntity.setTaskInputData("[]");
-            }
-        } catch (Exception e) {
-            log.error("Can not convert taskInputData to String: " + e.getMessage());
-        }
         taskEntity.setTicketId(this.getTicketId());
         taskEntity.setPhaseId(this.getPhaseId());
         taskEntity.setPhaseName(this.getPhaseName());
+        taskEntity.setIntegrationId(this.getIntegrationId());
+        taskEntity.setSubProcessId(this.getSubProcessId());
         taskEntity.setRetryCount(this.getRetryCount());
         taskEntity.setMaxRetries(this.getMaxRetries());
         taskEntity.setStartStep(this.getStartStep());

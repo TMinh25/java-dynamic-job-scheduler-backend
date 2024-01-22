@@ -39,7 +39,7 @@ public class JobServiceImpl implements JobService {
 
         JobDetail jobDetail = JobUtils.createJob(jobClass, false, context, jobKey, this.groupKey);
 
-        log.debug("creating trigger for key :" + jobKey + " at date :" + date);
+        log.debug("creating trigger for key: " + jobKey + " at date: " + date);
         Trigger cronTriggerBean = JobUtils.createSingleTrigger(triggerKey, date,
                 SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
         // Trigger cronTriggerBean = JobUtil.createSingleTrigger(triggerKey, date,
@@ -48,12 +48,12 @@ public class JobServiceImpl implements JobService {
         try {
             Scheduler scheduler = schedulerFactoryBean.getScheduler();
             Date dt = scheduler.scheduleJob(jobDetail, cronTriggerBean);
-            log.debug("Job with key jobKey :" + jobKey + " and group :" + this.groupKey
-                    + " scheduled successfully for date :" + dt);
+            log.debug("Job with key jobKey: " + jobKey + " and group:" + this.groupKey
+                    + " scheduled successfully for date:" + dt);
             return true;
         } catch (SchedulerException e) {
             log.error(
-                    "SchedulerException while scheduling job with key :" + jobKey + " message :" + e.getMessage());
+                    "SchedulerException while scheduling job with key:" + jobKey + " message:" + e.getMessage());
         }
 
         return false;
@@ -72,19 +72,19 @@ public class JobServiceImpl implements JobService {
 
         JobDetail jobDetail = JobUtils.createJob(jobClass, false, context, jobKey, this.groupKey);
 
-        log.debug("creating trigger for key :" + jobKey + " at date :" + date);
+        log.debug("creating trigger for key: " + jobKey + " at date: " + date);
         Trigger cronTriggerBean = JobUtils.createCronTrigger(triggerKey, date, cronExpression,
                 SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
 
         try {
             Scheduler scheduler = schedulerFactoryBean.getScheduler();
             Date dt = scheduler.scheduleJob(jobDetail, cronTriggerBean);
-            log.debug("Job with key jobKey :" + jobKey + " and group :" + this.groupKey
-                    + " scheduled successfully for date :" + dt);
+            log.debug("Job with key jobKey: " + jobKey + " and group:" + this.groupKey
+                    + " scheduled successfully for date:" + dt);
             return true;
         } catch (SchedulerException e) {
             log.error(
-                    "SchedulerException while scheduling job with key :" + jobKey + " message :" + e.getMessage());
+                    "SchedulerException while scheduling job with key:" + jobKey + " message:" + e.getMessage());
         }
 
         return false;
@@ -99,17 +99,17 @@ public class JobServiceImpl implements JobService {
 
         String jobKey = jobName;
 
-        log.debug("Parameters received for updating one time job : jobKey :" + jobKey + ", date: " + date);
+        log.debug("Parameters received for updating one time job jobKey: " + jobKey + ", date: " + date);
         try {
             // Trigger newTrigger = JobUtil.createSingleTrigger(jobKey, date,
             // SimpleTrigger.MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_REMAINING_COUNT);
             Trigger newTrigger = JobUtils.createSingleTrigger(jobKey, date, SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
 
             Date dt = schedulerFactoryBean.getScheduler().rescheduleJob(TriggerKey.triggerKey(jobKey), newTrigger);
-            log.debug("Trigger associated with jobKey :" + jobKey + " rescheduled successfully for date :" + dt);
+            log.debug("Trigger associated with jobKey: " + jobKey + " rescheduled successfully for date: " + dt);
             return true;
         } catch (Exception e) {
-            log.error("SchedulerException while updating one time job with key :" + jobKey + " message :"
+            log.error("SchedulerException while updating one time job with key: " + jobKey + " message: "
                     + e.getMessage());
             return false;
         }
@@ -124,7 +124,7 @@ public class JobServiceImpl implements JobService {
 
         String jobKey = jobName;
 
-        log.debug("Parameters received for updating cron job : jobKey :" + jobKey + ", date: " + date);
+        log.debug("Parameters received for updating cron job jobKey: " + jobKey + ", date: " + date);
         try {
             // Trigger newTrigger = JobUtil.createSingleTrigger(jobKey, date,
             // SimpleTrigger.MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_REMAINING_COUNT);
@@ -132,11 +132,11 @@ public class JobServiceImpl implements JobService {
                     SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
 
             Date dt = schedulerFactoryBean.getScheduler().rescheduleJob(TriggerKey.triggerKey(jobKey), newTrigger);
-            log.debug("Trigger associated with jobKey :" + jobKey + " rescheduled successfully for date :" + dt);
+            log.debug("Trigger associated with jobKey: " + jobKey + " rescheduled successfully for date: " + dt);
             return true;
         } catch (Exception e) {
             log.error(
-                    "SchedulerException while updating cron job with key :" + jobKey + " message :" + e.getMessage());
+                    "SchedulerException while updating cron job with key: " + jobKey + " message: " + e.getMessage());
             return false;
         }
     }
@@ -153,14 +153,14 @@ public class JobServiceImpl implements JobService {
         String jobKey = jobName;
 
         TriggerKey tkey = new TriggerKey(jobKey);
-        log.debug("Parameters received for unscheduling job : tkey :" + jobKey);
+        log.debug("Parameters received for unscheduling job : tkey: " + jobKey);
         try {
             boolean status = schedulerFactoryBean.getScheduler().unscheduleJob(tkey);
-            log.debug("Trigger associated with jobKey :" + jobKey + " unscheduled with status :" + status);
+            log.debug("Trigger associated with jobKey: " + jobKey + " unscheduled with status: " + status);
             return status;
         } catch (SchedulerException e) {
             log.error(
-                    "SchedulerException while unscheduling job with key :" + jobKey + " message :" + e.getMessage());
+                    "SchedulerException while unscheduling job with key: " + jobKey + " message: " + e.getMessage());
             return false;
         }
     }
@@ -175,15 +175,15 @@ public class JobServiceImpl implements JobService {
         String jobKey = jobName;
 
         JobKey jkey = new JobKey(jobKey, this.groupKey);
-        log.debug("Parameters received for deleting job : jobKey :" + jobKey);
+        log.debug("Parameters received for deleting job jobKey: " + jobKey);
 
         try {
             boolean status = schedulerFactoryBean.getScheduler().deleteJob(jkey);
-            log.debug("Job with jobKey :" + jobKey + " deleted with status :" + status);
+            log.debug("Job with jobKey: " + jobKey + " deleted with status: " + status);
             return status;
         } catch (SchedulerException e) {
             log.error(
-                    "SchedulerException while deleting job with key :" + jobKey + " message :" + e.getMessage());
+                    "SchedulerException while deleting job with key: " + jobKey + " message: " + e.getMessage());
             return false;
         }
     }
@@ -197,15 +197,15 @@ public class JobServiceImpl implements JobService {
 
         String jobKey = jobName;
         JobKey jkey = new JobKey(jobKey, this.groupKey);
-        log.debug("Parameters received for pausing job : jobKey :" + jobKey + ", groupKey :" + this.groupKey);
+        log.debug("Parameters received for pausing job jobKey: " + jobKey + ", groupkey: " + this.groupKey);
 
         try {
             schedulerFactoryBean.getScheduler().pauseJob(jkey);
-            log.debug("Job with jobKey :" + jobKey + " paused succesfully.");
+            log.debug("Job with jobKey: " + jobKey + " paused succesfully.");
             return true;
         } catch (SchedulerException e) {
             log.error(
-                    "SchedulerException while pausing job with key :" + jobName + " message :" + e.getMessage());
+                    "SchedulerException while pausing job with key: " + jobName + " message: " + e.getMessage());
             return false;
         }
     }
@@ -220,14 +220,14 @@ public class JobServiceImpl implements JobService {
         String jobKey = jobName;
 
         JobKey jKey = new JobKey(jobKey, this.groupKey);
-        log.debug("Parameters received for resuming job : jobKey :" + jobKey);
+        log.debug("Parameters received for resuming job jobKey: " + jobKey);
         try {
             schedulerFactoryBean.getScheduler().resumeJob(jKey);
-            log.debug("Job with jobKey :" + jobKey + " resumed succesfully.");
+            log.debug("Job with jobKey: " + jobKey + " resumed succesfully.");
             return true;
         } catch (SchedulerException e) {
             log.error(
-                    "SchedulerException while resuming job with key :" + jobKey + " message :" + e.getMessage());
+                    "SchedulerException while resuming job with key: " + jobKey + " message: " + e.getMessage());
             return false;
         }
     }
@@ -242,14 +242,14 @@ public class JobServiceImpl implements JobService {
         String jobKey = jobName;
 
         JobKey jKey = new JobKey(jobKey, this.groupKey);
-        log.debug("Parameters received for starting job now : jobKey :" + jobKey);
+        log.debug("Parameters received for starting job now : jobKey: " + jobKey);
         try {
             schedulerFactoryBean.getScheduler().triggerJob(jKey);
-            log.debug("Job with jobKey :" + jobKey + " started now succesfully.");
+            log.debug("Job with jobKey: " + jobKey + " started now succesfully.");
             return true;
         } catch (SchedulerException e) {
             log.error(
-                    "SchedulerException while starting job now with key :" + jobKey + " message :" + e.getMessage());
+                    "SchedulerException while starting job now with key: " + jobKey + " message: " + e.getMessage());
             return false;
         }
     }
@@ -263,7 +263,7 @@ public class JobServiceImpl implements JobService {
 
         String jobKey = jobName;
 
-        log.debug("Parameters received for checking job is running now : jobKey :" + jobKey);
+        log.debug("Parameters received for checking job is running now : jobKey: " + jobKey);
         try {
 
             List<JobExecutionContext> currentJobs = schedulerFactoryBean.getScheduler().getCurrentlyExecutingJobs();
@@ -277,7 +277,7 @@ public class JobServiceImpl implements JobService {
                 }
             }
         } catch (SchedulerException e) {
-            log.error("SchedulerException while checking job with key :" + jobKey + " is running. error message :"
+            log.error("SchedulerException while checking job with key: " + jobKey + " is running. error message: "
                     + e.getMessage());
             return false;
         }
@@ -294,7 +294,7 @@ public class JobServiceImpl implements JobService {
             Scheduler scheduler = schedulerFactoryBean.getScheduler();
 
             for (String groupName : scheduler.getJobGroupNames()) {
-                for (JobKey jobKey : scheduler.getJobKeys(GroupMatcher.jobGroupEquals(groupName))) {
+                for (JobKey jobKey: scheduler.getJobKeys(GroupMatcher.jobGroupEquals(groupName))) {
 
                     String jobName = jobKey.getName();
                     String jobGroup = jobKey.getGroup();
@@ -330,7 +330,7 @@ public class JobServiceImpl implements JobService {
 
             }
         } catch (SchedulerException e) {
-            log.error("SchedulerException while fetching all jobs. error message :" + e.getMessage());
+            log.error("SchedulerException while fetching all jobs. error message: " + e.getMessage());
         } catch (Exception e) {
         }
         return list;
@@ -406,7 +406,7 @@ public class JobServiceImpl implements JobService {
             return scheduler.interrupt(jkey);
 
         } catch (SchedulerException e) {
-            log.error("SchedulerException while stopping job. error message :" + e.getMessage());
+            log.error("SchedulerException while stopping job. error message: " + e.getMessage());
         }
         return false;
     }

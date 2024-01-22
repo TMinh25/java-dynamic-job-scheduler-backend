@@ -9,17 +9,12 @@ import org.quartz.JobKey;
 import org.quartz.UnableToInterruptJobException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.quartz.QuartzJobBean;
-import org.springframework.web.client.RestTemplate;
 
 import lombok.extern.slf4j.Slf4j;
 import vn.com.fpt.jobservice.entity.InternalIntegration;
 import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.exception.ResourceNotFoundException;
-import vn.com.fpt.jobservice.model.response.IntegrationResponse;
 import vn.com.fpt.jobservice.repositories.InternalIntegrationRepository;
 import vn.com.fpt.jobservice.service.TaskService;
 
@@ -37,9 +32,6 @@ public abstract class IntegrationJob extends QuartzJobBean implements Interrupta
 
     @Value("${integration-api}")
     String integrationURL;
-
-    protected void getIntegrationData() throws IOException {
-    }
 
     protected void jobInfo(String msg) {
         log.info(String.format("[%s] %s", this.className, msg));
