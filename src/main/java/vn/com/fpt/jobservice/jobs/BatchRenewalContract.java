@@ -23,8 +23,7 @@ public class BatchRenewalContract extends SystemJob {
             } else {
                 String createBatchURL = String.format("%s/batch/create?ticketId=%s&phaseId=%s&subProcessId=%s",
                         uServiceURL, this.task.getTicketId(), this.task.getPhaseId(), this.task.getTaskType().getProcessId());
-                Object response = CallExternalAPI.exchangeGet(createBatchURL, null);
-                jobInfo(response.toString());
+                CallExternalAPI.exchangeGet(createBatchURL, null);
             }
         } catch (Exception e) {
             throw new JobExecutionException(e.getMessage());
