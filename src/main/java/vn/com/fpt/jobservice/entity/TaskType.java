@@ -26,11 +26,16 @@ public class TaskType {
     @Column(name = "type")
     private TaskTypeType type;
 
+    @Column(name = "process_id")
+    private Long processId;
+
     public TaskType() {
     }
 
-    public TaskType(String name, AutomationTaskType className) {
+    public TaskType(String name, AutomationTaskType className, TaskTypeType type, Long processId) {
         this.name = name;
         this.className = className;
+        this.type = type;
+        this.processId = processId;
     }
 }

@@ -49,9 +49,9 @@ public class Task extends BaseEntity {
     @Column(name = "task_input_data", columnDefinition = "TEXT collate utf8mb4_unicode_ci")
     private String taskInputData;
 
-    @ManyToOne
-    @JoinColumn(name = "internal_integration_id", referencedColumnName = "id")
-    private InternalIntegration internalIntegration;
+    // Call external by making request to the integration service
+    @Column(name = "integration_id")
+    private Long integrationId;
 
     @Column(name = "ticket_id")
     private Long ticketId;
@@ -61,6 +61,9 @@ public class Task extends BaseEntity {
 
     @Column(name = "phase_name", columnDefinition = "VARCHAR(255) collate utf8mb4_unicode_ci")
     private String phaseName;
+
+    @Column(name = "subprocess_id")
+    private Long subProcessId;
 
     @ColumnDefault("0")
     @Column(name = "retry_count")
@@ -130,39 +133,41 @@ public class Task extends BaseEntity {
 
     public TaskModel toModel() {
         ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            Object[] taskInputData;
+        Object[] taskInputData;
+        Long internalIntegrationId = null;
+        if (this.getTaskInputData() != null && !this.getTaskInputData().equals("[]")) {
             try {
                 taskInputData = objectMapper.readValue(this.taskInputData, Object[].class);
             } catch (Exception e) {
                 log.error("Can not convert taskInputData to Object[]: " + e.getMessage());
                 taskInputData = new Object[0];
             }
-            return TaskModel.builder().id(this.id)
-                    .name(this.name)
-                    .taskType(this.taskType)
-                    .taskInputData(taskInputData)
-                    .internalIntegrationId(this.internalIntegration.getId())
-                    .ticketId(this.ticketId)
-                    .phaseId(this.phaseId)
-                    .phaseName(phaseName)
-                    .retryCount(this.retryCount)
-                    .maxRetries(this.maxRetries)
-                    .startStep(this.startStep)
-                    .cronExpression(this.cronExpression)
-                    .nextInvocation(this.nextInvocation)
-                    .prevInvocation(this.prevInvocation)
-                    .status(this.status)
-                    .active(this.active)
-                    .jobUUID(this.jobUUID)
-                    .createdAt(this.createdAt)
-                    .modifiedAt(this.modifiedAt)
-                    .createdBy(this.createdBy)
-                    .modifiedBy(this.modifiedBy)
-                    .build();
-        } catch (Exception e) {
+        } else {
+            taskInputData = new Object[0];
         }
-        return null;
+        return TaskModel.builder().id(this.id)
+                .name(this.name)
+                .taskType(this.taskType)
+                .taskInputData(taskInputData)
+                .ticketId(this.ticketId)
+                .phaseId(this.phaseId)
+                .phaseName(phaseName)
+                .integrationId(integrationId)
+                .subProcessId(this.subProcessId)
+                .retryCount(this.retryCount)
+                .maxRetries(this.maxRetries)
+                .startStep(this.startStep)
+                .cronExpression(this.cronExpression)
+                .nextInvocation(this.nextInvocation)
+                .prevInvocation(this.prevInvocation)
+                .status(this.status)
+                .active(this.active)
+                .jobUUID(this.jobUUID)
+                .createdAt(this.createdAt)
+                .modifiedAt(this.modifiedAt)
+                .createdBy(this.createdBy)
+                .modifiedBy(this.modifiedBy)
+                .build();
     }
 
     public boolean canUpdateTask() {

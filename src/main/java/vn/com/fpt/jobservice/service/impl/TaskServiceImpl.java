@@ -11,6 +11,7 @@ import org.quartz.SchedulerException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -198,11 +199,13 @@ public class TaskServiceImpl implements TaskService {
             throw new IllegalStateException("Task is not updatable");
         }
 
-        String[] nullProps = Utils.getNullPropertyNames(taskDetails);
-        // OriginalAndUpdatedData historyData = Utils.getOriginalAndUpdatedData(task, taskDetails);
-
-        BeanUtils.copyProperties(taskDetails, task, nullProps);
-        task = taskRepository.save(task);
+        // String[] nullProps = Utils.getNullPropertyNames(taskDetails);
+        // OriginalAndUpdatedData historyData = Utils.getOriginalAndUpdatedData(task,
+        // taskDetails);
+        if (taskDetails != null) {
+            BeanUtils.copyProperties(taskDetails, task, Utils.getNullPropertyNames(taskDetails));
+            task = taskRepository.save(task);
+        }
 
         String jobUUID = task.getJobUUID();
         Date nextInvocation = task.getNextInvocation();
@@ -211,10 +214,10 @@ public class TaskServiceImpl implements TaskService {
         // TaskHistory history = new TaskHistory();
         // ObjectMapper objectMapper = new ObjectMapper();
         // try {
-        //     history.setOldData(objectMapper.writeValueAsString(historyData.getOldData()));
-        //     history.setNewData(objectMapper.writeValueAsString(historyData.getNewData()));
+        // history.setOldData(objectMapper.writeValueAsString(historyData.getOldData()));
+        // history.setNewData(objectMapper.writeValueAsString(historyData.getNewData()));
         // } catch (JsonProcessingException e) {
-        //     log.error("Failed to convert to json string: " + e.getMessage());
+        // log.error("Failed to convert to json string: " + e.getMessage());
         // }
         // history.setTask(task);
         // history.setStartedAt(new Date());
