@@ -7,12 +7,14 @@ import org.springframework.stereotype.Service;
 import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.entity.TaskHistory;
 import vn.com.fpt.jobservice.exception.ResourceNotFoundException;
+import vn.com.fpt.jobservice.model.TaskHistoryModel;
 import vn.com.fpt.jobservice.repositories.TaskHistoryRepository;
 import vn.com.fpt.jobservice.repositories.TaskRepository;
 import vn.com.fpt.jobservice.service.TaskHistoryService;
 import vn.com.fpt.jobservice.utils.TaskStatus;
 import vn.com.fpt.jobservice.utils.Utils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -24,11 +26,18 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
     private TaskHistoryRepository taskHistoryRepo;
 
     @Override
-    public List<TaskHistory> readAllHistoryOfTask(String taskId) {
+    public List<TaskHistoryModel> readAllHistoryOfTask(String taskId) {
         log.debug("readAllHistoryOfTask - START");
-        List<TaskHistory> histories = taskHistoryRepo.findByTaskId(taskId);
+        List<TaskHistory> histories = taskHistoryRepo.findByTaskIdOrderByStartedAtDesc(taskId);
+
+        List<TaskHistoryModel> historyModels = new ArrayList<>();
+        for (TaskHistory history : histories) {
+            TaskHistoryModel historyModel = history.toModel();
+            historyModels.add(historyModel);
+        }
+
         log.debug("readAllHistoryOfTask - END");
-        return histories;
+        return historyModels;
     }
 
     @Override

@@ -2,7 +2,8 @@ package vn.com.fpt.jobservice.utils;
 
 public enum TaskTypeType {
     SYSTEM("SYSTEM"),
-    CUSTOM("CUSTOM");
+    CUSTOM("CUSTOM"),
+    INTEGRATION("INTEGRATION");
 
     TaskTypeType(String type) {
         if (!type.equals(this.name()))

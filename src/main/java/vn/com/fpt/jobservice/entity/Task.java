@@ -38,7 +38,7 @@ public class Task extends BaseEntity {
     @UuidGenerator
     private String id;
 
-    @Column(name = "name", columnDefinition = "varchar(255) collate utf8mb4_unicode_ci")
+    @Column(name = "name", columnDefinition = "VARCHAR(255) collate utf8mb4_unicode_ci")
     private String name;
 
     @NotNull
@@ -46,19 +46,20 @@ public class Task extends BaseEntity {
     @JoinColumn(name = "task_type_id", referencedColumnName = "id", nullable = false)
     private TaskType taskType;
 
-    @ColumnDefault("'[]'")
-    @Column(name = "task_input_data")
+    @Column(name = "task_input_data", columnDefinition = "TEXT collate utf8mb4_unicode_ci")
     private String taskInputData;
 
-    @NotNull
+    @ManyToOne
+    @JoinColumn(name = "internal_integration_id", referencedColumnName = "id")
+    private InternalIntegration internalIntegration;
+
     @Column(name = "ticket_id")
     private Long ticketId;
 
-    @NotNull
     @Column(name = "phase_id")
     private Long phaseId;
 
-    @Column(name = "phase_name")
+    @Column(name = "phase_name", columnDefinition = "VARCHAR(255) collate utf8mb4_unicode_ci")
     private String phaseName;
 
     @ColumnDefault("0")
@@ -137,12 +138,27 @@ public class Task extends BaseEntity {
                 log.error("Can not convert taskInputData to Object[]: " + e.getMessage());
                 taskInputData = new Object[0];
             }
-            return TaskModel.builder().id(this.id).name(this.name).taskType(this.taskType)
+            return TaskModel.builder().id(this.id)
+                    .name(this.name)
+                    .taskType(this.taskType)
                     .taskInputData(taskInputData)
-                    .ticketId(this.ticketId).phaseId(this.phaseId).retryCount(this.retryCount)
+                    .internalIntegrationId(this.internalIntegration.getId())
+                    .ticketId(this.ticketId)
+                    .phaseId(this.phaseId)
+                    .phaseName(phaseName)
+                    .retryCount(this.retryCount)
                     .maxRetries(this.maxRetries)
-                    .startStep(this.startStep).cronExpression(this.cronExpression).nextInvocation(this.nextInvocation)
-                    .prevInvocation(this.prevInvocation).status(this.status).active(this.active).jobUUID(this.jobUUID)
+                    .startStep(this.startStep)
+                    .cronExpression(this.cronExpression)
+                    .nextInvocation(this.nextInvocation)
+                    .prevInvocation(this.prevInvocation)
+                    .status(this.status)
+                    .active(this.active)
+                    .jobUUID(this.jobUUID)
+                    .createdAt(this.createdAt)
+                    .modifiedAt(this.modifiedAt)
+                    .createdBy(this.createdBy)
+                    .modifiedBy(this.modifiedBy)
                     .build();
         } catch (Exception e) {
         }
