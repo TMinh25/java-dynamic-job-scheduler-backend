@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.model.PagedResponse;
 import vn.com.fpt.jobservice.model.TaskModel;
+import vn.com.fpt.jobservice.repositories.InternalIntegrationRepository;
 import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
 import vn.com.fpt.jobservice.service.JobService;
 import vn.com.fpt.jobservice.service.TaskService;
@@ -19,7 +20,10 @@ import java.util.Map;
 @RequestMapping("/tasks")
 public class TaskController {
     @Autowired
-    TaskTypeRepository taskTypeRepository;
+    TaskTypeRepository ttRepository;
+
+    @Autowired
+    InternalIntegrationRepository iiRepository;
 
     @Autowired
     TaskService taskService;
@@ -35,7 +39,7 @@ public class TaskController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public Task createTask(@RequestBody TaskModel taskModel) throws Exception {
-        Task task = taskModel.toEntity(taskTypeRepository);
+        Task task = taskModel.toEntity(ttRepository, iiRepository);
         return taskService.createTask(task);
     }
 

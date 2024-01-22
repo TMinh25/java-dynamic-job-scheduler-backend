@@ -1,11 +1,13 @@
 package vn.com.fpt.jobservice.jobs;
 
 import lombok.extern.slf4j.Slf4j;
+import vn.com.fpt.jobservice.jobs.base.SystemJob;
+
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
 @Slf4j
-public class BatchRenewalContract extends BaseJob {
+public class BatchRenewalContract extends SystemJob {
 
     @Override
     public void executeInternal(JobExecutionContext context) throws JobExecutionException {

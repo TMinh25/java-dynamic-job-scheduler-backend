@@ -1,11 +1,16 @@
 package vn.com.fpt.jobservice.service.impl;
 
+import java.beans.PropertyDescriptor;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.quartz.SchedulerException;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,16 +18,24 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import lombok.extern.slf4j.Slf4j;
 import vn.com.fpt.jobservice.entity.Task;
+import vn.com.fpt.jobservice.entity.TaskHistory;
 import vn.com.fpt.jobservice.entity.TaskType;
 import vn.com.fpt.jobservice.exception.ResourceNotFoundException;
+import vn.com.fpt.jobservice.jobs.base.IntegrationJob;
+import vn.com.fpt.jobservice.jobs.base.SystemJob;
 import vn.com.fpt.jobservice.model.PagedResponse;
 import vn.com.fpt.jobservice.model.TaskModel;
+import vn.com.fpt.jobservice.repositories.TaskHistoryRepository;
 import vn.com.fpt.jobservice.repositories.TaskRepository;
 import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
 import vn.com.fpt.jobservice.service.JobService;
 import vn.com.fpt.jobservice.service.TaskService;
+import vn.com.fpt.jobservice.utils.OriginalAndUpdatedData;
 import vn.com.fpt.jobservice.utils.TaskStatus;
 import vn.com.fpt.jobservice.utils.TaskTypeType;
 import vn.com.fpt.jobservice.utils.Utils;
@@ -33,6 +46,8 @@ public class TaskServiceImpl implements TaskService {
 
     @Autowired
     private TaskRepository taskRepository;
+    @Autowired
+    private TaskHistoryRepository taskHistoryRepository;
     @Autowired
     private TaskTypeRepository taskTypeRepository;
     @Autowired
@@ -117,22 +132,35 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public boolean scheduleJob(Task task, TaskType taskType) {
         try {
+            String jobClassName = "vn.com.fpt.jobservice.jobs." + taskType.getClassName();
             if (taskType.getType() == TaskTypeType.SYSTEM) { // Job mặc định của hệ thống
-                String jobClassName = "vn.com.fpt.jobservice.jobs." + taskType.getClassName();
                 Class<?> jobClass = Class.forName(jobClassName);
 
-                if (QuartzJobBean.class.isAssignableFrom(jobClass)) {
+                if (SystemJob.class.isAssignableFrom(jobClass)) {
                     @SuppressWarnings("unchecked")
-                    Class<? extends QuartzJobBean> quartzJobClass = (Class<? extends QuartzJobBean>) jobClass;
+                    Class<? extends SystemJob> systemJob = (Class<? extends SystemJob>) jobClass;
 
                     _jobService.scheduleCronJob(
                             task.getJobUUID(),
-                            quartzJobClass,
+                            systemJob,
                             task.getNextInvocation(),
                             task.getCronExpression());
                 } else {
-                    throw new Exception("Class is not a subclass of QuartzJobBean: " +
-                            jobClassName);
+                    throw new Exception(jobClassName + " is not a subclass of SystemJob!");
+                }
+            } else if (taskType.getType() == TaskTypeType.INTEGRATION) { // Job tích hợp
+                Class<?> jobClass = Class.forName(jobClassName);
+                if (IntegrationJob.class.isAssignableFrom(jobClass)) {
+                    @SuppressWarnings("unchecked")
+                    Class<? extends IntegrationJob> integrationJob = (Class<? extends IntegrationJob>) jobClass;
+
+                    _jobService.scheduleCronJob(
+                            task.getJobUUID(),
+                            integrationJob,
+                            task.getNextInvocation(),
+                            task.getCronExpression());
+                } else {
+                    throw new Exception(jobClassName + " is not a subclass of IntegrationJob!");
                 }
             } else if (taskType.getType() == TaskTypeType.CUSTOM) { // Job tự định nghĩa
 
@@ -170,13 +198,27 @@ public class TaskServiceImpl implements TaskService {
             throw new IllegalStateException("Task is not updatable");
         }
 
-        // Copy non-null properties from taskDetails to task
-        BeanUtils.copyProperties(taskDetails, task, Utils.getNullPropertyNames(taskDetails));
+        String[] nullProps = Utils.getNullPropertyNames(taskDetails);
+        // OriginalAndUpdatedData historyData = Utils.getOriginalAndUpdatedData(task, taskDetails);
+
+        BeanUtils.copyProperties(taskDetails, task, nullProps);
         task = taskRepository.save(task);
 
         String jobUUID = task.getJobUUID();
         Date nextInvocation = task.getNextInvocation();
         String cronExpression = task.getCronExpression();
+
+        // TaskHistory history = new TaskHistory();
+        // ObjectMapper objectMapper = new ObjectMapper();
+        // try {
+        //     history.setOldData(objectMapper.writeValueAsString(historyData.getOldData()));
+        //     history.setNewData(objectMapper.writeValueAsString(historyData.getNewData()));
+        // } catch (JsonProcessingException e) {
+        //     log.error("Failed to convert to json string: " + e.getMessage());
+        // }
+        // history.setTask(task);
+        // history.setStartedAt(new Date());
+        // taskHistoryRepository.save(history);
 
         _jobService.updateCronJob(jobUUID, nextInvocation, cronExpression);
         if (task.canScheduleJob()) {

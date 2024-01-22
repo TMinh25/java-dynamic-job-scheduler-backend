@@ -1,21 +1,45 @@
-package vn.com.fpt.jobservice.jobs;
+package vn.com.fpt.jobservice.jobs.base;
+
+import java.io.IOException;
+
+import org.quartz.InterruptableJob;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.quartz.JobKey;
+import org.quartz.UnableToInterruptJobException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.quartz.QuartzJobBean;
+import org.springframework.web.client.RestTemplate;
 
 import lombok.extern.slf4j.Slf4j;
-import org.quartz.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.quartz.QuartzJobBean;
+import vn.com.fpt.jobservice.entity.InternalIntegration;
 import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.exception.ResourceNotFoundException;
+import vn.com.fpt.jobservice.model.response.IntegrationResponse;
+import vn.com.fpt.jobservice.repositories.InternalIntegrationRepository;
 import vn.com.fpt.jobservice.service.TaskService;
 
 @Slf4j
-public abstract class BaseJob extends QuartzJobBean implements InterruptableJob {
+public abstract class IntegrationJob extends QuartzJobBean implements InterruptableJob {
     protected volatile boolean toStopFlag = true;
     protected String className = this.getClass().getName();
     protected String jobUUID;
     protected Task task;
+    protected InternalIntegration internalIntegration;
     @Autowired
     TaskService _taskService;
+    @Autowired
+    InternalIntegrationRepository _iiRepository;
+
+    @Value("${integration-api}")
+    String integrationURL;
+
+    protected void getIntegrationData() throws IOException {
+    }
 
     protected void jobInfo(String msg) {
         log.info(String.format("[%s] %s", this.className, msg));
@@ -31,6 +55,7 @@ public abstract class BaseJob extends QuartzJobBean implements InterruptableJob 
 
         this.task = _taskService.readTaskByJobUUID(this.jobUUID)
                 .orElseThrow(() -> new ResourceNotFoundException("Task", "jobUUID", jobUUID));
+        this.internalIntegration = _iiRepository.getReferenceById(this.internalIntegration.getId());
 
         jobInfo(String.format("Job started with key: %s, group: %s, thread: %s",
                 key.getName(),

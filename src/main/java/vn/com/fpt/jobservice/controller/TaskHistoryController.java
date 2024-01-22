@@ -3,6 +3,7 @@ package vn.com.fpt.jobservice.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import vn.com.fpt.jobservice.entity.TaskHistory;
+import vn.com.fpt.jobservice.model.TaskHistoryModel;
 import vn.com.fpt.jobservice.service.TaskHistoryService;
 
 import java.util.List;
@@ -14,7 +15,7 @@ public class TaskHistoryController {
     TaskHistoryService taskHistoryService;
 
     @GetMapping("/{id}")
-    public List<TaskHistory> readAllTasks(@PathVariable(value = "id") String taskId) {
+    public List<TaskHistoryModel> readAllTasks(@PathVariable(value = "id") String taskId) {
         return taskHistoryService.readAllHistoryOfTask(taskId);
     }
 
