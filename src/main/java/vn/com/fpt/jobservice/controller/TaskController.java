@@ -54,9 +54,18 @@ public class TaskController {
     }
 
     @PatchMapping("/{id}")
-    public Task patchActivateTask(@PathVariable(value = "id") String id, @RequestBody TaskModel taskModel)
+    public Task updateTaskById(@PathVariable(value = "id") String id, @RequestBody TaskModel taskModel)
             throws Exception {
         return taskService.updateTaskById(id, taskModel);
+    }
+
+    @PatchMapping()
+    public Task updateTaskByTicketAndPhase(
+            @RequestParam(value = "ticketId", required = true) Long ticketId,
+            @RequestParam(value = "phaseId", required = true) Long phaseId,
+            @RequestBody TaskModel taskModel) throws Exception {
+        Task task = taskService.readTaskByTicketIdAndPhaseId(ticketId, phaseId);
+        return taskService.updateTaskById(task.getId(), taskModel);
     }
 
     @GetMapping("/jobs")

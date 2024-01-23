@@ -1,75 +1,45 @@
 package vn.com.fpt.jobservice.utils;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class CallExternalAPI {
 
-    public static JsonNode exchangeGet(String url, String token) {
+    public static <T> T exchangeGet(String url, HttpHeaders headers, Class<T> responseType) {
         RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
         try {
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            if (StringUtils.isNotEmpty(token)) {
-                headers.setBearerAuth(token);
-            }
             HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
-            ResponseEntity<Object> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity,
-                    new ParameterizedTypeReference<Object>() {
-                    });
-            ObjectMapper mapper = new ObjectMapper();
-            if (response.getBody() != null) {
-                String json = mapper.writeValueAsString(response.getBody());
-                return mapper.readTree(json);
-            }
+            ResponseEntity<T> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    requestEntity,
+                    responseType);
+            return response.getBody();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return null;
         }
-        return null;
     }
 
-    @SuppressWarnings("deprecation")
-    public static JsonNode exchangePost(String url, String token, String requestBody) {
+    public static <T> T exchangePost(String url, HttpHeaders headers, Object requestBody, Class<T> responseType) {
         RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        ObjectMapper mapper = new ObjectMapper();
         try {
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            if (StringUtils.isNotEmpty(token)) {
-                headers.setBearerAuth(token);
-            }
-            HttpEntity<String> request = new HttpEntity<>(requestBody, headers);
-
-            ResponseEntity<Object> response = restTemplate.exchange(url, HttpMethod.POST, request,
-                    new ParameterizedTypeReference<Object>() {
-                    });
-            log.warn("response: " + response.getBody());
-            if (response.getStatusCodeValue() == 200 && response.getBody() != null) {
-                String json = mapper.writeValueAsString(response.getBody());
-                JsonNode jsonBody = mapper.readTree(json);
-                if (jsonBody.get("statusCodeValue") != null && jsonBody.get("statusCodeValue").asInt() != 200) {
-                    String msgError = jsonBody.get("body") != null ? jsonBody.get("body").asText() : "System error";
-                    return mapper.readTree("{\"error\":\"" + msgError + "\"}");
-                } else {
-                    return jsonBody;
-                }
-            }
+            HttpEntity<Object> requestEntity = new HttpEntity<>(requestBody, headers);
+            ResponseEntity<T> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    requestEntity,
+                    responseType);
+            return response.getBody();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            try {
-                String json = "{\"error\":\"The connection to server failed. Please contact your system administrator.\"}";
-                return mapper.readTree(json);
-            } catch (Exception ex) {
-                return null;
-            }
+            return null;
         }
-        return null;
     }
 }

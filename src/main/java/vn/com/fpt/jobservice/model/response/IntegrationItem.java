@@ -3,6 +3,11 @@ package vn.com.fpt.jobservice.model.response;
 import java.util.Date;
 import java.util.Map;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class IntegrationItem {
   private Long id;
   private String tenantId;
