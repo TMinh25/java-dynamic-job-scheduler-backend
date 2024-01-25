@@ -40,7 +40,7 @@ public class TaskServiceImpl implements TaskService {
     @Autowired
     private TaskTypeRepository taskTypeRepository;
     @Autowired
-    private JobService _jobService;
+    private JobService jobService;
 
     @Override
     public List<Task> getPendingTasks() {
@@ -86,7 +86,9 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Task readTaskByJobUUID(String jobUUID) {
         log.debug("readTaskByJobUUID - START");
-        Task entity = taskRepository.findByJobUUID(jobUUID).orElseThrow(() -> new ResourceNotFoundException("Task", "jobUUID", jobUUID));;
+        Task entity = taskRepository.findByJobUUID(jobUUID)
+                .orElseThrow(() -> new ResourceNotFoundException("Task", "jobUUID", jobUUID));
+        ;
         log.debug("readTaskByJobUUID - END");
         return entity;
     }
@@ -120,7 +122,6 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    @Transactional
     public boolean scheduleJob(Task task, TaskType taskType) {
         try {
             String jobClassName = "vn.com.fpt.jobservice.jobs." + taskType.getClassName();
@@ -131,7 +132,7 @@ public class TaskServiceImpl implements TaskService {
                     @SuppressWarnings("unchecked")
                     Class<? extends SystemJob> systemJob = (Class<? extends SystemJob>) jobClass;
 
-                    _jobService.scheduleCronJob(
+                    jobService.scheduleCronJob(
                             task.getJobUUID(),
                             systemJob,
                             task.getNextInvocation(),
@@ -145,7 +146,7 @@ public class TaskServiceImpl implements TaskService {
                     @SuppressWarnings("unchecked")
                     Class<? extends IntegrationJob> integrationJob = (Class<? extends IntegrationJob>) jobClass;
 
-                    _jobService.scheduleCronJob(
+                    jobService.scheduleCronJob(
                             task.getJobUUID(),
                             integrationJob,
                             task.getNextInvocation(),
@@ -172,9 +173,9 @@ public class TaskServiceImpl implements TaskService {
         String jobUUID = taskEntity.getJobUUID();
 
         taskRepository.delete(taskEntity);
-        if (_jobService.isJobWithNamePresent(jobUUID)) {
-            _jobService.unscheduleJob(jobUUID);
-            _jobService.deleteJob(jobUUID);
+        if (jobService.isJobWithNamePresent(jobUUID)) {
+            jobService.unscheduleJob(jobUUID);
+            jobService.deleteJob(jobUUID);
         }
         log.debug("deleteTaskById - END");
         return ResponseEntity.ok().build();
@@ -215,11 +216,11 @@ public class TaskServiceImpl implements TaskService {
         // history.setStartedAt(new Date());
         // taskHistoryRepository.save(history);
 
-        _jobService.updateCronJob(jobUUID, nextInvocation, cronExpression);
+        jobService.updateCronJob(jobUUID, nextInvocation, cronExpression);
         if (task.canScheduleJob()) {
-            _jobService.resumeJob(jobUUID);
+            jobService.resumeJob(jobUUID);
         } else {
-            _jobService.pauseJob(jobUUID);
+            jobService.pauseJob(jobUUID);
         }
 
         log.debug("updateTaskById - END");
@@ -231,8 +232,8 @@ public class TaskServiceImpl implements TaskService {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task", "id", id));
 
-        if (_jobService.isJobWithNamePresent(task.getJobUUID())) {
-            boolean isJobRunning = _jobService.isJobRunning(task.getJobUUID());
+        if (jobService.isJobWithNamePresent(task.getJobUUID())) {
+            boolean isJobRunning = jobService.isJobRunning(task.getJobUUID());
 
             if (isJobRunning) {
                 throw new Exception("Job already in processing state");
@@ -245,7 +246,7 @@ public class TaskServiceImpl implements TaskService {
             throw new SchedulerException("The job has run out of reruns.");
         }
 
-        _jobService.triggerJob(task.getJobUUID());
+        jobService.triggerJob(task.getJobUUID());
 
         return ResponseEntity.ok().build();
     }
@@ -255,7 +256,7 @@ public class TaskServiceImpl implements TaskService {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task", "id", id));
 
-        _jobService.interuptJob(task.getJobUUID());
+        jobService.interuptJob(task.getJobUUID());
 
         return ResponseEntity.ok().build();
     }

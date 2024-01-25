@@ -6,6 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.com.fpt.jobservice.entity.Task;
+import vn.com.fpt.jobservice.model.JobModel;
 import vn.com.fpt.jobservice.model.PagedResponse;
 import vn.com.fpt.jobservice.model.TaskModel;
 import vn.com.fpt.jobservice.repositories.InternalIntegrationRepository;
@@ -14,7 +15,6 @@ import vn.com.fpt.jobservice.service.JobService;
 import vn.com.fpt.jobservice.service.TaskService;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/tasks")
@@ -71,7 +71,7 @@ public class TaskController {
     }
 
     @GetMapping("/jobs")
-    public List<Map<String, Object>> getAllJobs() {
+    public List<JobModel> getAllJobs() {
         return jobService.getAllJobs();
     }
 

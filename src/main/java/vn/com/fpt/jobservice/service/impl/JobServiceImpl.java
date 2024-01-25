@@ -10,10 +10,13 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.stereotype.Service;
+import vn.com.fpt.jobservice.model.JobModel;
 import vn.com.fpt.jobservice.service.JobService;
 import vn.com.fpt.jobservice.utils.JobUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -262,8 +265,8 @@ public class JobServiceImpl implements JobService {
      * Get all jobs
      */
     @Override
-    public List<Map<String, Object>> getAllJobs() {
-        List<Map<String, Object>> list = new ArrayList<>();
+    public List<JobModel> getAllJobs() {
+        List<JobModel> jobList = new ArrayList<JobModel>();
         try {
             Scheduler scheduler = schedulerFactoryBean.getScheduler();
 
@@ -280,22 +283,15 @@ public class JobServiceImpl implements JobService {
                         Date nextFireTime = triggers.get(0).getNextFireTime();
                         Date lastFiredTime = triggers.get(0).getPreviousFireTime();
 
-                        Map<String, Object> map = new HashMap<>();
-                        map.put("jobName", jobName);
-                        map.put("groupName", jobGroup);
-                        map.put("scheduleTime", new Date(scheduleTime.getTime()).toString());
-                        map.put("lastFiredTime",
-                                lastFiredTime != null ? new Date(lastFiredTime.getTime()).toString() : null);
-                        map.put("nextFireTime", new Date(nextFireTime.getTime()).toString());
+                        JobModel job = new JobModel();
+                        job.setJobName(jobName);
+                        job.setGroupName(jobGroup);
+                        job.setScheduleTime(scheduleTime);
+                        job.setLastFiredTime(lastFiredTime);
+                        job.setNextFireTime(nextFireTime);
+                        job.setJobStatus(getJobState(jobName));
 
-                        if (isJobRunning(jobName)) {
-                            map.put("jobStatus", "RUNNING");
-                        } else {
-                            String jobState = getJobState(jobName);
-                            map.put("jobStatus", jobState);
-                        }
-
-                        list.add(map);
+                        jobList.add(job);
                         log.debug("Job details:");
                         log.debug(
                                 "Job Name:" + jobName + ", Group Name:" + groupName + ", Schedule Time:" + scheduleTime);
@@ -306,7 +302,7 @@ public class JobServiceImpl implements JobService {
         } catch (Exception e) {
             log.error("SchedulerException while fetching all jobs. error message: " + e.getMessage());
         }
-        return list;
+        return jobList;
     }
 
     /**
@@ -355,6 +351,8 @@ public class JobServiceImpl implements JobService {
                         return "NONE";
                     } else if (TriggerState.NORMAL.equals(triggerState)) {
                         return "SCHEDULED";
+                    } else if (isJobRunning(jobName)) {
+                        return "RUNNING";
                     }
                 }
             }

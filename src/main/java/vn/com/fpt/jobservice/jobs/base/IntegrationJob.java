@@ -26,7 +26,7 @@ public abstract class IntegrationJob extends QuartzJobBean implements Interrupta
     protected Task task;
     protected InternalIntegration internalIntegration;
     @Autowired
-    TaskService _taskService;
+    TaskService taskService;
     @Autowired
     InternalIntegrationRepository _iiRepository;
 
@@ -45,7 +45,7 @@ public abstract class IntegrationJob extends QuartzJobBean implements Interrupta
         JobKey key = context.getJobDetail().getKey();
         this.jobUUID = key.getName();
 
-        this.task = _taskService.readTaskByJobUUID(this.jobUUID);
+        this.task = taskService.readTaskByJobUUID(this.jobUUID);
         this.internalIntegration = _iiRepository.getReferenceById(this.internalIntegration.getId());
 
         jobInfo(String.format("Job started with key: %s, group: %s, thread: %s",
