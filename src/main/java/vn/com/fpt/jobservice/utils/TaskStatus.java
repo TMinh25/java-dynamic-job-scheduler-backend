@@ -4,7 +4,8 @@ public enum TaskStatus {
     ERRORED("ERRORED"),
     PENDING("PENDING"),
     PROCESSING("PROCESSING"),
-    SUCCESS("SUCCESS");
+    SUCCESS("SUCCESS"),
+    CANCELED("CANCELED");
 
     TaskStatus(String status) {
         if (!status.equals(this.name()))

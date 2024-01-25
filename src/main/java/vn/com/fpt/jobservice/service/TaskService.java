@@ -2,13 +2,13 @@ package vn.com.fpt.jobservice.service;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import reactor.core.publisher.Flux;
 import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.entity.TaskType;
 import vn.com.fpt.jobservice.model.PagedResponse;
 import vn.com.fpt.jobservice.model.TaskModel;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface TaskService {
     PagedResponse<Task> searchTasks(Pageable pageable, String searchQuery);
@@ -19,7 +19,7 @@ public interface TaskService {
 
     Task readTaskByTicketIdAndPhaseId(Long ticketId, Long phaseId) throws Exception;
 
-    Optional<Task> readTaskByJobUUID(String jobUUID);
+    Task readTaskByJobUUID(String jobUUID);
 
     Task createTask(Task task) throws Exception;
 

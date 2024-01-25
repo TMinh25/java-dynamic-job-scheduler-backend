@@ -29,8 +29,7 @@ public abstract class SystemJob extends QuartzJobBean implements InterruptableJo
         JobKey key = context.getJobDetail().getKey();
         this.jobUUID = key.getName();
 
-        this.task = _taskService.readTaskByJobUUID(this.jobUUID)
-                .orElseThrow(() -> new ResourceNotFoundException("Task", "jobUUID", jobUUID));
+        this.task = _taskService.readTaskByJobUUID(this.jobUUID);
 
         jobInfo(String.format("Job started with key: %s, group: %s, thread: %s",
                 key.getName(),

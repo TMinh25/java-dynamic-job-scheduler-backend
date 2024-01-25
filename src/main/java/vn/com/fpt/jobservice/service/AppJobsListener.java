@@ -20,8 +20,6 @@ public class AppJobsListener implements JobListener {
     TaskService _taskService;
     @Autowired
     TaskHistoryService _taskHistoryService;
-    @Autowired
-    JobService _jobService;
 
     @Override
     public String getName() {
@@ -35,8 +33,7 @@ public class AppJobsListener implements JobListener {
         Date executionDate = new Date();
 
         String jobUUID = context.getJobDetail().getKey().getName();
-        Task task = _taskService.readTaskByJobUUID(jobUUID)
-                .orElseThrow(() -> new ResourceNotFoundException("Task", "jobUUID", jobUUID));
+        Task task = _taskService.readTaskByJobUUID(jobUUID);
 
         TaskHistory taskHistory = new TaskHistory();
         taskHistory.setTask(task);
@@ -63,8 +60,7 @@ public class AppJobsListener implements JobListener {
         TaskHistory taskHistory = new TaskHistory();
         try {
             String jobUUID = context.getJobDetail().getKey().getName();
-            task = _taskService.readTaskByJobUUID(jobUUID)
-                    .orElseThrow(() -> new ResourceNotFoundException("Task", "jobUUID", jobUUID));
+            task = _taskService.readTaskByJobUUID(jobUUID);
             taskHistory.setTask(task);
             taskHistory.setStatus(TaskStatus.SUCCESS);
 

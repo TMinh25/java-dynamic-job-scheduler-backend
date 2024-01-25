@@ -2,7 +2,7 @@ package vn.com.fpt.jobservice.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -13,8 +13,6 @@ import vn.com.fpt.jobservice.model.PagedResponse;
 import vn.com.fpt.jobservice.model.TaskTypeModel;
 import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
 
-import java.util.Optional;
-
 @RestController
 @RequestMapping("/task-types")
 public class TaskTypeController {
@@ -22,17 +20,15 @@ public class TaskTypeController {
     TaskTypeRepository taskTypeRepo;
 
     @GetMapping()
-    public PagedResponse<TaskType> readAllTasks(Pageable pageable) {
-        return new PagedResponse<>(taskTypeRepo.findAll(pageable));
+    public PagedResponse<TaskType> readAllTasks(
+            @RequestParam(value = "page", defaultValue = "0") int pageIndex,
+            @RequestParam(value = "size", defaultValue = "10") int pageSize) {
+        return new PagedResponse<>(taskTypeRepo.findAll(PageRequest.of(pageIndex, pageSize)));
     }
 
     @GetMapping("/{id}")
     public TaskType readTaskById(@PathVariable(value = "id") Long id) throws Exception {
-        Optional<TaskType> entity = taskTypeRepo.findById(id);
-        if (entity.isEmpty()) {
-            throw new Exception("Task type not found!");
-        }
-        return entity.get();
+        return taskTypeRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("TaskType", "id", id));
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -41,14 +37,13 @@ public class TaskTypeController {
         return taskTypeRepo.save(taskType);
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public TaskType updateTask(@PathVariable(value = "id") Long taskTypeId,
                                @Valid @RequestBody TaskTypeModel taskTypeDetails) throws Exception {
         TaskType task = taskTypeRepo.findById(taskTypeId)
                 .orElseThrow(() -> new ResourceNotFoundException("TaskType", "id", taskTypeId));
 
-        TaskType updatedTask = taskTypeRepo.save(task);
-        return updatedTask;
+        return taskTypeRepo.save(task);
     }
 
     @DeleteMapping("/{id}")

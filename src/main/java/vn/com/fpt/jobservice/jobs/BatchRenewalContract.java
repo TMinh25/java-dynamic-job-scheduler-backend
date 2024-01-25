@@ -14,7 +14,7 @@ import vn.com.fpt.jobservice.utils.CallExternalAPI;
 @Slf4j
 public class BatchRenewalContract extends SystemJob {
 
-    @Value("${uservice-api}")
+    @Value("${u-service-api}")
     String uServiceURL;
 
     @Value("${integration-api}")
@@ -43,11 +43,10 @@ public class BatchRenewalContract extends SystemJob {
                             headers,
                             executionRequest,
                             Object.class);
-                    System.out.println(executionResponse.toString());
+                    jobInfo(executionResponse.toString());
                 } else {
                     throw new JobExecutionException("Can not get data for integration!");
                 }
-
             } else {
                 String createBatchURL = String.format("%s/batch/create?ticketId=%s&phaseId=%s&subProcessId=%s",
                         uServiceURL,

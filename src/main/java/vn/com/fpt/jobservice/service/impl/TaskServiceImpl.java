@@ -1,30 +1,15 @@
 package vn.com.fpt.jobservice.service.impl;
 
-import java.beans.PropertyDescriptor;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
+import lombok.extern.slf4j.Slf4j;
 import org.quartz.SchedulerException;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 import vn.com.fpt.jobservice.entity.Task;
-import vn.com.fpt.jobservice.entity.TaskHistory;
 import vn.com.fpt.jobservice.entity.TaskType;
 import vn.com.fpt.jobservice.exception.ResourceNotFoundException;
 import vn.com.fpt.jobservice.jobs.base.IntegrationJob;
@@ -36,10 +21,13 @@ import vn.com.fpt.jobservice.repositories.TaskRepository;
 import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
 import vn.com.fpt.jobservice.service.JobService;
 import vn.com.fpt.jobservice.service.TaskService;
-import vn.com.fpt.jobservice.utils.OriginalAndUpdatedData;
 import vn.com.fpt.jobservice.utils.TaskStatus;
 import vn.com.fpt.jobservice.utils.TaskTypeType;
 import vn.com.fpt.jobservice.utils.Utils;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -96,14 +84,15 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Optional<Task> readTaskByJobUUID(String jobUUID) {
+    public Task readTaskByJobUUID(String jobUUID) {
         log.debug("readTaskByJobUUID - START");
-        Optional<Task> entity = taskRepository.findByJobUUID(jobUUID);
+        Task entity = taskRepository.findByJobUUID(jobUUID).orElseThrow(() -> new ResourceNotFoundException("Task", "jobUUID", jobUUID));;
         log.debug("readTaskByJobUUID - END");
         return entity;
     }
 
     @Override
+    @Transactional
     public Task createTask(final Task task) throws Exception {
         log.debug("createTask - START");
         Optional<Task> taskExisted = taskRepository.findById(task.getId());
@@ -131,6 +120,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional
     public boolean scheduleJob(Task task, TaskType taskType) {
         try {
             String jobClassName = "vn.com.fpt.jobservice.jobs." + taskType.getClassName();
@@ -164,7 +154,7 @@ public class TaskServiceImpl implements TaskService {
                     throw new Exception(jobClassName + " is not a subclass of IntegrationJob!");
                 }
             } else if (taskType.getType() == TaskTypeType.CUSTOM) { // Job tự định nghĩa
-
+                log.info("Custom job");
             }
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -174,6 +164,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<Object> deleteTaskById(String id) {
         log.debug("deleteTaskById - START");
         Task taskEntity = taskRepository.findById(id)
@@ -190,6 +181,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional
     public Task updateTaskById(String id, TaskModel taskDetails) {
         log.debug("updateTaskById - START");
         Task task = taskRepository.findById(id)

@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
 import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.utils.TaskStatus;
 
@@ -34,7 +35,7 @@ public interface TaskRepository extends JpaRepository<Task, String> {
 
         return findAll((Specification<Task>) (root, query, criteriaBuilder) -> {
             Predicate predicate = criteriaBuilder.conjunction();
-            if (!searchQuery.isBlank()) {
+            if (!searchQuery.isEmpty()) {
                 Predicate ticketIdPredicate = criteriaBuilder.isTrue(criteriaBuilder.literal(false));
                 Predicate phaseIdPredicate = criteriaBuilder.isTrue(criteriaBuilder.literal(false));
 
