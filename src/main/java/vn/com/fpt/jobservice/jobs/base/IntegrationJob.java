@@ -1,7 +1,5 @@
 package vn.com.fpt.jobservice.jobs.base;
 
-import java.io.IOException;
-
 import org.quartz.InterruptableJob;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -14,7 +12,6 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 import lombok.extern.slf4j.Slf4j;
 import vn.com.fpt.jobservice.entity.InternalIntegration;
 import vn.com.fpt.jobservice.entity.Task;
-import vn.com.fpt.jobservice.exception.ResourceNotFoundException;
 import vn.com.fpt.jobservice.repositories.InternalIntegrationRepository;
 import vn.com.fpt.jobservice.service.TaskService;
 
@@ -28,7 +25,7 @@ public abstract class IntegrationJob extends QuartzJobBean implements Interrupta
     @Autowired
     TaskService taskService;
     @Autowired
-    InternalIntegrationRepository _iiRepository;
+    InternalIntegrationRepository iiRepository;
 
     @Value("${integration-api}")
     String integrationURL;
@@ -46,7 +43,7 @@ public abstract class IntegrationJob extends QuartzJobBean implements Interrupta
         this.jobUUID = key.getName();
 
         this.task = taskService.readTaskByJobUUID(this.jobUUID);
-        this.internalIntegration = _iiRepository.getReferenceById(this.internalIntegration.getId());
+        this.internalIntegration = iiRepository.getReferenceById(this.internalIntegration.getId());
 
         jobInfo(String.format("Job started with key: %s, group: %s, thread: %s",
                 key.getName(),
