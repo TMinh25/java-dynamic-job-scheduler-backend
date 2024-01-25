@@ -2,7 +2,6 @@ package vn.com.fpt.jobservice.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -12,6 +11,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.UuidGenerator;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import vn.com.fpt.jobservice.model.TaskModel;
+import vn.com.fpt.jobservice.service.JobService;
 import vn.com.fpt.jobservice.service.TaskSchedulerService;
 import vn.com.fpt.jobservice.utils.TaskStatus;
 
@@ -28,7 +28,6 @@ import java.util.UUID;
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(value = { "createdAt", "modifiedAt" }, allowGetters = true)
 public class Task extends BaseEntity {
-
     /**
      *
      */
@@ -69,8 +68,7 @@ public class Task extends BaseEntity {
     @Column(name = "retry_count")
     private Integer retryCount;
 
-    @ColumnDefault("1")
-    @Column(name = "max_retries")
+    @Column(name = "max_retries", nullable = true)
     private Integer maxRetries;
 
     @Enumerated(EnumType.STRING)
@@ -105,13 +103,12 @@ public class Task extends BaseEntity {
         this.active = true;
         this.jobUUID = String.format("%s_%s", taskType.getClassName(), UUID.randomUUID());
         try {
-            log.debug("Calculating next invocation", id);
-            this.nextInvocation = TaskSchedulerService.calculateNextExecutionTime(cronExpression);
+            log.debug("Calculating next invocation: " + id);
+            if (this.canScheduleJob()) {
+                this.nextInvocation = TaskSchedulerService.calculateNextExecutionTime(cronExpression);
+            }
             this.createdAt = new Date();
             this.modifiedAt = new Date();
-            if (this.maxRetries == null) {
-                this.maxRetries = 1;
-            }
         } catch (ParseException e) {
             log.error("Error calculating next execution time: ", e);
         }
@@ -120,12 +117,11 @@ public class Task extends BaseEntity {
     @PreUpdate
     public void taskUpdate() {
         try {
-            log.debug("Calculating next invocation", id);
-            this.nextInvocation = TaskSchedulerService.calculateNextExecutionTime(cronExpression);
-            this.modifiedAt = new Date();
-            if (this.maxRetries == null) {
-                this.maxRetries = 1;
+            log.debug("Calculating next invocation: " + id);
+            if (this.canScheduleJob()) {
+                this.setNextInvocation(TaskSchedulerService.calculateNextExecutionTime(cronExpression));
             }
+            this.modifiedAt = new Date();
         } catch (ParseException e) {
             log.error("Error calculating next execution time: ", e);
         }
@@ -171,10 +167,22 @@ public class Task extends BaseEntity {
     }
 
     public boolean canUpdateTask() {
-        return this.status != TaskStatus.SUCCESS;
+        return this.status != TaskStatus.SUCCESS || this.maxRetries == null;
     }
 
     public boolean canScheduleJob() {
-        return this.active && (this.retryCount < this.maxRetries);
+        if (!this.active) {
+            return false;
+        }
+
+        if (this.maxRetries == null) {
+            return true;
+        }
+
+        if (this.status == TaskStatus.SUCCESS) {
+            return false;
+        }
+
+        return this.retryCount < this.maxRetries;
     }
 }

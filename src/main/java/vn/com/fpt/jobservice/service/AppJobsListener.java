@@ -77,7 +77,7 @@ public class AppJobsListener implements JobListener {
                 taskHistoryService.updateProcessingHistoryOfTask(task.getId(), taskHistory);
 
                 task.setStatus(taskHistory.getStatus());
-                if (task.getStatus() == TaskStatus.SUCCESS || task.getRetryCount() >= task.getMaxRetries())
+                if (!task.canScheduleJob())
                     task.setActive(false);
 
                 taskService.updateTaskById(task.getId(), task.toModel());

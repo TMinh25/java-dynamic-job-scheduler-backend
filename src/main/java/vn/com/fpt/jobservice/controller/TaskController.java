@@ -41,7 +41,7 @@ public class TaskController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public Task createTask(@RequestBody TaskModel taskModel) throws Exception {
-        Task task = taskModel.toEntity(ttRepository, iiRepository);
+        Task task = taskModel.toEntity(ttRepository);
         return taskService.createTask(task);
     }
 

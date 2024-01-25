@@ -69,7 +69,7 @@ public class JobServiceImpl implements JobService {
 
         log.debug("creating trigger for key: " + jobKey + " at date: " + date);
         Trigger cronTriggerBean = JobUtils.createCronTrigger(jobKey, date, cronExpression,
-                SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
+                CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW);
 
         try {
             Scheduler scheduler = schedulerFactoryBean.getScheduler();
@@ -93,8 +93,6 @@ public class JobServiceImpl implements JobService {
         log.debug("Request received for updating one time job.");
         log.debug("Parameters received for updating one time job jobKey: " + jobKey + ", date: " + date);
         try {
-            // Trigger newTrigger = JobUtil.createSingleTrigger(jobKey, date,
-            // SimpleTrigger.MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_REMAINING_COUNT);
             Trigger newTrigger = JobUtils.createSingleTrigger(jobKey, date, SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
 
             Date dt = schedulerFactoryBean.getScheduler().rescheduleJob(TriggerKey.triggerKey(jobKey), newTrigger);
@@ -115,10 +113,8 @@ public class JobServiceImpl implements JobService {
         log.debug("Request received for updating cron job.");
         log.debug("Parameters received for updating cron job jobKey: " + jobKey + ", date: " + date);
         try {
-            // Trigger newTrigger = JobUtil.createSingleTrigger(jobKey, date,
-            // SimpleTrigger.MISFIRE_INSTRUCTION_RESCHEDULE_NEXT_WITH_REMAINING_COUNT);
             Trigger newTrigger = JobUtils.createCronTrigger(jobKey, date, cronExpression,
-                    SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
+                    CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW);
 
             Date dt = schedulerFactoryBean.getScheduler().rescheduleJob(TriggerKey.triggerKey(jobKey), newTrigger);
             log.debug("Trigger associated with jobKey: " + jobKey + " rescheduled successfully for date: " + dt);

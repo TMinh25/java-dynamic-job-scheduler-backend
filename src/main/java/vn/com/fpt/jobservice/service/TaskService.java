@@ -29,7 +29,7 @@ public interface TaskService {
 
     List<Task> getPendingTasks();
 
-    boolean scheduleJob(Task task, TaskType taskType) throws Exception;
+    boolean scheduleJob(Task task) throws Exception;
 
     ResponseEntity<Object> triggerJob(String id) throws Exception;
 

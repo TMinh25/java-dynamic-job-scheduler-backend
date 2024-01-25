@@ -1,5 +1,6 @@
 package vn.com.fpt.jobservice.service.impl;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.SchedulerException;
 import org.springframework.beans.BeanUtils;
@@ -20,18 +21,18 @@ import vn.com.fpt.jobservice.repositories.TaskHistoryRepository;
 import vn.com.fpt.jobservice.repositories.TaskRepository;
 import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
 import vn.com.fpt.jobservice.service.JobService;
+import vn.com.fpt.jobservice.service.TaskSchedulerService;
 import vn.com.fpt.jobservice.service.TaskService;
 import vn.com.fpt.jobservice.utils.TaskStatus;
 import vn.com.fpt.jobservice.utils.TaskTypeType;
 import vn.com.fpt.jobservice.utils.Utils;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.text.ParseException;
+import java.util.*;
 
 @Service
 @Slf4j
-public class TaskServiceImpl implements TaskService {
+public class TaskServiceImpl implements TaskService  {
 
     @Autowired
     private TaskRepository taskRepository;
@@ -116,14 +117,15 @@ public class TaskServiceImpl implements TaskService {
 
         Task newTaskEntity = taskRepository.save(task);
         if (newTaskEntity.canScheduleJob())
-            scheduleJob(newTaskEntity, taskType);
+            scheduleJob(newTaskEntity);
         log.debug("createTask - END");
         return newTaskEntity;
     }
 
     @Override
-    public boolean scheduleJob(Task task, TaskType taskType) {
+    public boolean scheduleJob(Task task) {
         try {
+            TaskType taskType = task.getTaskType();
             String jobClassName = "vn.com.fpt.jobservice.jobs." + taskType.getClassName();
             if (taskType.getType() == TaskTypeType.SYSTEM) { // Job mặc định của hệ thống
                 Class<?> jobClass = Class.forName(jobClassName);
@@ -181,6 +183,7 @@ public class TaskServiceImpl implements TaskService {
         return ResponseEntity.ok().build();
     }
 
+    @SneakyThrows
     @Override
     @Transactional
     public Task updateTaskById(String id, TaskModel taskDetails) {
@@ -191,18 +194,14 @@ public class TaskServiceImpl implements TaskService {
         if (!task.canUpdateTask()) {
             throw new IllegalStateException("Task is not updatable");
         }
-
         // String[] nullProps = Utils.getNullPropertyNames(taskDetails);
-        // OriginalAndUpdatedData historyData = Utils.getOriginalAndUpdatedData(task,
-        // taskDetails);
+        // OriginalAndUpdatedData historyData = Utils.getOriginalAndUpdatedData(task, taskDetails);
         if (taskDetails != null) {
             BeanUtils.copyProperties(taskDetails, task, Utils.getNullPropertyNames(taskDetails));
             task = taskRepository.save(task);
         }
 
         String jobUUID = task.getJobUUID();
-        Date nextInvocation = task.getNextInvocation();
-        String cronExpression = task.getCronExpression();
 
         // TaskHistory history = new TaskHistory();
         // ObjectMapper objectMapper = new ObjectMapper();
@@ -215,12 +214,19 @@ public class TaskServiceImpl implements TaskService {
         // history.setTask(task);
         // history.setStartedAt(new Date());
         // taskHistoryRepository.save(history);
-
-        jobService.updateCronJob(jobUUID, nextInvocation, cronExpression);
         if (task.canScheduleJob()) {
-            jobService.resumeJob(jobUUID);
+            if (!jobService.isJobWithNamePresent(task.getJobUUID())) {
+                scheduleJob(task);
+            } else {
+                String cronExpression = task.getCronExpression();
+                Date nextInvocation = null;
+                nextInvocation = TaskSchedulerService.calculateNextExecutionTime(cronExpression);
+                jobService.updateCronJob(jobUUID, nextInvocation, cronExpression);
+            }
         } else {
-            jobService.pauseJob(jobUUID);
+            task.setNextInvocation(null);
+            task = taskRepository.save(task);
+            jobService.deleteJob(jobUUID);
         }
 
         log.debug("updateTaskById - END");
