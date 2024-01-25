@@ -1,30 +1,16 @@
 package vn.com.fpt.jobservice.service.impl;
 
-import java.beans.PropertyDescriptor;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.quartz.SchedulerException;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 import vn.com.fpt.jobservice.entity.Task;
-import vn.com.fpt.jobservice.entity.TaskHistory;
 import vn.com.fpt.jobservice.entity.TaskType;
 import vn.com.fpt.jobservice.exception.ResourceNotFoundException;
 import vn.com.fpt.jobservice.jobs.base.IntegrationJob;
@@ -35,15 +21,18 @@ import vn.com.fpt.jobservice.repositories.TaskHistoryRepository;
 import vn.com.fpt.jobservice.repositories.TaskRepository;
 import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
 import vn.com.fpt.jobservice.service.JobService;
+import vn.com.fpt.jobservice.service.TaskSchedulerService;
 import vn.com.fpt.jobservice.service.TaskService;
-import vn.com.fpt.jobservice.utils.OriginalAndUpdatedData;
 import vn.com.fpt.jobservice.utils.TaskStatus;
 import vn.com.fpt.jobservice.utils.TaskTypeType;
 import vn.com.fpt.jobservice.utils.Utils;
 
+import java.text.ParseException;
+import java.util.*;
+
 @Service
 @Slf4j
-public class TaskServiceImpl implements TaskService {
+public class TaskServiceImpl implements TaskService  {
 
     @Autowired
     private TaskRepository taskRepository;
@@ -52,7 +41,7 @@ public class TaskServiceImpl implements TaskService {
     @Autowired
     private TaskTypeRepository taskTypeRepository;
     @Autowired
-    private JobService _jobService;
+    private JobService jobService;
 
     @Override
     public List<Task> getPendingTasks() {
@@ -96,14 +85,17 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Optional<Task> readTaskByJobUUID(String jobUUID) {
+    public Task readTaskByJobUUID(String jobUUID) {
         log.debug("readTaskByJobUUID - START");
-        Optional<Task> entity = taskRepository.findByJobUUID(jobUUID);
+        Task entity = taskRepository.findByJobUUID(jobUUID)
+                .orElseThrow(() -> new ResourceNotFoundException("Task", "jobUUID", jobUUID));
+        ;
         log.debug("readTaskByJobUUID - END");
         return entity;
     }
 
     @Override
+    @Transactional
     public Task createTask(final Task task) throws Exception {
         log.debug("createTask - START");
         Optional<Task> taskExisted = taskRepository.findById(task.getId());
@@ -125,14 +117,15 @@ public class TaskServiceImpl implements TaskService {
 
         Task newTaskEntity = taskRepository.save(task);
         if (newTaskEntity.canScheduleJob())
-            scheduleJob(newTaskEntity, taskType);
+            scheduleJob(newTaskEntity);
         log.debug("createTask - END");
         return newTaskEntity;
     }
 
     @Override
-    public boolean scheduleJob(Task task, TaskType taskType) {
+    public boolean scheduleJob(Task task) {
         try {
+            TaskType taskType = task.getTaskType();
             String jobClassName = "vn.com.fpt.jobservice.jobs." + taskType.getClassName();
             if (taskType.getType() == TaskTypeType.SYSTEM) { // Job mặc định của hệ thống
                 Class<?> jobClass = Class.forName(jobClassName);
@@ -141,7 +134,7 @@ public class TaskServiceImpl implements TaskService {
                     @SuppressWarnings("unchecked")
                     Class<? extends SystemJob> systemJob = (Class<? extends SystemJob>) jobClass;
 
-                    _jobService.scheduleCronJob(
+                    jobService.scheduleCronJob(
                             task.getJobUUID(),
                             systemJob,
                             task.getNextInvocation(),
@@ -155,7 +148,7 @@ public class TaskServiceImpl implements TaskService {
                     @SuppressWarnings("unchecked")
                     Class<? extends IntegrationJob> integrationJob = (Class<? extends IntegrationJob>) jobClass;
 
-                    _jobService.scheduleCronJob(
+                    jobService.scheduleCronJob(
                             task.getJobUUID(),
                             integrationJob,
                             task.getNextInvocation(),
@@ -164,7 +157,7 @@ public class TaskServiceImpl implements TaskService {
                     throw new Exception(jobClassName + " is not a subclass of IntegrationJob!");
                 }
             } else if (taskType.getType() == TaskTypeType.CUSTOM) { // Job tự định nghĩa
-
+                log.info("Custom job");
             }
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -174,6 +167,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<Object> deleteTaskById(String id) {
         log.debug("deleteTaskById - START");
         Task taskEntity = taskRepository.findById(id)
@@ -181,15 +175,17 @@ public class TaskServiceImpl implements TaskService {
         String jobUUID = taskEntity.getJobUUID();
 
         taskRepository.delete(taskEntity);
-        if (_jobService.isJobWithNamePresent(jobUUID)) {
-            _jobService.unscheduleJob(jobUUID);
-            _jobService.deleteJob(jobUUID);
+        if (jobService.isJobWithNamePresent(jobUUID)) {
+            jobService.unscheduleJob(jobUUID);
+            jobService.deleteJob(jobUUID);
         }
         log.debug("deleteTaskById - END");
         return ResponseEntity.ok().build();
     }
 
+    @SneakyThrows
     @Override
+    @Transactional
     public Task updateTaskById(String id, TaskModel taskDetails) {
         log.debug("updateTaskById - START");
         Task task = taskRepository.findById(id)
@@ -198,18 +194,14 @@ public class TaskServiceImpl implements TaskService {
         if (!task.canUpdateTask()) {
             throw new IllegalStateException("Task is not updatable");
         }
-
         // String[] nullProps = Utils.getNullPropertyNames(taskDetails);
-        // OriginalAndUpdatedData historyData = Utils.getOriginalAndUpdatedData(task,
-        // taskDetails);
+        // OriginalAndUpdatedData historyData = Utils.getOriginalAndUpdatedData(task, taskDetails);
         if (taskDetails != null) {
             BeanUtils.copyProperties(taskDetails, task, Utils.getNullPropertyNames(taskDetails));
             task = taskRepository.save(task);
         }
 
         String jobUUID = task.getJobUUID();
-        Date nextInvocation = task.getNextInvocation();
-        String cronExpression = task.getCronExpression();
 
         // TaskHistory history = new TaskHistory();
         // ObjectMapper objectMapper = new ObjectMapper();
@@ -222,12 +214,19 @@ public class TaskServiceImpl implements TaskService {
         // history.setTask(task);
         // history.setStartedAt(new Date());
         // taskHistoryRepository.save(history);
-
-        _jobService.updateCronJob(jobUUID, nextInvocation, cronExpression);
         if (task.canScheduleJob()) {
-            _jobService.resumeJob(jobUUID);
+            if (!jobService.isJobWithNamePresent(task.getJobUUID())) {
+                scheduleJob(task);
+            } else {
+                String cronExpression = task.getCronExpression();
+                Date nextInvocation = null;
+                nextInvocation = TaskSchedulerService.calculateNextExecutionTime(cronExpression);
+                jobService.updateCronJob(jobUUID, nextInvocation, cronExpression);
+            }
         } else {
-            _jobService.pauseJob(jobUUID);
+            task.setNextInvocation(null);
+            task = taskRepository.save(task);
+            jobService.deleteJob(jobUUID);
         }
 
         log.debug("updateTaskById - END");
@@ -239,8 +238,8 @@ public class TaskServiceImpl implements TaskService {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task", "id", id));
 
-        if (_jobService.isJobWithNamePresent(task.getJobUUID())) {
-            boolean isJobRunning = _jobService.isJobRunning(task.getJobUUID());
+        if (jobService.isJobWithNamePresent(task.getJobUUID())) {
+            boolean isJobRunning = jobService.isJobRunning(task.getJobUUID());
 
             if (isJobRunning) {
                 throw new Exception("Job already in processing state");
@@ -253,7 +252,7 @@ public class TaskServiceImpl implements TaskService {
             throw new SchedulerException("The job has run out of reruns.");
         }
 
-        _jobService.triggerJob(task.getJobUUID());
+        jobService.triggerJob(task.getJobUUID());
 
         return ResponseEntity.ok().build();
     }
@@ -263,7 +262,7 @@ public class TaskServiceImpl implements TaskService {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task", "id", id));
 
-        _jobService.interuptJob(task.getJobUUID());
+        jobService.interuptJob(task.getJobUUID());
 
         return ResponseEntity.ok().build();
     }

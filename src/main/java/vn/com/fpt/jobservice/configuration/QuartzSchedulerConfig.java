@@ -23,7 +23,7 @@ public class QuartzSchedulerConfig {
     @Autowired
     DataSource dataSource;
     @Autowired
-    JobService _jobService;
+    JobService jobService;
     @Autowired
     private ApplicationContext applicationContext;
     @Autowired
@@ -55,7 +55,7 @@ public class QuartzSchedulerConfig {
         AutowiringSpringBeanJobFactory jobFactory = new AutowiringSpringBeanJobFactory();
         jobFactory.setApplicationContext(applicationContext);
         factory.setJobFactory(jobFactory);
-        // _jobService.clear();
+        // jobService.clear();
 
         return factory;
     }

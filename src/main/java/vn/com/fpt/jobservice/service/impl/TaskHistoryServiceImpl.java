@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.entity.TaskHistory;
 import vn.com.fpt.jobservice.exception.ResourceNotFoundException;
@@ -41,6 +42,7 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
     }
 
     @Override
+    @Transactional
     public TaskHistory insertNewHistoryOfTask(String taskId, TaskHistory history) {
         Task task = taskRepo.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Task", "taskId", taskId));
@@ -50,6 +52,7 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
     }
 
     @Override
+    @Transactional
     public TaskHistory updateProcessingHistoryOfTask(String taskId, TaskHistory history) {
         log.debug("updateHistoryOfTask - START");
         TaskHistory taskHistory = taskHistoryRepo.findFirstByTaskIdAndStatus(taskId, TaskStatus.PROCESSING)

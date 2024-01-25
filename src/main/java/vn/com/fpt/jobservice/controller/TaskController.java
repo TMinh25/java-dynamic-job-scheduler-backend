@@ -1,11 +1,12 @@
 package vn.com.fpt.jobservice.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.com.fpt.jobservice.entity.Task;
+import vn.com.fpt.jobservice.model.JobModel;
 import vn.com.fpt.jobservice.model.PagedResponse;
 import vn.com.fpt.jobservice.model.TaskModel;
 import vn.com.fpt.jobservice.repositories.InternalIntegrationRepository;
@@ -14,7 +15,6 @@ import vn.com.fpt.jobservice.service.JobService;
 import vn.com.fpt.jobservice.service.TaskService;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/tasks")
@@ -32,14 +32,16 @@ public class TaskController {
     JobService jobService;
 
     @GetMapping()
-    public PagedResponse<Task> searchTasks(Pageable pageable,
+    public PagedResponse<Task> searchTasks(
+            @RequestParam(value = "page", defaultValue = "0") int pageIndex,
+            @RequestParam(value = "size", defaultValue = "10") int pageSize,
             @RequestParam(value = "search", required = false, defaultValue = "") String searchQuery) {
-        return taskService.searchTasks(pageable, searchQuery);
+        return taskService.searchTasks(PageRequest.of(pageIndex, pageSize), searchQuery);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public Task createTask(@RequestBody TaskModel taskModel) throws Exception {
-        Task task = taskModel.toEntity(ttRepository, iiRepository);
+        Task task = taskModel.toEntity(ttRepository);
         return taskService.createTask(task);
     }
 
@@ -53,13 +55,13 @@ public class TaskController {
         return taskService.deleteTaskById(id);
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public Task updateTaskById(@PathVariable(value = "id") String id, @RequestBody TaskModel taskModel)
             throws Exception {
         return taskService.updateTaskById(id, taskModel);
     }
 
-    @PatchMapping()
+    @PutMapping()
     public Task updateTaskByTicketAndPhase(
             @RequestParam(value = "ticketId", required = true) Long ticketId,
             @RequestParam(value = "phaseId", required = true) Long phaseId,
@@ -69,9 +71,8 @@ public class TaskController {
     }
 
     @GetMapping("/jobs")
-    public List<Map<String, Object>> getAllJobs() {
-        List<Map<String, Object>> list = jobService.getAllJobs();
-        return list;
+    public List<JobModel> getAllJobs() {
+        return jobService.getAllJobs();
     }
 
     @GetMapping("/trigger/{id}")
@@ -87,8 +88,8 @@ public class TaskController {
         return taskService.triggerJob(task.getId());
     }
 
-    @GetMapping("/interupt/{id}")
-    public ResponseEntity<Object> interuptJob(@PathVariable(value = "id") String id) {
+    @GetMapping("/interrupt/{id}")
+    public ResponseEntity<Object> interruptJob(@PathVariable(value = "id") String id) {
         return taskService.interuptJob(id);
     }
 }

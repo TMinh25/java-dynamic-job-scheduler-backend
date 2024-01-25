@@ -1,10 +1,10 @@
 package vn.com.fpt.jobservice.service;
 
 import org.springframework.scheduling.quartz.QuartzJobBean;
+import vn.com.fpt.jobservice.model.JobModel;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 public interface JobService {
 
@@ -28,7 +28,7 @@ public interface JobService {
 
     boolean isJobRunning(String jobName);
 
-    List<Map<String, Object>> getAllJobs();
+    List<JobModel> getAllJobs();
 
     boolean isJobWithNamePresent(String jobName);
 

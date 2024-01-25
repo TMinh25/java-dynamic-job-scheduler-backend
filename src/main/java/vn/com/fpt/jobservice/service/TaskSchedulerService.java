@@ -3,7 +3,7 @@ package vn.com.fpt.jobservice.service;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.springframework.stereotype.Service;
-import vn.com.fpt.jobservice.jobs.BatchRenewalContract;
+import vn.com.fpt.jobservice.jobs.base.SystemJob;
 
 import java.text.ParseException;
 import java.util.Date;
@@ -23,13 +23,14 @@ public class TaskSchedulerService {
     public void scheduleTask(String cronExpression, Runnable task) throws SchedulerException, ParseException {
         Scheduler scheduler = new StdSchedulerFactory().getScheduler();
         JobDetail jobDetail = JobBuilder.newJob()
-                .ofType(BatchRenewalContract.class)
-                .withIdentity("job1", "group1")
+                .ofType(SystemJob.class)
+                .withIdentity("job", "JOB_SERVICE")
                 .build();
 
         Trigger trigger = TriggerBuilder.newTrigger()
-                .withIdentity("trigger1", "group1")
-                .withSchedule(CronScheduleBuilder.cronSchedule(cronExpression))
+                .withIdentity("trigger", "JOB_SERVICE")
+                .withSchedule(CronScheduleBuilder.cronSchedule(cronExpression)
+                        .withMisfireHandlingInstructionFireAndProceed())
                 .build();
 
         JobDataMap jobDataMap = new JobDataMap();

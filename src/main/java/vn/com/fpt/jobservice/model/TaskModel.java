@@ -1,23 +1,18 @@
 package vn.com.fpt.jobservice.model;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.UUID;
-
-import org.springframework.beans.factory.annotation.Autowired;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import vn.com.fpt.jobservice.entity.InternalIntegration;
 import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.entity.TaskType;
 import vn.com.fpt.jobservice.exception.ResourceNotFoundException;
-import vn.com.fpt.jobservice.repositories.InternalIntegrationRepository;
 import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
 import vn.com.fpt.jobservice.utils.TaskStatus;
+
+import java.util.Date;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -50,7 +45,7 @@ public class TaskModel {
     private String createdBy;
     private String modifiedBy;
 
-    public Task toEntity(TaskTypeRepository ttRepository, InternalIntegrationRepository iiRepository) {
+    public Task toEntity(TaskTypeRepository ttRepository) {
         Task taskEntity = new Task();
 
         if (this.getId() != null) {
@@ -59,10 +54,13 @@ public class TaskModel {
             taskEntity.setId(UUID.randomUUID().toString());
         }
         taskEntity.setName(this.getName());
-        if (taskTypeId != null) {
-            TaskType taskType = ttRepository.findById(taskTypeId)
-                    .orElseThrow(() -> new ResourceNotFoundException("TaskType", "id", taskTypeId));
+        if (this.getTaskTypeId() != null) {
+            TaskType taskType = ttRepository.findById(this.getTaskTypeId())
+                    .orElseThrow(() -> new ResourceNotFoundException("TaskType", "id", this.getTaskTypeId()));
             taskEntity.setTaskType(taskType);
+        }
+        if (this.getMaxRetries() != null) {
+            taskEntity.setMaxRetries(this.getMaxRetries());
         }
         taskEntity.setTicketId(this.getTicketId());
         taskEntity.setPhaseId(this.getPhaseId());
@@ -70,7 +68,6 @@ public class TaskModel {
         taskEntity.setIntegrationId(this.getIntegrationId());
         taskEntity.setSubProcessId(this.getSubProcessId());
         taskEntity.setRetryCount(this.getRetryCount());
-        taskEntity.setMaxRetries(this.getMaxRetries());
         taskEntity.setStartStep(this.getStartStep());
         taskEntity.setCronExpression(this.getCronExpression());
         taskEntity.setNextInvocation(this.getNextInvocation());

@@ -17,11 +17,9 @@ import java.util.Date;
 @Slf4j
 public class AppJobsListener implements JobListener {
     @Autowired
-    TaskService _taskService;
+    TaskService taskService;
     @Autowired
-    TaskHistoryService _taskHistoryService;
-    @Autowired
-    JobService _jobService;
+    TaskHistoryService taskHistoryService;
 
     @Override
     public String getName() {
@@ -35,20 +33,19 @@ public class AppJobsListener implements JobListener {
         Date executionDate = new Date();
 
         String jobUUID = context.getJobDetail().getKey().getName();
-        Task task = _taskService.readTaskByJobUUID(jobUUID)
-                .orElseThrow(() -> new ResourceNotFoundException("Task", "jobUUID", jobUUID));
+        Task task = taskService.readTaskByJobUUID(jobUUID);
 
         TaskHistory taskHistory = new TaskHistory();
         taskHistory.setTask(task);
         taskHistory.setStep(0L);
         taskHistory.setStatus(TaskStatus.PROCESSING);
         taskHistory.setStartedAt(executionDate);
-        _taskHistoryService.insertNewHistoryOfTask(task.getId(), taskHistory);
+        taskHistoryService.insertNewHistoryOfTask(task.getId(), taskHistory);
 
         task.setPrevInvocation(executionDate);
         task.setStatus(taskHistory.getStatus());
         task.setRetryCount(task.getRetryCount() + 1);
-        _taskService.updateTaskById(task.getId(), task.toModel());
+        taskService.updateTaskById(task.getId(), task.toModel());
     }
 
     @Override
@@ -63,8 +60,7 @@ public class AppJobsListener implements JobListener {
         TaskHistory taskHistory = new TaskHistory();
         try {
             String jobUUID = context.getJobDetail().getKey().getName();
-            task = _taskService.readTaskByJobUUID(jobUUID)
-                    .orElseThrow(() -> new ResourceNotFoundException("Task", "jobUUID", jobUUID));
+            task = taskService.readTaskByJobUUID(jobUUID);
             taskHistory.setTask(task);
             taskHistory.setStatus(TaskStatus.SUCCESS);
 
@@ -78,13 +74,13 @@ public class AppJobsListener implements JobListener {
         } finally {
             if (task != null) {
                 taskHistory.setEndedAt(new Date());
-                _taskHistoryService.updateProcessingHistoryOfTask(task.getId(), taskHistory);
+                taskHistoryService.updateProcessingHistoryOfTask(task.getId(), taskHistory);
 
                 task.setStatus(taskHistory.getStatus());
-                if (task.getStatus() == TaskStatus.SUCCESS || task.getRetryCount() >= task.getMaxRetries())
+                if (!task.canScheduleJob())
                     task.setActive(false);
 
-                _taskService.updateTaskById(task.getId(), task.toModel());
+                taskService.updateTaskById(task.getId(), task.toModel());
             }
         }
     }
