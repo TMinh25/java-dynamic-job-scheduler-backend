@@ -32,8 +32,7 @@ import java.util.*;
 
 @Service
 @Slf4j
-public class TaskServiceImpl implements TaskService  {
-
+public class TaskServiceImpl implements TaskService {
     @Autowired
     private TaskRepository taskRepository;
     @Autowired

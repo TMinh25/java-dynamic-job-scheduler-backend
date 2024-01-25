@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+package vn.com.fpt.jobservice.u_service.grpc;
+
+service UService {
+  // Create batch renewal contracts
+  rpc CreateBatchRenewalContract (BatchRenewalRequest) returns (BatchRenewalReply) {}
+}
+
+// The request message containing the user's name.
+message BatchRenewalRequest {
+  int64 ticketId = 1;
+  int64 phaseId = 2;
+  int64 subProcessId = 3;
+}
+
+// The response message containing the greetings
+message BatchRenewalReply {
+  string message = 1;
+}

@@ -12,6 +12,7 @@ import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
 import vn.com.fpt.jobservice.utils.TaskStatus;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -24,7 +25,7 @@ public class TaskModel {
     private String name;
     private TaskType taskType;
     private Long taskTypeId;
-    private Object[] taskInputData;
+    private List<Object> taskInputData;
     private Long integrationId;
     private Long ticketId;
     private Long phaseId;
