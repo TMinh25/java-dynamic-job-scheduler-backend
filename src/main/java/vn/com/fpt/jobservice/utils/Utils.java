@@ -87,4 +87,40 @@ public class Utils {
         }
         return new ArrayList<T>();
     }
+
+    public static Map<String, Object> remapKeys(Map<String, Object> input, Map<String, String> newKeys) {
+        Map<String, Object> output = new HashMap<>();
+
+        for (Map.Entry<String, String> entry : newKeys.entrySet()) {
+            String oldKey = entry.getKey();
+            String newKey = entry.getValue();
+
+            if (oldKey.contains(".")) {
+                Object nestedData = getNestedData(input, oldKey);
+                output.put(newKey, nestedData);
+            } else if (newKeys.containsKey(oldKey)) {
+                output.put(newKey, input.get(oldKey));
+            }
+        }
+
+        return output;
+    }
+
+    private static Object getNestedData(Map<String, Object> input, String key) {
+        try {
+
+            String[] nestedKeys = key.split("\\.");
+            Map<String, Object> nestedData = input;
+
+            for (int i = 0; i < nestedKeys.length - 1; i++) {
+                String nestedKey = nestedKeys[i];
+                nestedData = (Map<String, Object>) nestedData.get(nestedKey);
+            }
+
+            String lastKey = nestedKeys[nestedKeys.length - 1];
+            return nestedData.get(lastKey);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }

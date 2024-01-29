@@ -13,8 +13,10 @@ import vn.com.fpt.jobservice.repositories.InternalIntegrationRepository;
 import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
 import vn.com.fpt.jobservice.service.JobService;
 import vn.com.fpt.jobservice.service.TaskService;
+import vn.com.fpt.jobservice.utils.Utils;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/tasks")
@@ -30,6 +32,14 @@ public class TaskController {
 
     @Autowired
     JobService jobService;
+
+    @PostMapping("mapping")
+    public Map<String, Object> mappingObject(@RequestBody Map<String, Object> request) {
+        Map<String, Object> data = (Map<String, Object>) request.get("data");
+        Map<String, String> newKeys = (Map<String, String>) request.get("mappingObject");
+
+        return Utils.remapKeys(data, newKeys);
+    }
 
     @GetMapping()
     public PagedResponse<Task> searchTasks(
