@@ -1,11 +1,15 @@
 package vn.com.fpt.jobservice.jobs.base;
 
-import lombok.extern.slf4j.Slf4j;
-import org.quartz.*;
+import org.quartz.InterruptableJob;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.quartz.JobKey;
+import org.quartz.UnableToInterruptJobException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
+
+import lombok.extern.slf4j.Slf4j;
 import vn.com.fpt.jobservice.entity.Task;
-import vn.com.fpt.jobservice.exception.ResourceNotFoundException;
 import vn.com.fpt.jobservice.service.TaskService;
 
 @Slf4j

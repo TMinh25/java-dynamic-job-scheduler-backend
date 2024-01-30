@@ -2,6 +2,9 @@ package vn.com.fpt.jobservice.model;
 
 import java.util.Map;
 
+import lombok.Data;
+
+@Data
 public class InternalIntegrationModel {
   private Long id;
   private String url;

@@ -13,9 +13,10 @@ import vn.com.fpt.jobservice.service.AppJobsListener;
 import vn.com.fpt.jobservice.service.AppTriggerListener;
 import vn.com.fpt.jobservice.service.JobService;
 
-import javax.sql.DataSource;
 import java.io.IOException;
 import java.util.Properties;
+
+import javax.sql.DataSource;
 
 @Configuration
 public class QuartzSchedulerConfig {

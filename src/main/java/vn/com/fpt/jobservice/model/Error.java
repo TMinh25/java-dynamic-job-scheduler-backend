@@ -1,11 +1,11 @@
 package vn.com.fpt.jobservice.model;
 
-import lombok.Data;
-import org.springframework.http.HttpStatus;
-
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import org.springframework.http.HttpStatus;
+
+import lombok.Data;
 
 @Data
 public class Error {

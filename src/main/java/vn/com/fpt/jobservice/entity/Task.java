@@ -1,23 +1,37 @@
 package vn.com.fpt.jobservice.entity;
 
+import java.text.ParseException;
+import java.util.Date;
+import java.util.UUID;
+
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.UuidGenerator;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.*;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.UuidGenerator;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import vn.com.fpt.jobservice.model.TaskModel;
-import vn.com.fpt.jobservice.service.JobService;
 import vn.com.fpt.jobservice.service.TaskSchedulerService;
 import vn.com.fpt.jobservice.utils.TaskStatus;
-
-import java.text.ParseException;
-import java.util.Date;
-import java.util.UUID;
 
 @Entity
 @Table(name = "tasks", uniqueConstraints = @UniqueConstraint(name = "unique_phase_ticket", columnNames = { "ticket_id",
@@ -130,7 +144,7 @@ public class Task extends BaseEntity {
     public TaskModel toModel() {
         ObjectMapper objectMapper = new ObjectMapper();
         Object[] taskInputData;
-        Long internalIntegrationId = null;
+//        Long internalIntegrationId = null;
         if (this.getTaskInputData() != null && !this.getTaskInputData().equals("[]")) {
             try {
                 taskInputData = objectMapper.readValue(this.taskInputData, Object[].class);

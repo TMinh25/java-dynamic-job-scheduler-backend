@@ -1,14 +1,13 @@
 package vn.com.fpt.jobservice.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import reactor.core.publisher.Flux;
+
 import vn.com.fpt.jobservice.entity.Task;
-import vn.com.fpt.jobservice.entity.TaskType;
 import vn.com.fpt.jobservice.model.PagedResponse;
 import vn.com.fpt.jobservice.model.TaskModel;
-
-import java.util.List;
 
 public interface TaskService {
     PagedResponse<Task> searchTasks(Pageable pageable, String searchQuery);

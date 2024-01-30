@@ -1,13 +1,8 @@
 package vn.com.fpt.jobservice.entity;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,7 +16,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import vn.com.fpt.jobservice.model.TaskHistoryModel;
 import vn.com.fpt.jobservice.utils.TaskStatus;
 
@@ -29,12 +23,7 @@ import vn.com.fpt.jobservice.utils.TaskStatus;
 @Table(name = "task_histories")
 @Data
 @EntityListeners(AuditingEntityListener.class)
-@Slf4j
 public class TaskHistory {
-    /**
-     *
-     */
-    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
