@@ -44,12 +44,17 @@
 		<dependency>
 			<groupId>com.fpt.framework</groupId>
 			<artifactId>turbo-security</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-core</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
-			<version>3.2.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.zaxxer</groupId>
@@ -82,14 +87,14 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
-			<version>3.2.1</version>
+			<version>3.2.2</version>
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
-			<version>3.2.1</version>
+			<version>3.2.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -159,7 +164,7 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-quartz</artifactId>
-			<version>2.5.4</version>
+			<version>3.2.2</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.springframework</groupId>

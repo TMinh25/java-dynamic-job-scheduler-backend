@@ -1,6 +1,9 @@
 package vn.com.fpt.jobservice.repositories;
 
-import jakarta.persistence.criteria.Predicate;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -8,13 +11,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import reactor.core.publisher.Flux;
+
+import jakarta.persistence.criteria.Predicate;
 import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.utils.TaskStatus;
-
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface TaskRepository extends JpaRepository<Task, String> {
