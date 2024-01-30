@@ -1,11 +1,13 @@
 package vn.com.fpt.jobservice.model.response;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class IntegrationResponseData {
+@Builder
+public class IntegrationData {
   private IntegrationItem item;
   private IntegrationStructure structure;
 }

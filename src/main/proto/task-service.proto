@@ -6,6 +6,15 @@ package vn.com.fpt.jobservice.task_service.grpc;
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/any.proto";
 
+service TaskService {
+  rpc CreateTask(TaskCreateRequest) returns (TaskResponse);
+  rpc UpdateTaskByTaskId(TaskUpdateRequestByTaskId) returns (TaskResponse);
+  rpc UpdateTaskByTicketIdAndPhaseId(TaskUpdateRequestByTicketIdAndPhaseId) returns (TaskResponse);
+
+  rpc TriggerTaskByTaskId(TaskTriggerRequestByTaskId) returns (TaskTriggerResponse);
+  rpc TriggerTaskByTicketIdAndPhaseId(TaskTriggerRequestByTicketIdAndPhaseId) returns (TaskTriggerResponse);
+}
+
 message TaskGrpc {
   string id = 1;
   string name = 2;
@@ -40,14 +49,34 @@ message TaskTypeGrpc {
   string type = 5;
 }
 
-service TaskService {
-  rpc CreateTask(TaskCreationRequest) returns (TaskCreationResponse);
-}
-
-message TaskCreationRequest {
+message TaskResponse {
   TaskGrpc task = 1;
 }
 
-message TaskCreationResponse {
+message TaskCreateRequest {
   TaskGrpc task = 1;
+}
+
+message TaskUpdateRequestByTaskId {
+  string id = 1;
+  TaskGrpc task = 2;
+}
+
+message TaskUpdateRequestByTicketIdAndPhaseId {
+  int64 ticketId = 1;
+  int64 phaseId = 2;
+  TaskGrpc task = 3;
+}
+
+message TaskTriggerRequestByTaskId {
+  string id = 1;
+}
+
+message TaskTriggerRequestByTicketIdAndPhaseId {
+  int64 ticketId = 1;
+  int64 phaseId = 2;
+}
+
+message TaskTriggerResponse {
+  bool success = 1;
 }

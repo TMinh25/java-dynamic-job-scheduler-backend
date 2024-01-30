@@ -1,7 +1,6 @@
 package vn.com.fpt.jobservice.service.impl;
 
 import io.grpc.Metadata;
-import io.grpc.reflection.v1alpha.ErrorResponse;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.service.GrpcService;
@@ -10,15 +9,8 @@ import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.model.TaskModel;
 import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
 import vn.com.fpt.jobservice.service.TaskService;
-import vn.com.fpt.jobservice.task_service.grpc.TaskCreationRequest;
-import vn.com.fpt.jobservice.task_service.grpc.TaskCreationResponse;
-import vn.com.fpt.jobservice.task_service.grpc.TaskGrpc;
+import vn.com.fpt.jobservice.task_service.grpc.*;
 import vn.com.fpt.jobservice.task_service.grpc.TaskServiceGrpc.TaskServiceImplBase;
-import vn.com.fpt.jobservice.utils.TaskStatus;
-import vn.com.fpt.jobservice.utils.Utils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @GrpcService
@@ -30,63 +22,109 @@ public class TaskServiceGrpcImpl extends TaskServiceImplBase {
     TaskTypeRepository taskTypeRepository;
 
     @Override
-    public void createTask(TaskCreationRequest request, StreamObserver<TaskCreationResponse> responseObserver) {
+    public void createTask(TaskCreateRequest request, StreamObserver<TaskResponse> responseObserver) {
         try {
             TaskGrpc grpcTask = request.getTask();
-            TaskModel taskModel = convertToModel(grpcTask);
+            TaskModel taskModel = TaskModel.fromGrpc(grpcTask);
             Task task = taskModel.toEntity(taskTypeRepository);
 
             task = taskService.createTask(task);
 
-            TaskCreationResponse response = TaskCreationResponse
+            TaskGrpc taskGrpc = task.toGrpc();
+
+            TaskResponse response = TaskResponse
+                    .newBuilder()
+                    .setTask(taskGrpc)
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            Metadata metadata = new Metadata();
+            responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription(e.getMessage())
+                    .asRuntimeException(metadata));
+        }
+    }
+
+    @Override
+    public void updateTaskByTaskId(TaskUpdateRequestByTaskId request, StreamObserver<TaskResponse> responseObserver) {
+        try {
+            String taskId = request.getId();
+            TaskGrpc grpcTask = request.getTask();
+            TaskModel taskModel = TaskModel.fromGrpc(grpcTask);
+
+            Task task = taskService.updateTaskById(taskId, taskModel);
+
+            TaskResponse response = TaskResponse
                     .newBuilder()
                     .setTask(task.toGrpc())
                     .build();
             responseObserver.onNext(response);
             responseObserver.onCompleted();
         } catch (Exception e) {
-            log.error(e.getMessage());
-            e.printStackTrace();
-            Metadata.Key<ErrorResponse> errorResponseKey = ProtoUtils.keyForProto(ErrorResponse.getDefaultInstance());
             Metadata metadata = new Metadata();
-
             responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription(e.getMessage())
                     .asRuntimeException(metadata));
-
         }
     }
 
-    private TaskModel convertToModel(TaskGrpc taskGrpc) {
-        List<Object> taskInputData;
-        if (!String.valueOf(taskGrpc.getTaskInputDataList()).equals("[]")) {
-            taskInputData = Utils.convertRepeatedAny2List(taskGrpc.getTaskInputDataList());
-        } else {
-            taskInputData = new ArrayList<Object>();
+    @Override
+    public void updateTaskByTicketIdAndPhaseId(TaskUpdateRequestByTicketIdAndPhaseId request, StreamObserver<TaskResponse> responseObserver) {
+        try {
+            Long ticketId = request.getTicketId();
+            Long phaseId = request.getPhaseId();
+            TaskGrpc grpcTask = request.getTask();
+
+            TaskModel taskModel = TaskModel.fromGrpc(grpcTask);
+
+            Task taskFound = taskService.readTaskByTicketIdAndPhaseId(ticketId, phaseId);
+            Task task = taskService.updateTaskById(taskFound.getId(), taskModel);
+
+            TaskResponse response = TaskResponse
+                    .newBuilder()
+                    .setTask(task.toGrpc())
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            Metadata metadata = new Metadata();
+            responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription(e.getMessage())
+                    .asRuntimeException(metadata));
         }
-        return TaskModel.builder()
-                .id(taskGrpc.getId())
-                .name(taskGrpc.getName())
-                .taskTypeId(taskGrpc.getTaskTypeId())
-                .taskTypeId(taskGrpc.getTaskTypeId())
-                .taskInputData(taskInputData)
-                .integrationId(taskGrpc.getIntegrationId())
-                .ticketId(taskGrpc.getTicketId())
-                .phaseId(taskGrpc.getPhaseId())
-                .phaseName(taskGrpc.getPhaseName())
-                .subProcessId(taskGrpc.getSubProcessId())
-                .retryCount(taskGrpc.getRetryCount())
-                .maxRetries(taskGrpc.getMaxRetries())
-                .status(TaskStatus.fromString(taskGrpc.getStatus()))
-                .startStep(taskGrpc.getStartStep())
-                .cronExpression(taskGrpc.getCronExpression())
-                .active(taskGrpc.getActive())
-                .nextInvocation(Utils.convertProtocTimestamp2Date(taskGrpc.getNextInvocation()))
-                .prevInvocation(Utils.convertProtocTimestamp2Date(taskGrpc.getPrevInvocation()))
-                .jobUUID(taskGrpc.getJobUUID())
-                .createdAt(Utils.convertProtocTimestamp2Date(taskGrpc.getCreatedAt()))
-                .modifiedAt(Utils.convertProtocTimestamp2Date(taskGrpc.getModifiedAt()))
-                .createdBy(taskGrpc.getCreatedBy())
-                .modifiedBy(taskGrpc.getModifiedBy())
-                .build();
+    }
+
+    @Override
+    public void triggerTaskByTaskId(TaskTriggerRequestByTaskId request, StreamObserver<TaskTriggerResponse> responseObserver) {
+        try {
+            boolean success = taskService.triggerJob(request.getId());
+
+            TaskTriggerResponse response = TaskTriggerResponse.newBuilder().setSuccess(success).build();
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            Metadata metadata = new Metadata();
+            responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription(e.getMessage())
+                    .asRuntimeException(metadata));
+        }
+    }
+
+    @Override
+    public void triggerTaskByTicketIdAndPhaseId(TaskTriggerRequestByTicketIdAndPhaseId request, StreamObserver<TaskTriggerResponse> responseObserver) {
+        try {
+            Long ticketId = request.getTicketId();
+            Long phaseId = request.getPhaseId();
+            Task taskFound = taskService.readTaskByTicketIdAndPhaseId(ticketId, phaseId);
+
+            boolean success = taskService.triggerJob(taskFound.getId());
+
+            TaskTriggerResponse response = TaskTriggerResponse.newBuilder().setSuccess(success).build();
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            Metadata metadata = new Metadata();
+            responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription(e.getMessage())
+                    .asRuntimeException(metadata));
+        }
     }
 }

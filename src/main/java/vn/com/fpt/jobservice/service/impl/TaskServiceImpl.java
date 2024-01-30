@@ -27,8 +27,9 @@ import vn.com.fpt.jobservice.utils.TaskStatus;
 import vn.com.fpt.jobservice.utils.TaskTypeType;
 import vn.com.fpt.jobservice.utils.Utils;
 
-import java.text.ParseException;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -233,27 +234,33 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public ResponseEntity<Object> triggerJob(String id) throws Exception {
-        Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Task", "id", id));
+    public boolean triggerJob(String taskId) throws Exception {
+        try {
 
-        if (jobService.isJobWithNamePresent(task.getJobUUID())) {
-            boolean isJobRunning = jobService.isJobRunning(task.getJobUUID());
+            Task task = taskRepository.findById(taskId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Task", "id", taskId));
 
-            if (isJobRunning) {
-                throw new Exception("Job already in processing state");
+            if (jobService.isJobWithNamePresent(task.getJobUUID())) {
+                boolean isJobRunning = jobService.isJobRunning(task.getJobUUID());
+
+                if (isJobRunning) {
+                    throw new Exception("Job already in processing state");
+                }
+            } else {
+                throw new ResourceNotFoundException("Job", "jobName", task.getJobUUID());
             }
-        } else {
-            throw new ResourceNotFoundException("Job", "jobName", task.getJobUUID());
+
+            if (task.getRetryCount() >= task.getMaxRetries()) {
+                throw new SchedulerException("The job has run out of reruns.");
+            }
+
+            jobService.triggerJob(task.getJobUUID());
+
+            return true;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return false;
         }
-
-        if (task.getRetryCount() >= task.getMaxRetries()) {
-            throw new SchedulerException("The job has run out of reruns.");
-        }
-
-        jobService.triggerJob(task.getJobUUID());
-
-        return ResponseEntity.ok().build();
     }
 
     @Override
