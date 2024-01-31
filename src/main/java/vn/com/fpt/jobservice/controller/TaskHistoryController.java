@@ -10,6 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/task-histories")
+@CrossOrigin("*")
 public class TaskHistoryController {
     @Autowired
     TaskHistoryService taskHistoryService;
