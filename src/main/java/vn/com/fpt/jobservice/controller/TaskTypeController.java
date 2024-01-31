@@ -15,6 +15,7 @@ import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
 
 @RestController
 @RequestMapping("/task-types")
+@CrossOrigin("*")
 public class TaskTypeController {
     @Autowired
     TaskTypeRepository taskTypeRepo;
