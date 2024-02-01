@@ -18,10 +18,7 @@ import vn.com.fpt.jobservice.utils.TaskStatus;
 import vn.com.fpt.jobservice.utils.Utils;
 
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "tasks", uniqueConstraints = @UniqueConstraint(name = "unique_phase_ticket", columnNames = {"ticket_id",
@@ -197,8 +194,11 @@ public class Task extends BaseEntity {
     }
 
     public boolean canUpdateTask() {
+        List<TaskStatus> cannotUpdateStatus = Arrays.asList(TaskStatus.SUCCESS, TaskStatus.PROCESSING, TaskStatus.CANCELED);
+        if (cannotUpdateStatus.contains(this.status) || this.maxRetries == null || this.retryCount < this.maxRetries) {
+            return false;
+        }
         return true;
-//        return this.status != TaskStatus.SUCCESS || this.maxRetries == null;
     }
 
     public boolean canScheduleJob() {

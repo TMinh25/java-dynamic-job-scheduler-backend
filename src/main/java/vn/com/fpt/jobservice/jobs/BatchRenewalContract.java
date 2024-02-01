@@ -13,8 +13,6 @@ import vn.com.fpt.jobservice.utils.CallExternalAPI;
 
 @Slf4j
 public class BatchRenewalContract extends SystemJob {
-    static String jobName = "Tạo hợp đồng lao động";
-
     @Value("${u-service-api}")
     String uServiceURL;
 
