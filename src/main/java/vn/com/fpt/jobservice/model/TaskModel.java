@@ -56,7 +56,31 @@ public class TaskModel {
         } else {
             taskInputData = new ArrayList<Object>();
         }
-        return TaskModel.builder().id(taskGrpc.getId()).name(taskGrpc.getName()).taskTypeId(taskGrpc.getTaskTypeId()).taskTypeId(taskGrpc.getTaskTypeId()).taskInputData(taskInputData).integrationId(taskGrpc.getIntegrationId()).ticketId(taskGrpc.getTicketId()).phaseId(taskGrpc.getPhaseId()).phaseName(taskGrpc.getPhaseName()).subProcessId(taskGrpc.getSubProcessId()).retryCount(taskGrpc.getRetryCount()).maxRetries(taskGrpc.getMaxRetries()).status(TaskStatus.fromString(taskGrpc.getStatus())).startStep(taskGrpc.getStartStep()).cronExpression(taskGrpc.getCronExpression()).active(taskGrpc.getActive()).nextInvocation(Utils.convertProtocTimestamp2Date(taskGrpc.getNextInvocation())).prevInvocation(Utils.convertProtocTimestamp2Date(taskGrpc.getPrevInvocation())).jobUUID(taskGrpc.getJobUUID()).createdAt(Utils.convertProtocTimestamp2Date(taskGrpc.getCreatedAt())).modifiedAt(Utils.convertProtocTimestamp2Date(taskGrpc.getModifiedAt())).createdBy(taskGrpc.getCreatedBy()).modifiedBy(taskGrpc.getModifiedBy()).build();
+        return TaskModel.builder()
+                .id(taskGrpc.getId())
+                .name(taskGrpc.getName())
+                .taskTypeId(taskGrpc.getTaskTypeId())
+                .taskTypeId(taskGrpc.getTaskTypeId())
+                .taskInputData(taskInputData)
+                .integrationId(taskGrpc.getIntegrationId())
+                .ticketId(taskGrpc.getTicketId())
+                .phaseId(taskGrpc.getPhaseId())
+                .phaseName(taskGrpc.getPhaseName())
+                .subProcessId(taskGrpc.getSubProcessId())
+                .retryCount(taskGrpc.getRetryCount())
+                .maxRetries(taskGrpc.getMaxRetries())
+                .status(TaskStatus.fromString(taskGrpc.getStatus()))
+                .startStep(taskGrpc.getStartStep())
+                .cronExpression(taskGrpc.getCronExpression())
+                .active(taskGrpc.getActive())
+                .nextInvocation(Utils.convertProtocTimestamp2Date(taskGrpc.getNextInvocation()))
+                .prevInvocation(Utils.convertProtocTimestamp2Date(taskGrpc.getPrevInvocation()))
+                .jobUUID(taskGrpc.getJobUUID())
+                .createdAt(Utils.convertProtocTimestamp2Date(taskGrpc.getCreatedAt()))
+                .modifiedAt(Utils.convertProtocTimestamp2Date(taskGrpc.getModifiedAt()))
+                .createdBy(taskGrpc.getCreatedBy())
+                .modifiedBy(taskGrpc.getModifiedBy())
+                .build();
     }
 
     public Task toEntity(TaskTypeRepository ttRepository) {

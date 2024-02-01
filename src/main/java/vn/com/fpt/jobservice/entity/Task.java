@@ -24,13 +24,13 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "tasks", uniqueConstraints = @UniqueConstraint(name = "unique_phase_ticket", columnNames = { "ticket_id",
-        "phase_id" }))
+@Table(name = "tasks", uniqueConstraints = @UniqueConstraint(name = "unique_phase_ticket", columnNames = {"ticket_id",
+        "phase_id"}))
 @Data
 @Slf4j
 @EqualsAndHashCode(callSuper = true)
 @EntityListeners(AuditingEntityListener.class)
-@JsonIgnoreProperties(value = { "createdAt", "modifiedAt" }, allowGetters = true)
+@JsonIgnoreProperties(value = {"createdAt", "modifiedAt"}, allowGetters = true)
 public class Task extends BaseEntity {
     /**
      *
@@ -139,7 +139,8 @@ public class Task extends BaseEntity {
         List<Object> taskInputData;
         if (this.getTaskInputData() != null && !this.getTaskInputData().equals("[]")) {
             try {
-                taskInputData = objectMapper.readValue(this.taskInputData, new TypeReference<List<Object>>() {});
+                taskInputData = objectMapper.readValue(this.taskInputData, new TypeReference<List<Object>>() {
+                });
             } catch (Exception e) {
                 log.error("Can not convert taskInputData to Object[]: " + e.getMessage());
                 taskInputData = new ArrayList<Object>();
