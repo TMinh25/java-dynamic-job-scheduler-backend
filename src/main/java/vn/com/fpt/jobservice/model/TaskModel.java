@@ -68,7 +68,7 @@ public class TaskModel {
                 .phaseName(taskGrpc.getPhaseName())
                 .subProcessId(taskGrpc.getSubProcessId())
                 .retryCount(taskGrpc.getRetryCount())
-                .maxRetries(taskGrpc.getMaxRetries())
+                .maxRetries(taskGrpc.getMaxRetries() == 0 ? null : taskGrpc.getMaxRetries())
                 .status(TaskStatus.fromString(taskGrpc.getStatus()))
                 .startStep(taskGrpc.getStartStep())
                 .cronExpression(taskGrpc.getCronExpression())

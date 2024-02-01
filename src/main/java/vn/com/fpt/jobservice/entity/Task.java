@@ -209,7 +209,7 @@ public class Task extends BaseEntity {
             return false;
         }
 
-        if (this.maxRetries == null || this.maxRetries == 0) {
+        if (this.maxRetries == null) {
             return true;
         }
 

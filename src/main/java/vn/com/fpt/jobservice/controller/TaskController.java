@@ -18,7 +18,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/tasks")
-@CrossOrigin("*")
 public class TaskController {
     @Autowired
     TaskTypeRepository ttRepository;
@@ -33,10 +32,7 @@ public class TaskController {
     JobService jobService;
 
     @GetMapping()
-    public PagedResponse<Task> searchTasks(
-            @RequestParam(value = "page", defaultValue = "0") int pageIndex,
-            @RequestParam(value = "size", defaultValue = "10") int pageSize,
-            @RequestParam(value = "search", required = false, defaultValue = "") String searchQuery) {
+    public PagedResponse<Task> searchTasks(@RequestParam(value = "page", defaultValue = "0") int pageIndex, @RequestParam(value = "size", defaultValue = "10") int pageSize, @RequestParam(value = "search", required = false, defaultValue = "") String searchQuery) {
         return taskService.searchTasks(PageRequest.of(pageIndex, pageSize), searchQuery);
     }
 
@@ -57,16 +53,12 @@ public class TaskController {
     }
 
     @PutMapping("/{id}")
-    public Task updateTaskById(@PathVariable(value = "id") String id, @RequestBody TaskModel taskModel)
-            throws Exception {
+    public Task updateTaskById(@PathVariable(value = "id") String id, @RequestBody TaskModel taskModel) throws Exception {
         return taskService.updateTaskById(id, taskModel);
     }
 
     @PutMapping()
-    public Task updateTaskByTicketAndPhase(
-            @RequestParam(value = "ticketId", required = true) Long ticketId,
-            @RequestParam(value = "phaseId", required = true) Long phaseId,
-            @RequestBody TaskModel taskModel) throws Exception {
+    public Task updateTaskByTicketAndPhase(@RequestParam(value = "ticketId", required = true) Long ticketId, @RequestParam(value = "phaseId", required = true) Long phaseId, @RequestBody TaskModel taskModel) throws Exception {
         Task task = taskService.readTaskByTicketIdAndPhaseId(ticketId, phaseId);
         return taskService.updateTaskById(task.getId(), taskModel);
     }
@@ -82,9 +74,7 @@ public class TaskController {
     }
 
     @GetMapping("/trigger")
-    public boolean triggerJobByPhase(
-            @RequestParam(value = "ticketId", required = true) Long ticketId,
-            @RequestParam(value = "phaseId", required = true) Long phaseId) throws Exception {
+    public boolean triggerJobByPhase(@RequestParam(value = "ticketId", required = true) Long ticketId, @RequestParam(value = "phaseId", required = true) Long phaseId) throws Exception {
         Task task = taskService.readTaskByTicketIdAndPhaseId(ticketId, phaseId);
         return taskService.triggerJob(task.getId());
     }
