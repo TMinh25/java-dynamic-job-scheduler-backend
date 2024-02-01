@@ -20,6 +20,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/tasks")
+@CrossOrigin("*")
 public class TaskController {
     @Autowired
     TaskTypeRepository ttRepository;

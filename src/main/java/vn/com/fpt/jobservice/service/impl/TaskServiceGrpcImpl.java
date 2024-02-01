@@ -1,6 +1,7 @@
 package vn.com.fpt.jobservice.service.impl;
 
 import io.grpc.Metadata;
+import io.grpc.protobuf.ProtoUtils;
 import io.grpc.reflection.v1alpha.ErrorResponse;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;

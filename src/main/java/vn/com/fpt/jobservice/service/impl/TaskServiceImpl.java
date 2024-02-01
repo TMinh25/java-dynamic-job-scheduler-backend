@@ -1,7 +1,9 @@
 package vn.com.fpt.jobservice.service.impl;
 
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
 import org.quartz.SchedulerException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.entity.TaskType;
 import vn.com.fpt.jobservice.exception.ResourceNotFoundException;
@@ -17,7 +22,6 @@ import vn.com.fpt.jobservice.jobs.base.IntegrationJob;
 import vn.com.fpt.jobservice.jobs.base.SystemJob;
 import vn.com.fpt.jobservice.model.PagedResponse;
 import vn.com.fpt.jobservice.model.TaskModel;
-import vn.com.fpt.jobservice.repositories.TaskHistoryRepository;
 import vn.com.fpt.jobservice.repositories.TaskRepository;
 import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
 import vn.com.fpt.jobservice.service.JobService;
@@ -27,16 +31,13 @@ import vn.com.fpt.jobservice.utils.TaskStatus;
 import vn.com.fpt.jobservice.utils.TaskTypeType;
 import vn.com.fpt.jobservice.utils.Utils;
 
-import java.text.ParseException;
-import java.util.*;
-
 @Service
 @Slf4j
 public class TaskServiceImpl implements TaskService {
     @Autowired
     private TaskRepository taskRepository;
-    @Autowired
-    private TaskHistoryRepository taskHistoryRepository;
+//    @Autowired
+//    private TaskHistoryRepository taskHistoryRepository;
     @Autowired
     private TaskTypeRepository taskTypeRepository;
     @Autowired

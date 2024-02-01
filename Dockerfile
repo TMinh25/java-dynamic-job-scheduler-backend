@@ -3,8 +3,9 @@
 #
 FROM public.ecr.aws/docker/library/maven:3.8.1-openjdk-17-slim AS build
 COPY src /home/app/src
+COPY settings.xml /home/app
 COPY pom.xml /home/app
-RUN mvn -f /home/app/pom.xml clean package install -DskipTests
+RUN mvn -f /home/app/pom.xml clean package install -s /home/app/settings.xml -DskipTests
 
 #
 # Package stage

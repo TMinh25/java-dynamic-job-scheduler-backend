@@ -12,7 +12,6 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.UuidGenerator;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import vn.com.fpt.jobservice.model.TaskModel;
-import vn.com.fpt.jobservice.service.JobService;
 import vn.com.fpt.jobservice.service.TaskSchedulerService;
 import vn.com.fpt.jobservice.task_service.grpc.TaskGrpc;
 import vn.com.fpt.jobservice.utils.TaskStatus;
