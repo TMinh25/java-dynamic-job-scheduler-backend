@@ -195,9 +195,12 @@ public class Task extends BaseEntity {
 
     public boolean canUpdateTask() {
         List<TaskStatus> cannotUpdateStatus = Arrays.asList(TaskStatus.SUCCESS, TaskStatus.PROCESSING, TaskStatus.CANCELED);
-        if (cannotUpdateStatus.contains(this.status) || this.maxRetries == null || this.retryCount < this.maxRetries) {
+        if (this.status != TaskStatus.PROCESSING && this.maxRetries == null) {
+            return true;
+        } else if (cannotUpdateStatus.contains(this.status)) {
             return false;
         }
+
         return true;
     }
 
