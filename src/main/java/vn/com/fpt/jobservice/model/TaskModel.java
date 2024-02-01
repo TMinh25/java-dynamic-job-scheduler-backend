@@ -9,9 +9,13 @@ import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.entity.TaskType;
 import vn.com.fpt.jobservice.exception.ResourceNotFoundException;
 import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
+import vn.com.fpt.jobservice.task_service.grpc.TaskGrpc;
 import vn.com.fpt.jobservice.utils.TaskStatus;
+import vn.com.fpt.jobservice.utils.Utils;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -24,7 +28,7 @@ public class TaskModel {
     private String name;
     private TaskType taskType;
     private Long taskTypeId;
-    private Object[] taskInputData;
+    private List<Object> taskInputData;
     private Long integrationId;
     private Long ticketId;
     private Long phaseId;
@@ -45,6 +49,40 @@ public class TaskModel {
     private String createdBy;
     private String modifiedBy;
 
+    public static TaskModel fromGrpc(TaskGrpc taskGrpc) {
+        List<Object> taskInputData;
+        if (!String.valueOf(taskGrpc.getTaskInputDataList()).equals("[]")) {
+            taskInputData = Utils.convertRepeatedAny2List(taskGrpc.getTaskInputDataList());
+        } else {
+            taskInputData = new ArrayList<Object>();
+        }
+        return TaskModel.builder()
+                .id(taskGrpc.getId())
+                .name(taskGrpc.getName())
+                .taskTypeId(taskGrpc.getTaskTypeId())
+                .taskTypeId(taskGrpc.getTaskTypeId())
+                .taskInputData(taskInputData)
+                .integrationId(taskGrpc.getIntegrationId())
+                .ticketId(taskGrpc.getTicketId())
+                .phaseId(taskGrpc.getPhaseId())
+                .phaseName(taskGrpc.getPhaseName())
+                .subProcessId(taskGrpc.getSubProcessId())
+                .retryCount(taskGrpc.getRetryCount())
+                .maxRetries(taskGrpc.getMaxRetries() == 0 ? null : taskGrpc.getMaxRetries())
+                .status(TaskStatus.fromString(taskGrpc.getStatus()))
+                .startStep(taskGrpc.getStartStep())
+                .cronExpression(taskGrpc.getCronExpression())
+                .active(taskGrpc.getActive())
+                .nextInvocation(Utils.convertProtocTimestamp2Date(taskGrpc.getNextInvocation()))
+                .prevInvocation(Utils.convertProtocTimestamp2Date(taskGrpc.getPrevInvocation()))
+                .jobUUID(taskGrpc.getJobUUID())
+                .createdAt(Utils.convertProtocTimestamp2Date(taskGrpc.getCreatedAt()))
+                .modifiedAt(Utils.convertProtocTimestamp2Date(taskGrpc.getModifiedAt()))
+                .createdBy(taskGrpc.getCreatedBy())
+                .modifiedBy(taskGrpc.getModifiedBy())
+                .build();
+    }
+
     public Task toEntity(TaskTypeRepository ttRepository) {
         Task taskEntity = new Task();
 
@@ -55,8 +93,7 @@ public class TaskModel {
         }
         taskEntity.setName(this.getName());
         if (this.getTaskTypeId() != null) {
-            TaskType taskType = ttRepository.findById(this.getTaskTypeId())
-                    .orElseThrow(() -> new ResourceNotFoundException("TaskType", "id", this.getTaskTypeId()));
+            TaskType taskType = ttRepository.findById(this.getTaskTypeId()).orElseThrow(() -> new ResourceNotFoundException("TaskType", "id", this.getTaskTypeId()));
             taskEntity.setTaskType(taskType);
         }
         if (this.getMaxRetries() != null) {

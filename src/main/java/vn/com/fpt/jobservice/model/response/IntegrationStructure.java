@@ -2,6 +2,7 @@ package vn.com.fpt.jobservice.model.response;
 
 import java.util.Map;
 
+import lombok.Builder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @Setter
 @Slf4j
+@Builder
 public class IntegrationStructure {
   @Autowired
   ObjectMapper objectMapper;

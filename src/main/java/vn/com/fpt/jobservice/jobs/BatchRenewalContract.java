@@ -13,7 +13,6 @@ import vn.com.fpt.jobservice.utils.CallExternalAPI;
 
 @Slf4j
 public class BatchRenewalContract extends SystemJob {
-
     @Value("${u-service-api}")
     String uServiceURL;
 
@@ -24,7 +23,7 @@ public class BatchRenewalContract extends SystemJob {
     public void executeInternal(JobExecutionContext context) throws JobExecutionException {
         super.executeInternal(context);
         try {
-            if (this.task.getIntegrationId() != null) {
+            if (this.task.getIntegrationId() != null && this.task.getIntegrationId() != 0) {
                 // Getting data from integration
                 Long integrationId = this.task.getIntegrationId();
                 String getIntegrationURL = String.format("%s/get/%s", integrationURL, integrationId);
@@ -43,6 +42,7 @@ public class BatchRenewalContract extends SystemJob {
                             headers,
                             executionRequest,
                             Object.class);
+                    assert executionResponse != null;
                     jobInfo(executionResponse.toString());
                 } else {
                     throw new JobExecutionException("Can not get data for integration!");

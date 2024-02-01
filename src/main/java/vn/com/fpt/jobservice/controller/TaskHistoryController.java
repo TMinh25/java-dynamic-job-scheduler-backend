@@ -10,7 +10,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/task-histories")
-@CrossOrigin("*")
 public class TaskHistoryController {
     @Autowired
     TaskHistoryService taskHistoryService;
@@ -21,8 +20,7 @@ public class TaskHistoryController {
     }
 
     @PostMapping("/{id}")
-    public TaskHistory insertHistoryOfTask(@PathVariable(value = "id") String taskId, TaskHistory taskHistory)
-            throws Exception {
+    public TaskHistory insertHistoryOfTask(@PathVariable(value = "id") String taskId, TaskHistory taskHistory) throws Exception {
         return taskHistoryService.insertNewHistoryOfTask(taskId, taskHistory);
     }
 }

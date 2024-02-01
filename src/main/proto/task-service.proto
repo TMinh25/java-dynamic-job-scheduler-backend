@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+package vn.com.fpt.jobservice.task_service.grpc;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+
+service TaskService {
+  rpc CreateTask(TaskCreateRequest) returns (TaskResponse);
+  rpc UpdateTaskByTaskId(TaskUpdateRequestByTaskId) returns (TaskResponse);
+  rpc UpdateTaskByTicketIdAndPhaseId(TaskUpdateRequestByTicketIdAndPhaseId) returns (TaskResponse);
+
+  rpc TriggerTaskByTaskId(TaskTriggerRequestByTaskId) returns (TaskTriggerResponse);
+  rpc TriggerTaskByTicketIdAndPhaseId(TaskTriggerRequestByTicketIdAndPhaseId) returns (TaskTriggerResponse);
+}
+
+message TaskGrpc {
+  string id = 1;
+  string name = 2;
+  int64 taskTypeId = 3;
+  repeated google.protobuf.Any taskInputData = 4;
+  int64 ticketId = 5;
+  int64 phaseId = 6;
+  string phaseName = 7;
+  int64 subProcessId = 8;
+  int64 integrationId = 9;
+  int32 retryCount = 10;
+  int32 maxRetries = 11;
+  int32 startStep = 12;
+  string cronExpression = 13;
+  google.protobuf.Timestamp nextInvocation = 14;
+  google.protobuf.Timestamp prevInvocation = 15;
+  string jobUUID = 16;
+  string status = 17;
+  bool active = 18;
+  TaskTypeGrpc taskType = 19;
+  google.protobuf.Timestamp createdAt = 20;
+  google.protobuf.Timestamp modifiedAt = 21;
+  string createdBy = 22;
+  string modifiedBy = 23;
+}
+
+message TaskTypeGrpc {
+  int64 id = 1;
+  string className = 2;
+  string name = 3;
+  int64 processId = 4;
+  string type = 5;
+}
+
+message TaskResponse {
+  TaskGrpc task = 1;
+}
+
+message TaskCreateRequest {
+  TaskGrpc task = 1;
+}
+
+message TaskUpdateRequestByTaskId {
+  string id = 1;
+  TaskGrpc task = 2;
+}
+
+message TaskUpdateRequestByTicketIdAndPhaseId {
+  int64 ticketId = 1;
+  int64 phaseId = 2;
+  TaskGrpc task = 3;
+}
+
+message TaskTriggerRequestByTaskId {
+  string id = 1;
+}
+
+message TaskTriggerRequestByTicketIdAndPhaseId {
+  int64 ticketId = 1;
+  int64 phaseId = 2;
+}
+
+message TaskTriggerResponse {
+  bool success = 1;
+}
