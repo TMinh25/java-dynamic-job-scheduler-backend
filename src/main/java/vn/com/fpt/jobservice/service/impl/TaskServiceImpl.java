@@ -1,9 +1,7 @@
 package vn.com.fpt.jobservice.service.impl;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.quartz.SchedulerException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.entity.TaskType;
 import vn.com.fpt.jobservice.exception.ResourceNotFoundException;
@@ -31,13 +26,17 @@ import vn.com.fpt.jobservice.utils.TaskStatus;
 import vn.com.fpt.jobservice.utils.TaskTypeType;
 import vn.com.fpt.jobservice.utils.Utils;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
 @Service
 @Slf4j
 public class TaskServiceImpl implements TaskService {
     @Autowired
     private TaskRepository taskRepository;
-//    @Autowired
-//    private TaskHistoryRepository taskHistoryRepository;
+    // @Autowired
+    // private TaskHistoryRepository taskHistoryRepository;
     @Autowired
     private TaskTypeRepository taskTypeRepository;
     @Autowired
@@ -195,7 +194,8 @@ public class TaskServiceImpl implements TaskService {
             throw new IllegalStateException("Task is not updatable");
         }
         // String[] nullProps = Utils.getNullPropertyNames(taskDetails);
-        // OriginalAndUpdatedData historyData = Utils.getOriginalAndUpdatedData(task, taskDetails);
+        // OriginalAndUpdatedData historyData = Utils.getOriginalAndUpdatedData(task,
+        // taskDetails);
         if (taskDetails != null) {
             BeanUtils.copyProperties(taskDetails, task, Utils.getNullPropertyNames(taskDetails));
             task = taskRepository.save(task);
@@ -234,27 +234,33 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public ResponseEntity<Object> triggerJob(String id) throws Exception {
-        Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Task", "id", id));
+    public boolean triggerJob(String taskId) throws Exception {
+        try {
 
-        if (jobService.isJobWithNamePresent(task.getJobUUID())) {
-            boolean isJobRunning = jobService.isJobRunning(task.getJobUUID());
+            Task task = taskRepository.findById(taskId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Task", "id", taskId));
 
-            if (isJobRunning) {
-                throw new Exception("Job already in processing state");
+            if (jobService.isJobWithNamePresent(task.getJobUUID())) {
+                boolean isJobRunning = jobService.isJobRunning(task.getJobUUID());
+
+                if (isJobRunning) {
+                    throw new Exception("Job already in processing state");
+                }
+            } else {
+                throw new ResourceNotFoundException("Job", "jobName", task.getJobUUID());
             }
-        } else {
-            throw new ResourceNotFoundException("Job", "jobName", task.getJobUUID());
+
+            if (task.getRetryCount() >= task.getMaxRetries()) {
+                throw new SchedulerException("The job has run out of reruns.");
+            }
+
+            jobService.triggerJob(task.getJobUUID());
+
+            return true;
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return false;
         }
-
-        if (task.getRetryCount() >= task.getMaxRetries()) {
-            throw new SchedulerException("The job has run out of reruns.");
-        }
-
-        jobService.triggerJob(task.getJobUUID());
-
-        return ResponseEntity.ok().build();
     }
 
     @Override

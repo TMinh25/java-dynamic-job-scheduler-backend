@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import vn.com.fpt.jobservice.entity.TaskType;
-import vn.com.fpt.jobservice.utils.AutomationTaskType;
 import vn.com.fpt.jobservice.utils.TaskTypeType;
 
 @Data
@@ -15,7 +14,7 @@ import vn.com.fpt.jobservice.utils.TaskTypeType;
 public class TaskTypeModel {
     private Long id;
     private String name;
-    private AutomationTaskType className;
+    private String className;
     private TaskTypeType type;
     private Long processId;
 

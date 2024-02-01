@@ -30,7 +30,7 @@ public interface TaskService {
 
     boolean scheduleJob(Task task) throws Exception;
 
-    ResponseEntity<Object> triggerJob(String id) throws Exception;
+    boolean triggerJob(String taskId) throws Exception;
 
-    ResponseEntity<Object> interuptJob(String id);
+    ResponseEntity<Object> interuptJob(String taskId);
 }

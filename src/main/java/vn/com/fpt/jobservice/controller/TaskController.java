@@ -87,12 +87,12 @@ public class TaskController {
     }
 
     @GetMapping("/trigger/{id}")
-    public ResponseEntity<Object> triggerJob(@PathVariable(value = "id") String id) throws Exception {
+    public boolean triggerJob(@PathVariable(value = "id") String id) throws Exception {
         return taskService.triggerJob(id);
     }
 
     @GetMapping("/trigger")
-    public ResponseEntity<Object> triggerJobByPhase(
+    public boolean triggerJobByPhase(
             @RequestParam(value = "ticketId", required = true) Long ticketId,
             @RequestParam(value = "phaseId", required = true) Long phaseId) throws Exception {
         Task task = taskService.readTaskByTicketIdAndPhaseId(ticketId, phaseId);

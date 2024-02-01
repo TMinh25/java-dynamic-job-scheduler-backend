@@ -52,19 +52,25 @@ public class Utils {
     }
 
     public static Date convertProtocTimestamp2Date(Timestamp ts) {
-        return Date.from(Instant
-                .ofEpochSecond(ts.getSeconds(), ts.getNanos()));
+        if (ts.getSeconds() != 0 && ts.getNanos() != 0) {
+            return Date.from(Instant
+                    .ofEpochSecond(ts.getSeconds(), ts.getNanos()));
+        }
+        return null;
     }
 
     public static Timestamp convertDate2ProtocTimestamp(Date date) {
-        long millis = date.getTime();
-        long seconds = millis / 1000;
-        int nanos = (int) ((millis % 1000) * 1_000_000);
+        if (date != null) {
+            long millis = date.getTime();
+            long seconds = millis / 1000;
+            int nanos = (int) ((millis % 1000) * 1_000_000);
 
-        return Timestamp.newBuilder()
-                .setSeconds(seconds)
-                .setNanos(nanos)
-                .build();
+            return Timestamp.newBuilder()
+                    .setSeconds(seconds)
+                    .setNanos(nanos)
+                    .build();
+        }
+        return Timestamp.newBuilder().setSeconds(0).setNanos(0).build();
     }
 
     public static <T> List<T> convertRepeatedAny2List(List<Any> inputList) {

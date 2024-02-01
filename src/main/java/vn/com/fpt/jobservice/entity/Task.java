@@ -125,6 +125,9 @@ public class Task extends BaseEntity {
             if (this.canScheduleJob()) {
                 this.setNextInvocation(TaskSchedulerService.calculateNextExecutionTime(cronExpression));
             }
+            if (this.getStatus() == TaskStatus.CANCELED) {
+                this.active = false;
+            }
             this.modifiedAt = new Date();
         } catch (ParseException e) {
             log.error("Error calculating next execution time: ", e);
@@ -193,7 +196,8 @@ public class Task extends BaseEntity {
     }
 
     public boolean canUpdateTask() {
-        return this.status != TaskStatus.SUCCESS || this.maxRetries == null;
+        return true;
+//        return this.status != TaskStatus.SUCCESS || this.maxRetries == null;
     }
 
     public boolean canScheduleJob() {
@@ -201,7 +205,7 @@ public class Task extends BaseEntity {
             return false;
         }
 
-        if (this.maxRetries == null) {
+        if (this.maxRetries == null || this.maxRetries == 0) {
             return true;
         }
 
