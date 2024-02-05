@@ -30,6 +30,7 @@ public class TaskModel {
     private Long taskTypeId;
     private List<Object> taskInputData;
     private Long integrationId;
+    private String integrationName;
     private Long ticketId;
     private Long phaseId;
     private String phaseName;
@@ -63,6 +64,7 @@ public class TaskModel {
                 .taskTypeId(taskGrpc.getTaskTypeId())
                 .taskInputData(taskInputData)
                 .integrationId(taskGrpc.getIntegrationId())
+                .integrationName(taskGrpc.getIntegrationName())
                 .ticketId(taskGrpc.getTicketId())
                 .phaseId(taskGrpc.getPhaseId())
                 .phaseName(taskGrpc.getPhaseName())
