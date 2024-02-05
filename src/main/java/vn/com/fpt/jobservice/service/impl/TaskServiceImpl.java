@@ -98,6 +98,7 @@ public class TaskServiceImpl implements TaskService {
     public Task createTask(final Task task) throws Exception {
         log.debug("createTask - START");
         Optional<Task> taskExisted = taskRepository.findById(task.getId());
+        TaskType taskType = null;
         if (taskExisted.isPresent()) {
             throw new Exception("Task existed with id " + task.getId());
         }
@@ -108,11 +109,12 @@ public class TaskServiceImpl implements TaskService {
             task.setStartStep(0);
         }
 
-        TaskType taskType = taskTypeRepository.findById(task.getTaskType().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Task type", "id", task.getTaskType().getId()));
-
-        task.setTaskType(taskType);
-        task.setName(taskType.getName());
+        if (task.getTaskType() != null && task.getTaskType().getId() != null && task.getTaskType().getId() != 0) {
+            taskType = taskTypeRepository.findById(task.getTaskType().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Task type", "id", task.getTaskType().getId()));
+            task.setName(taskType.getName());
+            task.setTaskType(taskType);
+        }
 
         Task newTaskEntity = taskRepository.save(task);
         if (newTaskEntity.canScheduleJob())

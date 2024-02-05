@@ -25,20 +25,21 @@ message TaskGrpc {
   string phaseName = 7;
   int64 subProcessId = 8;
   int64 integrationId = 9;
-  int32 retryCount = 10;
-  int32 maxRetries = 11;
-  int32 startStep = 12;
-  string cronExpression = 13;
-  google.protobuf.Timestamp nextInvocation = 14;
-  google.protobuf.Timestamp prevInvocation = 15;
-  string jobUUID = 16;
-  string status = 17;
-  bool active = 18;
-  TaskTypeGrpc taskType = 19;
-  google.protobuf.Timestamp createdAt = 20;
-  google.protobuf.Timestamp modifiedAt = 21;
-  string createdBy = 22;
-  string modifiedBy = 23;
+  string integrationName = 10;
+  int32 retryCount = 11;
+  int32 maxRetries = 12;
+  int32 startStep = 13;
+  string cronExpression = 14;
+  google.protobuf.Timestamp nextInvocation = 15;
+  google.protobuf.Timestamp prevInvocation = 16;
+  string jobUUID = 17;
+  string status = 18;
+  bool active = 19;
+  TaskTypeGrpc taskType = 20;
+  google.protobuf.Timestamp createdAt = 21;
+  google.protobuf.Timestamp modifiedAt = 22;
+  string createdBy = 23;
+  string modifiedBy = 24;
 }
 
 message TaskTypeGrpc {

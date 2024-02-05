@@ -5,8 +5,11 @@ import lombok.Data;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import vn.com.fpt.jobservice.utils.TaskTypeType;
 
+import java.util.Collection;
+import java.util.Set;
+
 @Entity
-@Table(name = "task_types", uniqueConstraints = @UniqueConstraint(columnNames = "class_name"))
+@Table(name = "task_types")
 @Data
 @EntityListeners(AuditingEntityListener.class)
 public class TaskType {
@@ -26,6 +29,17 @@ public class TaskType {
 
     @Column(name = "process_id")
     private Long processId;
+
+//    @OneToMany(cascade = CascadeType.ALL) //remove mappedBy
+//    @JoinTable(name = "task_type_steps",
+//            joinColumns = @JoinColumn(name = "step_id"),
+//            inverseJoinColumns = @JoinColumn(name = "task_type_id"),
+//            uniqueConstraints = @UniqueConstraint(
+//                    name = "unique_step",
+//                    columnNames = {"task_type_id", "step_id", "step"}))
+//    private Collection<TaskStep> users;
+    @OneToMany(fetch = FetchType.EAGER)
+    private Set<TaskStep> steps;
 
     public TaskType() {
     }

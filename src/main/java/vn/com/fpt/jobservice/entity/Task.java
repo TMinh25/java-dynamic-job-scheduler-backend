@@ -41,9 +41,8 @@ public class Task extends BaseEntity {
     @Column(name = "name", columnDefinition = "VARCHAR(255) collate utf8mb4_unicode_ci")
     private String name;
 
-    @NotNull
     @ManyToOne
-    @JoinColumn(name = "task_type_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "task_type_id", referencedColumnName = "id")
     private TaskType taskType;
 
     @Column(name = "task_input_data", columnDefinition = "TEXT collate utf8mb4_unicode_ci")
@@ -52,6 +51,9 @@ public class Task extends BaseEntity {
     // Call external by making request to the integration service
     @Column(name = "integration_id")
     private Long integrationId;
+
+    @Column(name = "integration_name")
+    private String integrationName;
 
     @Column(name = "ticket_id")
     private Long ticketId;
@@ -102,7 +104,9 @@ public class Task extends BaseEntity {
     @PrePersist
     public void taskCreate() {
         this.active = true;
-        this.jobUUID = String.format("%s_%s", taskType.getClassName(), UUID.randomUUID());
+        if (this.taskType != null) {
+            this.jobUUID = String.format("%s_%s", this.taskType.getClassName(), UUID.randomUUID());
+        }
         try {
             log.debug("Calculating next invocation: " + id);
             if (this.canScheduleJob()) {
