@@ -1,6 +1,7 @@
 package vn.com.fpt.jobservice.utils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
@@ -14,6 +15,9 @@ import java.util.*;
 
 @Slf4j
 public class Utils {
+
+    private static final ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);;
+
     public static String[] getNullPropertyNames(Object source) {
         final BeanWrapper src = new BeanWrapperImpl(source);
         java.beans.PropertyDescriptor[] pds = src.getPropertyDescriptors();
@@ -128,5 +132,25 @@ public class Utils {
         } catch (Exception e) {
             return null;
         }
+    }
+
+
+    public static String objectToString(Object obj) {
+        String res = null;
+        try {
+            res =  mapper.writeValueAsString(obj);
+        } catch (Exception e) {
+            log.error("objectToString failed :" + obj, e);
+        }
+        return res;
+    }
+
+    public static <T> T stringToObject(String str, Class<T> type) {
+        try {
+            return mapper.readValue(str, type);
+        } catch (Exception e) {
+            log.error("stringToObject failed :" + str, e);
+        }
+        return null;
     }
 }

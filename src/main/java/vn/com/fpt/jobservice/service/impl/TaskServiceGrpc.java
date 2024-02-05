@@ -1,20 +1,18 @@
 package vn.com.fpt.jobservice.service.impl;
 
-import io.grpc.Metadata;
-import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.service.GrpcService;
 import org.springframework.beans.factory.annotation.Autowired;
+import reactor.core.publisher.Mono;
 import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.model.TaskModel;
 import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
 import vn.com.fpt.jobservice.service.TaskService;
 import vn.com.fpt.jobservice.task_service.grpc.*;
-import vn.com.fpt.jobservice.task_service.grpc.TaskServiceGrpc.TaskServiceImplBase;
 
 @Slf4j
 @GrpcService
-public class TaskServiceGrpcImpl extends TaskServiceImplBase {
+public class TaskServiceGrpc extends ReactorTaskServiceGrpc.TaskServiceImplBase {
     @Autowired
     TaskService taskService;
 
@@ -22,7 +20,7 @@ public class TaskServiceGrpcImpl extends TaskServiceImplBase {
     TaskTypeRepository taskTypeRepository;
 
     @Override
-    public void createTask(TaskCreateRequest request, StreamObserver<TaskResponse> responseObserver) {
+    public Mono<TaskResponse> createTask(TaskCreateRequest request) {
         try {
             TaskGrpc grpcTask = request.getTask();
             TaskModel taskModel = TaskModel.fromGrpc(grpcTask);
@@ -36,17 +34,15 @@ public class TaskServiceGrpcImpl extends TaskServiceImplBase {
                     .newBuilder()
                     .setTask(taskGrpc)
                     .build();
-            responseObserver.onNext(response);
-            responseObserver.onCompleted();
+            return Mono.just(response);
         } catch (Exception e) {
-            Metadata metadata = new Metadata();
-            responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription(e.getMessage())
-                    .asRuntimeException(metadata));
+            log.error("TaskServiceGrpcImpl createTask err(): ", e);
+            return Mono.error(e);
         }
     }
 
     @Override
-    public void updateTaskByTaskId(TaskUpdateRequestByTaskId request, StreamObserver<TaskResponse> responseObserver) {
+    public Mono<TaskResponse> updateTaskByTaskId(TaskUpdateRequestByTaskId request) {
         try {
             String taskId = request.getId();
             TaskGrpc grpcTask = request.getTask();
@@ -58,17 +54,15 @@ public class TaskServiceGrpcImpl extends TaskServiceImplBase {
                     .newBuilder()
                     .setTask(task.toGrpc())
                     .build();
-            responseObserver.onNext(response);
-            responseObserver.onCompleted();
+            return Mono.just(response);
         } catch (Exception e) {
-            Metadata metadata = new Metadata();
-            responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription(e.getMessage())
-                    .asRuntimeException(metadata));
+            log.error("TaskServiceGrpcImpl updateTaskByTaskId err(): ", e);
+            return Mono.error(e);
         }
     }
 
     @Override
-    public void updateTaskByTicketIdAndPhaseId(TaskUpdateRequestByTicketIdAndPhaseId request, StreamObserver<TaskResponse> responseObserver) {
+    public Mono<TaskResponse> updateTaskByTicketIdAndPhaseId(TaskUpdateRequestByTicketIdAndPhaseId request) {
         try {
             Long ticketId = request.getTicketId();
             Long phaseId = request.getPhaseId();
@@ -83,33 +77,29 @@ public class TaskServiceGrpcImpl extends TaskServiceImplBase {
                     .newBuilder()
                     .setTask(task.toGrpc())
                     .build();
-            responseObserver.onNext(response);
-            responseObserver.onCompleted();
+            return Mono.just(response);
         } catch (Exception e) {
-            Metadata metadata = new Metadata();
-            responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription(e.getMessage())
-                    .asRuntimeException(metadata));
+            log.error("TaskServiceGrpcImpl updateTaskByTicketIdAndPhaseId err(): ", e);
+            return Mono.error(e);
         }
     }
 
     @Override
-    public void triggerTaskByTaskId(TaskTriggerRequestByTaskId request, StreamObserver<TaskTriggerResponse> responseObserver) {
+    public Mono<TaskTriggerResponse> triggerTaskByTaskId(TaskTriggerRequestByTaskId request) {
         try {
             boolean success = taskService.triggerJob(request.getId());
 
             TaskTriggerResponse response = TaskTriggerResponse.newBuilder().setSuccess(success).build();
 
-            responseObserver.onNext(response);
-            responseObserver.onCompleted();
+            return Mono.just(response);
         } catch (Exception e) {
-            Metadata metadata = new Metadata();
-            responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription(e.getMessage())
-                    .asRuntimeException(metadata));
+            log.error("TaskServiceGrpcImpl triggerTaskByTaskId err(): ", e);
+            return Mono.error(e);
         }
     }
 
     @Override
-    public void triggerTaskByTicketIdAndPhaseId(TaskTriggerRequestByTicketIdAndPhaseId request, StreamObserver<TaskTriggerResponse> responseObserver) {
+    public Mono<TaskTriggerResponse> triggerTaskByTicketIdAndPhaseId(TaskTriggerRequestByTicketIdAndPhaseId request) {
         try {
             Long ticketId = request.getTicketId();
             Long phaseId = request.getPhaseId();
@@ -119,12 +109,10 @@ public class TaskServiceGrpcImpl extends TaskServiceImplBase {
 
             TaskTriggerResponse response = TaskTriggerResponse.newBuilder().setSuccess(success).build();
 
-            responseObserver.onNext(response);
-            responseObserver.onCompleted();
+            return Mono.just(response);
         } catch (Exception e) {
-            Metadata metadata = new Metadata();
-            responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription(e.getMessage())
-                    .asRuntimeException(metadata));
+            log.error("TaskServiceGrpcImpl triggerTaskByTicketIdAndPhaseId err(): ", e);
+            return Mono.error(e);
         }
     }
 }

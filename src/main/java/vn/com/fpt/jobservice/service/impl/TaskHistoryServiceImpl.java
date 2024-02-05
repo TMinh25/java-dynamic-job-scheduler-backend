@@ -44,6 +44,7 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
     @Override
     @Transactional
     public TaskHistory insertNewHistoryOfTask(String taskId, TaskHistory history) {
+        log.debug("insertNewHistoryOfTask - START");
         Task task = taskRepo.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Task", "taskId", taskId));
         history.setTask(task);

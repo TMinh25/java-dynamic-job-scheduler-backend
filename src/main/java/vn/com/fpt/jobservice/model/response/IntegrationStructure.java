@@ -21,8 +21,11 @@ public class IntegrationStructure {
   ObjectMapper objectMapper;
 
   private String tenantId;
+
   private Long integrationId;
+
   private String url;
+
   private String method;
 
   public String getMethod() {
@@ -30,10 +33,15 @@ public class IntegrationStructure {
   }
 
   private Map<String, Object> params;
+
   private Map<String, String> headers;
+
   private Map<String, Object> body;
+
   private Map<String, String> outputConfig;
+
   private Map<String, String> mappingConfig;
+
   private Map<String, Map<String, String>> auth;
 
   public String convertToJson() {

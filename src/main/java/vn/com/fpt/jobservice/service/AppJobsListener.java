@@ -45,7 +45,7 @@ public class AppJobsListener implements JobListener {
         task.setPrevInvocation(executionDate);
         task.setStatus(taskHistory.getStatus());
         task.setRetryCount(task.getRetryCount() + 1);
-        taskService.updateTaskById(task.getId(), task.toModel());
+        taskService.updateTask(task.getId(), task.toModel());
     }
 
     @Override
@@ -80,7 +80,7 @@ public class AppJobsListener implements JobListener {
                 if (!task.canScheduleJob())
                     task.setActive(false);
 
-                taskService.updateTaskById(task.getId(), task.toModel());
+                taskService.updateTask(task.getId(), task.toModel());
             }
         }
     }
