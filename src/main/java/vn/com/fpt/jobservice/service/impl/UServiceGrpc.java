@@ -9,7 +9,7 @@ import vn.com.fpt.jobservice.u_service.grpc.UServiceGrpc.UServiceBlockingStub;
 @Slf4j
 @Service
 public class UServiceGrpc {
-    @GrpcClient("grpc-u-service")
+    @GrpcClient("u-service")
     UServiceBlockingStub uServiceStubClient;
 
     public Object createBatchRenewalContract(Long ticketId, Long phaseId, Long subProcessId) {

@@ -16,7 +16,6 @@ class RestExceptionHandler {
     @ExceptionHandler(Exception.class)
     ResponseEntity<Object> exception(Exception ex) {
         log.error(ex.getLocalizedMessage());
-        ex.printStackTrace();
         Error apiError = new Error(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
         return new ResponseEntity<Object>(apiError, new HttpHeaders(), apiError.getStatus());
     }
