@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+package com.fpt.fis.integration.grpc;
+
+message GetIntegrationListRequest {
+	string query = 1;
+	int32 page = 2;
+	int32 size = 3;
+	string sortType = 4;
+	string sortField = 5;
+}
+
+message GetIntegrationRequest {
+	int64 id = 1;
+}
+
+message ExecuteIntegrationRequest {
+	string request = 1;
+}
+
+message ExecuteIntegrationResult {
+	string result = 1;
+}
+
+message IntegrationData {
+	int64 id = 1;
+	string tenantId = 2;
+	string name = 3;
+	string type = 4;
+	string url = 5;
+	string method = 6;
+	string params = 7;
+	string headers = 8;
+	string body = 9;
+	string outputConfig = 10;
+	string mappingConfig = 11;
+	int64 auth = 12;
+	string description = 13;
+	string structure = 14;
+}
+
+message GetIntegrationListResult {
+	int64 totalData = 1;
+	repeated IntegrationData data = 2;
+}
+
+message GetIntegrationResult {
+	IntegrationData item = 1;
+	string structure = 2;
+}
+
+service IntegrationServiceGrpc {
+	rpc getIntegrationList (GetIntegrationListRequest) returns (GetIntegrationListResult);
+	rpc getIntegration (GetIntegrationRequest) returns (GetIntegrationResult);
+	rpc verifyIntegration (ExecuteIntegrationRequest) returns (ExecuteIntegrationResult);
+	rpc executeIntegration (ExecuteIntegrationRequest) returns (ExecuteIntegrationResult);
+}

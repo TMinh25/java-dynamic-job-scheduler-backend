@@ -16,28 +16,10 @@
     <properties>
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- gRPC -->
-        <spring.grpc.version>2.15.0.RELEASE</spring.grpc.version>
-        <protobuf.protoc.version>3.25.2</protobuf.protoc.version>
-        <grpc.version>1.61.0</grpc.version>
-        <protoc.gen.grpc.java.version>1.61.0</protoc.gen.grpc.java.version>
-        <grpc.reactive.version>1.2.4</grpc.reactive.version>
-        <java.reactor.version>3.6.2</java.reactor.version>
         <!-- required for JDK 8 -->
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-bom</artifactId>
-                <version>${grpc.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
     <repositories>
         <repository>
             <id>gitlab-fpt</id>
@@ -206,52 +188,21 @@
 			<artifactId>flyway-mysql</artifactId>
 			<version>10.1.0</version>
 		</dependency>
+
 		<dependency>
-			<groupId>javax.annotation</groupId>
-			<artifactId>javax.annotation-api</artifactId>
-			<version>1.3.2</version>
+			<groupId>com.fpt.framework</groupId>
+			<artifactId>turbo-grpc-server</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>net.devh</groupId>
-			<artifactId>grpc-server-spring-boot-starter</artifactId>
-			<version>${spring.grpc.version}</version>
+			<groupId>com.fpt.framework</groupId>
+			<artifactId>turbo-grpc-client</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>net.devh</groupId>
-			<artifactId>grpc-server-spring-boot-autoconfigure</artifactId>
-			<version>${spring.grpc.version}</version>
+			<groupId>com.fpt.framework</groupId>
+			<artifactId>job-grpc</artifactId>
+			<version>1.0-SNAPSHOT</version>
 		</dependency>
-		<dependency>
-			<groupId>net.devh</groupId>
-			<artifactId>grpc-client-spring-boot-autoconfigure</artifactId>
-			<version>${spring.grpc.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.grpc</groupId>
-			<artifactId>grpc-stub</artifactId>
-			<version>${grpc.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.grpc</groupId>
-			<artifactId>grpc-protobuf</artifactId>
-			<version>${grpc.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.grpc</groupId>
-			<artifactId>grpc-netty</artifactId>
-			<version>${grpc.version}</version>
-		</dependency>
-        <dependency>
-            <groupId>com.google.api.grpc</groupId>
-            <artifactId>proto-google-common-protos</artifactId>
-            <version>2.30.0</version>
-        </dependency>
-		<dependency>
-			<groupId>io.projectreactor</groupId>
-			<artifactId>reactor-core</artifactId>
-			<version>3.6.2</version>
-			<scope>compile</scope>
-		</dependency>
+
 	</dependencies>
 
     <build>
@@ -266,37 +217,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.xolstice.maven.plugins</groupId>
-                <artifactId>protobuf-maven-plugin</artifactId>
-                <version>0.6.1</version>
-                <configuration>
-                    <protocArtifact>
-                        com.google.protobuf:protoc:${protobuf.protoc.version}:exe:${os.detected.classifier}
-                    </protocArtifact>
-                    <pluginId>grpc-java</pluginId>
-                    <pluginArtifact>
-                        io.grpc:protoc-gen-grpc-java:${protoc.gen.grpc.java.version}:exe:${os.detected.classifier}
-                    </pluginArtifact>
-                    <protocPlugins>
-                        <protocPlugin>
-                            <id>reactor-grpc</id>
-                            <groupId>com.salesforce.servicelibs</groupId>
-                            <artifactId>reactor-grpc</artifactId>
-                            <version>${grpc.reactive.version}</version>
-                            <mainClass>vn.com.fpt.jobservice.JobServiceApplication</mainClass>
-                        </protocPlugin>
-                    </protocPlugins>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>compile</goal>
-                            <goal>compile-custom</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
         <finalName>job-service</finalName>

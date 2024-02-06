@@ -26,6 +26,7 @@ import vn.com.fpt.jobservice.utils.TaskStatus;
 import vn.com.fpt.jobservice.utils.TaskTypeType;
 import vn.com.fpt.jobservice.utils.Utils;
 
+import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -35,8 +36,7 @@ import java.util.Optional;
 public class TaskServiceImpl implements TaskService {
     @Autowired
     private TaskRepository taskRepository;
-    // @Autowired
-    // private TaskHistoryRepository taskHistoryRepository;
+
     @Autowired
     private TaskTypeRepository taskTypeRepository;
     @Autowired
@@ -98,6 +98,7 @@ public class TaskServiceImpl implements TaskService {
     public Task createTask(final Task task) throws Exception {
         log.debug("createTask - START");
         Optional<Task> taskExisted = taskRepository.findById(task.getId());
+        TaskType taskType = null;
         if (taskExisted.isPresent()) {
             throw new Exception("Task existed with id " + task.getId());
         }
@@ -108,11 +109,12 @@ public class TaskServiceImpl implements TaskService {
             task.setStartStep(0);
         }
 
-        TaskType taskType = taskTypeRepository.findById(task.getTaskType().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Task type", "id", task.getTaskType().getId()));
-
-        task.setTaskType(taskType);
-        task.setName(taskType.getName());
+        if (task.getTaskType() != null && task.getTaskType().getId() != null && task.getTaskType().getId() != 0) {
+            taskType = taskTypeRepository.findById(task.getTaskType().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Task type", "id", task.getTaskType().getId()));
+            task.setName(taskType.getName());
+            task.setTaskType(taskType);
+        }
 
         Task newTaskEntity = taskRepository.save(task);
         if (newTaskEntity.canScheduleJob())
@@ -193,27 +195,26 @@ public class TaskServiceImpl implements TaskService {
         if (!task.canUpdateTask()) {
             throw new IllegalStateException("Task is not updatable");
         }
-        // String[] nullProps = Utils.getNullPropertyNames(taskDetails);
-        // OriginalAndUpdatedData historyData = Utils.getOriginalAndUpdatedData(task,
-        // taskDetails);
+
+        updateTask(id, taskDetails);
+        log.debug("updateTaskById - END");
+        return task;
+    }
+
+    @SneakyThrows
+    @Override
+    @Transactional
+    public Task updateTask(String id, TaskModel taskDetails) {
+        log.debug("updateTask - START");
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Task", "id", id));
+
         if (taskDetails != null) {
             BeanUtils.copyProperties(taskDetails, task, Utils.getNullPropertyNames(taskDetails));
             task = taskRepository.save(task);
         }
 
         String jobUUID = task.getJobUUID();
-
-        // TaskHistory history = new TaskHistory();
-        // ObjectMapper objectMapper = new ObjectMapper();
-        // try {
-        // history.setOldData(objectMapper.writeValueAsString(historyData.getOldData()));
-        // history.setNewData(objectMapper.writeValueAsString(historyData.getNewData()));
-        // } catch (JsonProcessingException e) {
-        // log.error("Failed to convert to json string: " + e.getMessage());
-        // }
-        // history.setTask(task);
-        // history.setStartedAt(new Date());
-        // taskHistoryRepository.save(history);
         if (task.canScheduleJob()) {
             if (!jobService.isJobWithNamePresent(task.getJobUUID())) {
                 scheduleJob(task);
@@ -229,14 +230,13 @@ public class TaskServiceImpl implements TaskService {
             jobService.deleteJob(jobUUID);
         }
 
-        log.debug("updateTaskById - END");
+        log.debug("updateTask - END");
         return task;
     }
 
     @Override
     public boolean triggerJob(String taskId) throws Exception {
         try {
-
             Task task = taskRepository.findById(taskId)
                     .orElseThrow(() -> new ResourceNotFoundException("Task", "id", taskId));
 
@@ -250,7 +250,7 @@ public class TaskServiceImpl implements TaskService {
                 throw new ResourceNotFoundException("Job", "jobName", task.getJobUUID());
             }
 
-            if (task.getRetryCount() >= task.getMaxRetries()) {
+            if (task.getMaxRetries() != null && task.getRetryCount() >= task.getMaxRetries()) {
                 throw new SchedulerException("The job has run out of reruns.");
             }
 

@@ -8,7 +8,7 @@ import vn.com.fpt.jobservice.u_service.grpc.UServiceGrpc.UServiceBlockingStub;
 
 @Slf4j
 @Service
-public class UServiceGrpcImpl {
+public class UServiceGrpc {
     @GrpcClient("grpc-u-service")
     UServiceBlockingStub uServiceStubClient;
 

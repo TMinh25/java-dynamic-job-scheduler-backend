@@ -3,16 +3,12 @@ package vn.com.fpt.jobservice.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import vn.com.fpt.jobservice.utils.TaskTypeType;
-
-import java.util.Collection;
-import java.util.Set;
 
 @Entity
-@Table(name = "task_types")
+@Table(name = "task_steps", uniqueConstraints = @UniqueConstraint(columnNames = "class_name"))
 @Data
 @EntityListeners(AuditingEntityListener.class)
-public class TaskType {
+public class TaskStep {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,31 +19,24 @@ public class TaskType {
     @Column(name = "class_name")
     private String className;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "type")
-    private TaskTypeType type;
+    @Column(name = "description")
+    private String description;
 
-    @Column(name = "process_id")
-    private Long processId;
-
-//    @OneToMany(cascade = CascadeType.ALL) //remove mappedBy
+//    @ManyToOne
 //    @JoinTable(name = "task_type_steps",
-//            joinColumns = @JoinColumn(name = "step_id"),
-//            inverseJoinColumns = @JoinColumn(name = "task_type_id"),
+//            joinColumns = @JoinColumn(name = "task_type_id"),
+//            inverseJoinColumns = @JoinColumn(name = "step_id"),
 //            uniqueConstraints = @UniqueConstraint(
 //                    name = "unique_step",
 //                    columnNames = {"task_type_id", "step_id", "step"}))
-//    private Collection<TaskStep> users;
-    @OneToMany(fetch = FetchType.EAGER)
-    private Set<TaskStep> steps;
+//    private TaskType taskType;
 
-    public TaskType() {
+    public TaskStep() {
     }
 
-    public TaskType(String name, String className, TaskTypeType type, Long processId) {
+    public TaskStep(String name, String className, String description) {
         this.name = name;
         this.className = className;
-        this.type = type;
-        this.processId = processId;
+        this.description = description;
     }
 }

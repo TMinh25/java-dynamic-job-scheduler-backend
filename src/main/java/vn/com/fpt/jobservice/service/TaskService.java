@@ -26,6 +26,8 @@ public interface TaskService {
 
     Task updateTaskById(String id, TaskModel task);
 
+    Task updateTask(String id, TaskModel task);
+
     List<Task> getPendingTasks();
 
     boolean scheduleJob(Task task) throws Exception;

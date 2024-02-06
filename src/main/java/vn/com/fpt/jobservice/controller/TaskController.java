@@ -1,5 +1,6 @@
 package vn.com.fpt.jobservice.controller;
 
+import com.fpt.fis.integration.grpc.GetIntegrationListResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
@@ -9,10 +10,10 @@ import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.model.JobModel;
 import vn.com.fpt.jobservice.model.PagedResponse;
 import vn.com.fpt.jobservice.model.TaskModel;
-import vn.com.fpt.jobservice.repositories.InternalIntegrationRepository;
 import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
 import vn.com.fpt.jobservice.service.JobService;
 import vn.com.fpt.jobservice.service.TaskService;
+import vn.com.fpt.jobservice.service.impl.IntegrationServiceGrpc;
 
 import java.util.List;
 
@@ -21,9 +22,6 @@ import java.util.List;
 public class TaskController {
     @Autowired
     TaskTypeRepository ttRepository;
-
-    @Autowired
-    InternalIntegrationRepository iiRepository;
 
     @Autowired
     TaskService taskService;
