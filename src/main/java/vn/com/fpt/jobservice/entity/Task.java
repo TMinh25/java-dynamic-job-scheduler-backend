@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +37,7 @@ public class Task extends BaseEntity {
     @UuidGenerator
     private String id;
 
-    @Column(name = "name", columnDefinition = "VARCHAR(255) collate utf8mb4_unicode_ci")
+    @Column(name = "name", columnDefinition = "VARCHAR(255) collate utf8mb4_unicode_ci", unique = true)
     private String name;
 
     @ManyToOne
@@ -48,7 +47,6 @@ public class Task extends BaseEntity {
     @Column(name = "task_input_data", columnDefinition = "TEXT collate utf8mb4_unicode_ci")
     private String taskInputData;
 
-    // Call external by making request to the integration service
     @Column(name = "integration_id")
     private Long integrationId;
 
@@ -101,11 +99,17 @@ public class Task extends BaseEntity {
     @Column(name = "job_uuid", unique = true)
     private String jobUUID;
 
+    @Column(name = "synchronize_data")
+    private String synchronizeData;
+
     @PrePersist
     public void taskCreate() {
         this.active = true;
         if (this.taskType != null) {
             this.jobUUID = String.format("%s_%s", this.taskType.getClassName(), UUID.randomUUID());
+        }
+        if (this.status == null) {
+            this.status = TaskStatus.PENDING;
         }
         try {
             log.debug("Calculating next invocation: " + id);
@@ -135,6 +139,14 @@ public class Task extends BaseEntity {
         }
     }
 
+    public void generateNextInvocation() {
+        try {
+            this.setNextInvocation(TaskSchedulerService.calculateNextExecutionTime(this.cronExpression));
+        } catch (ParseException e) {
+            log.error("Error calculating next execution time: ", e);
+        }
+    }
+
     public TaskModel toModel() {
         ObjectMapper objectMapper = new ObjectMapper();
         List<Object> taskInputData;
@@ -157,6 +169,7 @@ public class Task extends BaseEntity {
                 .phaseId(this.phaseId)
                 .phaseName(phaseName)
                 .integrationId(integrationId)
+                .integrationName(integrationName)
                 .subProcessId(this.subProcessId)
                 .retryCount(this.retryCount)
                 .maxRetries(this.maxRetries)
@@ -181,6 +194,7 @@ public class Task extends BaseEntity {
                 .setPhaseId(this.getPhaseId())
                 .setPhaseName(this.getPhaseName())
                 .setIntegrationId(this.getIntegrationId())
+                .setIntegrationName(this.getIntegrationName())
                 .setSubProcessId(this.getSubProcessId())
                 .setRetryCount(this.getRetryCount())
                 .setStartStep(this.getStartStep())
@@ -201,11 +215,7 @@ public class Task extends BaseEntity {
         List<TaskStatus> cannotUpdateStatus = Arrays.asList(TaskStatus.SUCCESS, TaskStatus.PROCESSING, TaskStatus.CANCELED);
         if (this.status != TaskStatus.PROCESSING && this.maxRetries == null) {
             return true;
-        } else if (cannotUpdateStatus.contains(this.status)) {
-            return false;
-        }
-
-        return true;
+        } else return !cannotUpdateStatus.contains(this.status);
     }
 
     public boolean canScheduleJob() {

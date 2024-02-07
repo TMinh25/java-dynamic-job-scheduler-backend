@@ -6,16 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import vn.com.fpt.jobservice.jobs.base.SystemJob;
 
 public class SyncOrgChart extends SystemJob {
-    @Value("${u-service-api}")
-    String uServiceURL;
-
-    @Value("${integration-api}")
-    String integrationURL;
-
     @Override
-    protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-        context.put("uServiceURL", uServiceURL);
-        context.put("integrationURL", integrationURL);
-
+    protected void defineSteps() {
     }
 }

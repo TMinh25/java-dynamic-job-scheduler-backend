@@ -12,6 +12,9 @@ import vn.com.fpt.jobservice.exception.ResourceNotFoundException;
 import vn.com.fpt.jobservice.model.PagedResponse;
 import vn.com.fpt.jobservice.model.TaskTypeModel;
 import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
+import vn.com.fpt.jobservice.utils.JobType;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/task-types")
@@ -20,8 +23,12 @@ public class TaskTypeController {
     TaskTypeRepository taskTypeRepo;
 
     @GetMapping()
-    public PagedResponse<TaskType> readAllTasks(@RequestParam(value = "page", defaultValue = "0") int pageIndex, @RequestParam(value = "size", defaultValue = "10") int pageSize) {
-        return new PagedResponse<>(taskTypeRepo.findAll(PageRequest.of(pageIndex, pageSize)));
+    public List<TaskType> readAllTasks(@RequestParam(value = "jobType", required = false) String jobType) {
+        if (jobType != null) {
+            return taskTypeRepo.findAllByJobType(JobType.valueOf(jobType));
+        } else {
+            return taskTypeRepo.findAll();
+        }
     }
 
     @GetMapping("/{id}")

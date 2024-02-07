@@ -20,6 +20,7 @@ import vn.com.fpt.jobservice.model.TaskModel;
 import vn.com.fpt.jobservice.repositories.TaskRepository;
 import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
 import vn.com.fpt.jobservice.service.JobService;
+import vn.com.fpt.jobservice.service.TaskHistoryService;
 import vn.com.fpt.jobservice.service.TaskSchedulerService;
 import vn.com.fpt.jobservice.service.TaskService;
 import vn.com.fpt.jobservice.utils.TaskStatus;
@@ -39,6 +40,10 @@ public class TaskServiceImpl implements TaskService {
 
     @Autowired
     private TaskTypeRepository taskTypeRepository;
+
+    @Autowired
+    private TaskHistoryService taskHistoryService;
+
     @Autowired
     private JobService jobService;
 
@@ -103,7 +108,6 @@ public class TaskServiceImpl implements TaskService {
             throw new Exception("Task existed with id " + task.getId());
         }
         task.setId(null);
-        task.setStatus(TaskStatus.PENDING);
         task.setRetryCount(0);
         if (task.getStartStep() == null) {
             task.setStartStep(0);
@@ -117,8 +121,9 @@ public class TaskServiceImpl implements TaskService {
         }
 
         Task newTaskEntity = taskRepository.save(task);
-        if (newTaskEntity.canScheduleJob())
+        if (newTaskEntity.canScheduleJob()) {
             scheduleJob(newTaskEntity);
+        }
         log.debug("createTask - END");
         return newTaskEntity;
     }
@@ -126,6 +131,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public boolean scheduleJob(Task task) {
         try {
+            task.generateNextInvocation();
             TaskType taskType = task.getTaskType();
             String jobClassName = "vn.com.fpt.jobservice.jobs." + taskType.getClassName();
             if (taskType.getType() == TaskTypeType.SYSTEM) { // Job mặc định của hệ thống
@@ -174,7 +180,7 @@ public class TaskServiceImpl implements TaskService {
         Task taskEntity = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Tasks", "id", id));
         String jobUUID = taskEntity.getJobUUID();
-
+        taskHistoryService.deleteAllHistoriesOfTask(taskEntity.getId());
         taskRepository.delete(taskEntity);
         if (jobService.isJobWithNamePresent(jobUUID)) {
             jobService.unscheduleJob(jobUUID);
@@ -184,9 +190,7 @@ public class TaskServiceImpl implements TaskService {
         return ResponseEntity.ok().build();
     }
 
-    @SneakyThrows
     @Override
-    @Transactional
     public Task updateTaskById(String id, TaskModel taskDetails) {
         log.debug("updateTaskById - START");
         Task task = taskRepository.findById(id)
@@ -201,7 +205,6 @@ public class TaskServiceImpl implements TaskService {
         return task;
     }
 
-    @SneakyThrows
     @Override
     @Transactional
     public Task updateTask(String id, TaskModel taskDetails) {
@@ -221,7 +224,11 @@ public class TaskServiceImpl implements TaskService {
             } else {
                 String cronExpression = task.getCronExpression();
                 Date nextInvocation = null;
-                nextInvocation = TaskSchedulerService.calculateNextExecutionTime(cronExpression);
+                try {
+                    nextInvocation = TaskSchedulerService.calculateNextExecutionTime(cronExpression);
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
                 jobService.updateCronJob(jobUUID, nextInvocation, cronExpression);
             }
         } else {

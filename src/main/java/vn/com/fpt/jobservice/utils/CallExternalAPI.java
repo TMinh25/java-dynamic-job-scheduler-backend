@@ -22,7 +22,7 @@ public class CallExternalAPI {
                     responseType);
             return response.getBody();
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+//            log.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -38,7 +38,7 @@ public class CallExternalAPI {
                     responseType);
             return response.getBody();
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+//            log.error(e.getMessage(), e);
             throw e;
         }
     }

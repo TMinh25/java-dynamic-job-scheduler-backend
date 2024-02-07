@@ -3,6 +3,7 @@ package vn.com.fpt.jobservice.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import vn.com.fpt.jobservice.utils.JobType;
 import vn.com.fpt.jobservice.utils.TaskTypeType;
 
 import java.util.Collection;
@@ -27,19 +28,12 @@ public class TaskType {
     @Column(name = "type")
     private TaskTypeType type;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "job_type")
+    private JobType jobType;
+
     @Column(name = "process_id")
     private Long processId;
-
-//    @OneToMany(cascade = CascadeType.ALL) //remove mappedBy
-//    @JoinTable(name = "task_type_steps",
-//            joinColumns = @JoinColumn(name = "step_id"),
-//            inverseJoinColumns = @JoinColumn(name = "task_type_id"),
-//            uniqueConstraints = @UniqueConstraint(
-//                    name = "unique_step",
-//                    columnNames = {"task_type_id", "step_id", "step"}))
-//    private Collection<TaskStep> users;
-    @OneToMany(fetch = FetchType.EAGER)
-    private Set<TaskStep> steps;
 
     public TaskType() {
     }

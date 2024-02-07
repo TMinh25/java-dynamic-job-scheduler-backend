@@ -1,25 +1,63 @@
 package vn.com.fpt.jobservice.jobs.base;
 
 import lombok.extern.slf4j.Slf4j;
-import org.quartz.*;
+import org.quartz.InterruptableJob;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
+import org.quartz.JobKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
+import vn.com.fpt.jobservice.entity.StepHistory;
 import vn.com.fpt.jobservice.entity.Task;
+import vn.com.fpt.jobservice.entity.TaskHistory;
+import vn.com.fpt.jobservice.service.StepHistoryService;
 import vn.com.fpt.jobservice.service.TaskService;
+import vn.com.fpt.jobservice.utils.TaskStatus;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 public abstract class BaseJob extends QuartzJobBean implements InterruptableJob {
     public String type;
     protected Task task;
     protected String jobUUID;
+    protected List<BaseTaskStep> steps = new ArrayList<>();
     protected volatile boolean toStopFlag = true;
     protected String className = this.getClass().getName();
 
     @Autowired
     TaskService taskService;
 
+    @Autowired
+    StepHistoryService stepHistoryService;
+
     protected void jobInfo(String msg) {
         log.info(String.format("[%s] %s", this.getClass().getName(), msg));
+    }
+
+    protected abstract void defineSteps();
+
+
+    private void preStepExecute(int currentStep, BaseTaskStep step, TaskHistory taskHistory) {
+        jobInfo(String.format("Job execute step #%s: %s", currentStep, step.getClass().getName()));
+        StepHistory stepHistory = new StepHistory();
+        stepHistory.setStep(currentStep);
+        stepHistory.setStepName(step.getClass().getName());
+        stepHistoryService.insertNewStepOfTaskHistory(taskHistory.getId(), stepHistory);
+    }
+
+    private void postStepExecute(TaskHistory taskHistory) {
+        StepHistory stepHistory = new StepHistory();
+        stepHistory.setStatus(TaskStatus.SUCCESS);
+        stepHistoryService.updateProcessingStepOfTaskHistory(taskHistory.getId(), stepHistory);
+    }
+
+    private void stepExceptionHandler(TaskHistory taskHistory, Exception e) {
+        StepHistory stepHistory = new StepHistory();
+        stepHistory.setStatus(TaskStatus.ERRORED);
+        stepHistory.setErrorMessage(e.getMessage());
+        stepHistoryService.updateProcessingStepOfTaskHistory(taskHistory.getId(), stepHistory);
     }
 
     @Override
@@ -29,10 +67,34 @@ public abstract class BaseJob extends QuartzJobBean implements InterruptableJob 
         JobKey key = context.getJobDetail().getKey();
         this.jobUUID = key.getName();
         this.task = taskService.readTaskByJobUUID(this.jobUUID);
+        context.put("task", this.task);
+
+        defineSteps();
+
+        final TaskHistory taskHistory = (TaskHistory) context.get("taskHistory");
+
+        int currentStep = 0;
+        for (BaseTaskStep step : steps) {
+            currentStep++;
+            if (toStopFlag) {
+                try {
+                    preStepExecute(currentStep, step, taskHistory);
+                    step.execute(context);
+                    postStepExecute(taskHistory);
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                    stepExceptionHandler(taskHistory, e);
+                    throw new JobExecutionException(e);
+                }
+            } else {
+                jobInfo("Job execution is interrupted.");
+                break;
+            }
+        }
     }
 
     @Override
-    public void interrupt() throws UnableToInterruptJobException {
+    public void interrupt() {
         jobInfo(String.format("[%s] stopping thread... ", this.className));
         toStopFlag = false;
     }

@@ -8,7 +8,7 @@ import vn.com.fpt.jobservice.utils.CallExternalAPI;
 
 public class BatchRenewalSPro extends BaseTaskStep {
     @Override
-    protected Object execute(JobExecutionContext context) {
+    protected void execute(JobExecutionContext context) {
         final String uServiceURL = (String) context.get("uServiceURL");
         final Task task = (Task) context.get("task");
 
@@ -19,7 +19,5 @@ public class BatchRenewalSPro extends BaseTaskStep {
                 task.getTaskType().getProcessId());
         HttpHeaders headers = new HttpHeaders();
         CallExternalAPI.exchangeGet(createBatchURL, headers, Object.class);
-
-        return context;
     }
 }

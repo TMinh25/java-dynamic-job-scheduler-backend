@@ -3,20 +3,25 @@ package vn.com.fpt.jobservice.service.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.entity.TaskHistory;
 import vn.com.fpt.jobservice.exception.ResourceNotFoundException;
+import vn.com.fpt.jobservice.model.PagedResponse;
 import vn.com.fpt.jobservice.model.TaskHistoryModel;
 import vn.com.fpt.jobservice.repositories.TaskHistoryRepository;
 import vn.com.fpt.jobservice.repositories.TaskRepository;
+import vn.com.fpt.jobservice.service.StepHistoryService;
 import vn.com.fpt.jobservice.service.TaskHistoryService;
 import vn.com.fpt.jobservice.utils.TaskStatus;
 import vn.com.fpt.jobservice.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -25,6 +30,27 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
     private TaskRepository taskRepo;
     @Autowired
     private TaskHistoryRepository taskHistoryRepo;
+
+    @Autowired
+    private StepHistoryService stepHistoryService;
+
+    @Override
+    public TaskHistoryModel findById(Long id) {
+        TaskHistory history = taskHistoryRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("TaskHistory", "id", id));
+        TaskHistoryModel historyModel = history.toModel();
+        historyModel.setStepHistories(stepHistoryService.readAllStepOfTaskHistory(historyModel.getId()));
+        return historyModel;
+    }
+
+    @Override
+    public PagedResponse<TaskHistoryModel> readAll(Pageable pageable, String searchQuery) {
+        log.debug("readAllHistoryOfTask - START");
+        Page<TaskHistory> histories = taskHistoryRepo.searchByString(pageable, searchQuery);
+        Page<TaskHistoryModel> taskHistoryModelPage = histories.map(TaskHistory::toModel);
+        log.debug("readAllHistoryOfTask - END");
+
+        return new PagedResponse<>(taskHistoryModelPage);
+    }
 
     @Override
     public List<TaskHistoryModel> readAllHistoryOfTask(String taskId) {
@@ -65,5 +91,14 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
         }
         log.debug("updateHistoryOfTask - END");
         return taskHistoryRepo.save(taskHistory);
+    }
+
+    @Override
+    public void deleteAllHistoriesOfTask(String taskId) {
+        log.debug("deleteAllHistoriesOfTask - START");
+        List<TaskHistory> histories = taskHistoryRepo.findByTaskIdOrderByStartedAtDesc(taskId);
+
+        taskHistoryRepo.deleteAll(histories);
+        log.debug("deleteAllHistoriesOfTask - END");
     }
 }

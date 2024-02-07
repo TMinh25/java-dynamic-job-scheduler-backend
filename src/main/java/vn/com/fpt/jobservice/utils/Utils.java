@@ -153,4 +153,8 @@ public class Utils {
         }
         return null;
     }
+
+    public static long calculateDateDifferenceInMillis(Date date1, Date date2) {
+        return Math.abs(date1.getTime() - date2.getTime());
+    }
 }

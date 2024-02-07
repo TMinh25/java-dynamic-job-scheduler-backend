@@ -40,7 +40,8 @@ public class AppJobsListener implements JobListener {
         taskHistory.setStep(0L);
         taskHistory.setStatus(TaskStatus.PROCESSING);
         taskHistory.setStartedAt(executionDate);
-        taskHistoryService.insertNewHistoryOfTask(task.getId(), taskHistory);
+        taskHistory = taskHistoryService.insertNewHistoryOfTask(task.getId(), taskHistory);
+        context.put("taskHistory", taskHistory);
 
         task.setPrevInvocation(executionDate);
         task.setStatus(taskHistory.getStatus());
@@ -50,7 +51,7 @@ public class AppJobsListener implements JobListener {
 
     @Override
     public void jobExecutionVetoed(JobExecutionContext context) {
-        log.debug("AppJobsListener.jobExecutionVetoed()");
+        log.info("AppJobsListener.jobExecutionVetoed()");
     }
 
     @Override
@@ -67,7 +68,6 @@ public class AppJobsListener implements JobListener {
             if (jobException != null) {
                 throw jobException;
             }
-
         } catch (Exception e) {
             taskHistory.setStatus(TaskStatus.ERRORED);
             taskHistory.setErrorMessage(e.getMessage());
