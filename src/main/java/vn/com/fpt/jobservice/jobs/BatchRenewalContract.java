@@ -33,7 +33,6 @@ public class BatchRenewalContract extends SystemJob {
         // Declare data for job steps
         context.put("uServiceURL", uServiceURL);
         context.put("integrationURL", integrationURL);
-        jobInfo(context.toString());
         super.executeInternal(context);
     }
 }

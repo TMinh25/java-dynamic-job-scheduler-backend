@@ -41,6 +41,9 @@ public class TaskHistory {
     @Column(name = "ended_at")
     private Date endedAt;
 
+    @Column(name = "logs", columnDefinition = "TEXT")
+    private String logs;
+
     @Column(name = "execution_time")
     private Long executionTime;
 

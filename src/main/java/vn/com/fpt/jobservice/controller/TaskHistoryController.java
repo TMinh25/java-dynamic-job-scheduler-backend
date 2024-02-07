@@ -21,7 +21,6 @@ public class TaskHistoryController {
         return taskHistoryService.readAll(PageRequest.of(pageIndex, pageSize), searchQuery);
     }
 
-
     @GetMapping("/{id}")
     public TaskHistoryModel readById(@PathVariable(value = "id") Long id) {
         return taskHistoryService.findById(id);

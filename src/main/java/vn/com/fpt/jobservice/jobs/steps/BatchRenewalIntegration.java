@@ -45,10 +45,7 @@ public class BatchRenewalIntegration extends BaseTaskStep {
 //            throw new JobExecutionException("Can not get data for integration!");
 //        }
         GetIntegrationResult result = integrationServiceGrpc.getIntegrationById(task.getIntegrationId());
-        System.out.println(result);
         ExecuteIntegrationResult res = integrationServiceGrpc.executeIntegration(Utils.stringToObject(result.getStructure(), IntegrationStructure.class));
-        System.out.println(res);
-
         System.out.println("Done");
     }
 }
