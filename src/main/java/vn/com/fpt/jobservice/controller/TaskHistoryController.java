@@ -31,9 +31,4 @@ public class TaskHistoryController {
     public List<TaskHistoryModel> readAllHistoryOfTask(@PathVariable(value = "taskId") String taskId) {
         return taskHistoryService.readAllHistoryOfTask(taskId);
     }
-
-    @PostMapping("/{taskId}")
-    public TaskHistory insertHistoryOfTask(@PathVariable(value = "taskId") String taskId, TaskHistory taskHistory) throws Exception {
-        return taskHistoryService.insertNewHistoryOfTask(taskId, taskHistory);
-    }
 }
