@@ -134,6 +134,9 @@ public class JobServiceImpl implements JobService {
     @Override
     public boolean unscheduleJob(String jobKey) {
         log.debug("Request received for unscheduling job.");
+        if (jobKey == null) {
+            return true;
+        }
 
         TriggerKey triggerKey = new TriggerKey(jobKey);
         log.debug("Parameters received for unscheduling job : key: " + jobKey);
@@ -154,6 +157,9 @@ public class JobServiceImpl implements JobService {
     @Override
     public boolean deleteJob(String jobKey) {
         log.debug("Request received for deleting job.");
+        if (jobKey == null) {
+            return true;
+        }
 
         JobKey jKey = new JobKey(jobKey, this.groupKey);
         log.debug("Parameters received for deleting job jobKey: " + jobKey);
@@ -175,6 +181,9 @@ public class JobServiceImpl implements JobService {
     @Override
     public boolean pauseJob(String jobKey) {
         log.debug("Request received for pausing job.");
+        if (jobKey == null) {
+            return true;
+        }
 
         JobKey jKey = new JobKey(jobKey, this.groupKey);
         log.debug("Parameters received for pausing job jobKey: " + jobKey + ", groupkey: " + this.groupKey);
@@ -196,6 +205,9 @@ public class JobServiceImpl implements JobService {
     @Override
     public boolean resumeJob(String jobKey) {
         log.debug("Request received for resuming job.");
+        if (jobKey == null) {
+            return true;
+        }
 
         JobKey jKey = new JobKey(jobKey, this.groupKey);
         log.debug("Parameters received for resuming job jobKey: " + jobKey);
@@ -305,11 +317,14 @@ public class JobServiceImpl implements JobService {
      * Check job exist with given name
      */
     @Override
-    public boolean isJobWithNamePresent(String jobName) {
+    public boolean isJobWithNamePresent(String jobKey) {
+        if (jobKey == null) {
+            return true;
+        }
         try {
-            JobKey jobKey = new JobKey(jobName, this.groupKey);
+            JobKey jKey = new JobKey(jobKey, this.groupKey);
             Scheduler scheduler = schedulerFactoryBean.getScheduler();
-            if (scheduler.checkExists(jobKey)) {
+            if (scheduler.checkExists(jKey)) {
                 return true;
             }
         } catch (SchedulerException e) {
@@ -331,7 +346,7 @@ public class JobServiceImpl implements JobService {
             JobDetail jobDetail = scheduler.getJobDetail(jobKey);
 
             List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobDetail.getKey());
-            if (triggers != null && triggers.size() > 0) {
+            if (triggers != null && !triggers.isEmpty()) {
                 for (Trigger trigger : triggers) {
                     TriggerState triggerState = scheduler.getTriggerState(trigger.getKey());
 

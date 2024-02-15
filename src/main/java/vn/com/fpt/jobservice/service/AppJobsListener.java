@@ -1,6 +1,8 @@
 package vn.com.fpt.jobservice.service;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -11,7 +13,9 @@ import org.springframework.context.annotation.Configuration;
 import lombok.extern.slf4j.Slf4j;
 import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.entity.TaskHistory;
+import vn.com.fpt.jobservice.model.LogModel;
 import vn.com.fpt.jobservice.utils.TaskStatus;
+import vn.com.fpt.jobservice.utils.Utils;
 
 @Configuration
 @Slf4j
@@ -40,7 +44,9 @@ public class AppJobsListener implements JobListener {
         taskHistory.setStep(0L);
         taskHistory.setStatus(TaskStatus.PROCESSING);
         taskHistory.setStartedAt(executionDate);
-        taskHistoryService.insertNewHistoryOfTask(task.getId(), taskHistory);
+        taskHistory = taskHistoryService.insertNewHistoryOfTask(task.getId(), taskHistory);
+        context.put("taskHistory", taskHistory);
+        context.put("logs", new ArrayList<>());
 
         task.setPrevInvocation(executionDate);
         task.setStatus(taskHistory.getStatus());
@@ -50,7 +56,7 @@ public class AppJobsListener implements JobListener {
 
     @Override
     public void jobExecutionVetoed(JobExecutionContext context) {
-        log.debug("AppJobsListener.jobExecutionVetoed()");
+        log.info("AppJobsListener.jobExecutionVetoed()");
     }
 
     @Override
@@ -67,13 +73,14 @@ public class AppJobsListener implements JobListener {
             if (jobException != null) {
                 throw jobException;
             }
-
         } catch (Exception e) {
             taskHistory.setStatus(TaskStatus.ERRORED);
             taskHistory.setErrorMessage(e.getMessage());
         } finally {
             if (task != null) {
+                List<LogModel> logs = (List<LogModel>) context.get("logs");
                 taskHistory.setEndedAt(new Date());
+                taskHistory.setLogs(Utils.objectToString(logs));
                 taskHistoryService.updateProcessingHistoryOfTask(task.getId(), taskHistory);
 
                 task.setStatus(taskHistory.getStatus());

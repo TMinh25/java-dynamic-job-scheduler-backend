@@ -1,79 +1,85 @@
 package vn.com.fpt.jobservice.entity;
 
-import java.util.Date;
-import java.util.List;
-
 import jakarta.persistence.*;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
+import lombok.Builder;
 import lombok.Data;
-import vn.com.fpt.jobservice.model.TaskHistoryModel;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import vn.com.fpt.jobservice.model.StepHistoryModel;
 import vn.com.fpt.jobservice.utils.TaskStatus;
 import vn.com.fpt.jobservice.utils.Utils;
 
+import java.util.Date;
+
+
 @Entity
-@Table(name = "task_histories")
+@Table(name = "step_histories")
 @Data
 @EntityListeners(AuditingEntityListener.class)
-public class TaskHistory {
+public class StepHistory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "task_id")
+    @JoinColumn(name = "task_history_id", nullable = false)
+    private TaskHistory taskHistory;
+
+    @ManyToOne
+    @JoinColumn(name = "task_id", nullable = false)
     private Task task;
 
     @Column(name = "step")
-    private Long step;
+    private Integer step;
 
-    @Column(name = "error_message", columnDefinition = "TEXT")
-    private String errorMessage;
+    @Column(name = "step_name")
+    private String stepName;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private TaskStatus status;
 
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "started_at")
     private Date startedAt;
 
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "ended_at")
     private Date endedAt;
 
-    @Column(name = "logs", columnDefinition = "TEXT")
-    private String logs;
+    @Column(name = "error_message")
+    private String errorMessage;
 
     @Column(name = "execution_time")
     private Long executionTime;
 
-//    @OneToMany(mappedBy = "taskHistory", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-//    private List<StepHistory> stepHistories;
-
-
-    public TaskHistory() {
+    public StepHistory() {
     }
 
-    public TaskHistory(Task task, Long step, TaskStatus status, Date startedAt,
-            Date endedAt, String errorMessage) {
+    public StepHistory(Long id, TaskHistory taskHistory, Task task, Integer step, String stepName, TaskStatus status, Date startedAt, Date endedAt, String errorMessage) {
+        this.id = id;
+        this.taskHistory = taskHistory;
         this.task = task;
         this.step = step;
+        this.stepName = stepName;
         this.status = status;
         this.startedAt = startedAt;
         this.endedAt = endedAt;
         this.errorMessage = errorMessage;
-        this.executionTime = Math.abs(endedAt.toInstant().getEpochSecond() - startedAt.toInstant().getEpochSecond());
+        this.executionTime = Math
+                .abs(this.endedAt.toInstant().getEpochSecond() - this.startedAt.toInstant().getEpochSecond());
     }
 
     public void calculateExecutionTime() {
         this.executionTime = Utils.calculateDateDifferenceInMillis(this.startedAt, this.endedAt);
     }
 
-    public TaskHistoryModel toModel() {
-        return TaskHistoryModel.builder()
-                .id(this.id)
+    public StepHistoryModel toModel() {
+        return StepHistoryModel.builder()
+//                .id(this.id)
+                .taskHistoryId(this.taskHistory.getId())
                 .taskId(this.task.getId())
                 .step(this.getStep())
+                .stepName(this.getStepName())
                 .status(this.getStatus())
                 .startedAt(this.getStartedAt())
                 .endedAt(this.getEndedAt())
@@ -82,3 +88,4 @@ public class TaskHistory {
                 .build();
     }
 }
+

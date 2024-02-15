@@ -105,6 +105,7 @@ public class TaskModel {
         taskEntity.setPhaseId(this.getPhaseId());
         taskEntity.setPhaseName(this.getPhaseName());
         taskEntity.setIntegrationId(this.getIntegrationId());
+        taskEntity.setIntegrationName(this.getIntegrationName());
         taskEntity.setSubProcessId(this.getSubProcessId());
         taskEntity.setRetryCount(this.getRetryCount());
         taskEntity.setStartStep(this.getStartStep());

@@ -20,8 +20,7 @@ public class IntegrationController {
 
     @GetMapping()
     public GetIntegrationListResult getIntegrationGRPC() {
-        GetIntegrationListResult res = integrationServiceGrpc.getListIntegration();
-        return res;
+        return integrationServiceGrpc.getListIntegration();
     }
 
     @GetMapping("/execute/{id}")
