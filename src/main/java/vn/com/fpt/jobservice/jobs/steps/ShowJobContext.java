@@ -9,6 +9,6 @@ import vn.com.fpt.jobservice.jobs.base.BaseTaskStep;
 public class ShowJobContext extends BaseTaskStep {
     @Override
     protected void execute(JobExecutionContext context) throws JobExecutionException {
-        log.info("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccc");
+        log.info(context.toString());
     }
 }
