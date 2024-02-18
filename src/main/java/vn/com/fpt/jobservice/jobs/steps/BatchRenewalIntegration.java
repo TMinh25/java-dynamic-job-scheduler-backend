@@ -2,19 +2,22 @@ package vn.com.fpt.jobservice.jobs.steps;
 
 import com.fpt.fis.integration.grpc.ExecuteIntegrationResult;
 import com.fpt.fis.integration.grpc.GetIntegrationResult;
-import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import vn.com.fpt.jobservice.entity.Task;
-import vn.com.fpt.jobservice.jobs.base.BaseTaskStep;
+import vn.com.fpt.jobservice.jobs.base.BaseJob;
+import vn.com.fpt.jobservice.jobs.base.BaseJobStep;
 import vn.com.fpt.jobservice.model.response.IntegrationStructure;
 import vn.com.fpt.jobservice.service.impl.IntegrationServiceGrpc;
 import vn.com.fpt.jobservice.utils.Utils;
 
-@Slf4j
-public class BatchRenewalIntegration extends BaseTaskStep {
+public class BatchRenewalIntegration extends BaseJobStep {
     @Autowired
     IntegrationServiceGrpc integrationServiceGrpc;
+
+    public BatchRenewalIntegration(BaseJob baseJob) {
+        super(baseJob);
+    }
 
     @Override
     protected void execute(JobExecutionContext context) {
@@ -45,7 +48,7 @@ public class BatchRenewalIntegration extends BaseTaskStep {
 //            throw new JobExecutionException("Can not get data for integration!");
 //        }
         GetIntegrationResult result = integrationServiceGrpc.getIntegrationById(task.getIntegrationId());
+        logger("Integration data: " + result.toString());
         ExecuteIntegrationResult res = integrationServiceGrpc.executeIntegration(Utils.stringToObject(result.getStructure(), IntegrationStructure.class));
-        System.out.println("Done");
     }
 }

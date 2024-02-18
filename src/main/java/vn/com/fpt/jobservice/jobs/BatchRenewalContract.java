@@ -19,12 +19,12 @@ public class BatchRenewalContract extends SystemJob {
 
     @Override
     protected void defineSteps() {
-        this.steps.add(new ShowJobContext());
+        this.steps.add(new ShowJobContext(this));
 
         if (this.task.getIntegrationId() != null && this.task.getIntegrationId() != 0) {
-            this.steps.add(new BatchRenewalIntegration());
+            this.steps.add(new BatchRenewalIntegration(this));
         } else {
-            this.steps.add(new BatchRenewalSPro());
+            this.steps.add(new BatchRenewalSPro(this));
         }
     }
 
