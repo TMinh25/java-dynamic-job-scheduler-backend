@@ -167,7 +167,7 @@ public class TaskServiceImpl implements TaskService {
                 log.info("Custom job");
             }
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(), (Object) e.getStackTrace());
             return false;
         }
         return true;
@@ -265,7 +265,7 @@ public class TaskServiceImpl implements TaskService {
 
             return true;
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(), (Object) e.getStackTrace());
             return false;
         }
     }

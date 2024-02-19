@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.JobListener;
@@ -80,7 +81,11 @@ public class AppJobsListener implements JobListener {
             if (task != null) {
                 List<LogModel> logs = (List<LogModel>) context.get("logs");
                 taskHistory.setEndedAt(new Date());
-                taskHistory.setLogs(Utils.objectToString(logs));
+                try {
+                    taskHistory.setLogs(Utils.objectToString(logs));
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
                 taskHistoryService.updateProcessingHistoryOfTask(task.getId(), taskHistory);
 
                 task.setStatus(taskHistory.getStatus());

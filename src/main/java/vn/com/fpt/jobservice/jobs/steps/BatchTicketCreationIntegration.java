@@ -3,6 +3,7 @@ package vn.com.fpt.jobservice.jobs.steps;
 import com.fpt.fis.integration.grpc.ExecuteIntegrationResult;
 import com.fpt.fis.integration.grpc.GetIntegrationResult;
 import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.jobs.base.BaseJob;
@@ -11,16 +12,16 @@ import vn.com.fpt.jobservice.model.response.IntegrationStructure;
 import vn.com.fpt.jobservice.service.impl.IntegrationServiceGrpc;
 import vn.com.fpt.jobservice.utils.Utils;
 
-public class BatchRenewalIntegration extends BaseJobStep {
+public class BatchTicketCreationIntegration extends BaseJobStep {
     @Autowired
     IntegrationServiceGrpc integrationServiceGrpc;
 
-    public BatchRenewalIntegration(BaseJob baseJob) {
+    public BatchTicketCreationIntegration(BaseJob baseJob) {
         super(baseJob);
     }
 
     @Override
-    protected void execute(JobExecutionContext context) {
+    protected void execute(JobExecutionContext context) throws JobExecutionException {
         final String integrationURL = (String) context.get("integrationURL");
         final Task task = (Task) context.get("task");
 //
@@ -47,8 +48,12 @@ public class BatchRenewalIntegration extends BaseJobStep {
 //        } else {
 //            throw new JobExecutionException("Can not get data for integration!");
 //        }
-        GetIntegrationResult result = integrationServiceGrpc.getIntegrationById(task.getIntegrationId());
-        logger("Integration data: " + result.toString());
-        ExecuteIntegrationResult res = integrationServiceGrpc.executeIntegration(Utils.stringToObject(result.getStructure(), IntegrationStructure.class));
+        try {
+            GetIntegrationResult result = integrationServiceGrpc.getIntegrationById(task.getIntegrationId());
+            logger("Integration data: " + result.toString());
+            ExecuteIntegrationResult res = integrationServiceGrpc.executeIntegration(result.getStructure());
+        } catch (Exception e) {
+            throw new JobExecutionException(e);
+        }
     }
 }

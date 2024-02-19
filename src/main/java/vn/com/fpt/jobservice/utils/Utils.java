@@ -1,5 +1,6 @@
 package vn.com.fpt.jobservice.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,6 +11,7 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
 import java.beans.PropertyDescriptor;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
 
@@ -135,23 +137,35 @@ public class Utils {
     }
 
 
-    public static String objectToString(Object obj) {
+    public static String objectToString(Object obj) throws JsonProcessingException {
         String res = null;
         try {
-            res =  mapper.writeValueAsString(obj);
+            res = mapper.writeValueAsString(obj);
         } catch (Exception e) {
             log.error("objectToString failed :" + obj, e);
+            throw e;
         }
         return res;
     }
 
-    public static <T> T stringToObject(String str, Class<T> type) {
+    public static <T> T stringToObject(String str, Class<T> type) throws JsonProcessingException {
         try {
             return mapper.readValue(str, type);
         } catch (Exception e) {
             log.error("stringToObject failed :" + str, e);
+            throw e;
         }
-        return null;
+    }
+
+    public static Map<String, Object> convertToMap(Object json) {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        try {
+            return objectMapper.readValue(Utils.objectToString(json), new TypeReference<Map<String, Object>>() {});
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            return null;
+        }
     }
 
     public static long calculateDateDifferenceInMillis(Date date1, Date date2) {

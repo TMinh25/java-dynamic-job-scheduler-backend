@@ -2,17 +2,14 @@ package vn.com.fpt.jobservice.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import vn.com.fpt.jobservice.entity.TaskType;
 import vn.com.fpt.jobservice.exception.ResourceNotFoundException;
-import vn.com.fpt.jobservice.model.PagedResponse;
 import vn.com.fpt.jobservice.model.TaskTypeModel;
 import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
-import vn.com.fpt.jobservice.utils.JobType;
 
 import java.util.List;
 
@@ -23,12 +20,8 @@ public class TaskTypeController {
     TaskTypeRepository taskTypeRepo;
 
     @GetMapping()
-    public List<TaskType> readAllTasks(@RequestParam(value = "jobType", required = false) String jobType) {
-        if (jobType != null) {
-            return taskTypeRepo.findAllByJobType(JobType.valueOf(jobType));
-        } else {
-            return taskTypeRepo.findAll();
-        }
+    public List<TaskType> readAllTasks() {
+        return taskTypeRepo.findAll();
     }
 
     @GetMapping("/{id}")

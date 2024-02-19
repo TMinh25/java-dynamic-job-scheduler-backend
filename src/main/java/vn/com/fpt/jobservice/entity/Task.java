@@ -99,8 +99,8 @@ public class Task extends BaseEntity {
     @Column(name = "job_uuid", unique = true)
     private String jobUUID;
 
-    @Column(name = "synchronize_data")
-    private String synchronizeData;
+//    @Column(name = "synchronize_data")
+//    private String synchronizeData;
 
     @PrePersist
     public void taskCreate() {
