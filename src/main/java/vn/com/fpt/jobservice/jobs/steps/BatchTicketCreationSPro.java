@@ -1,4 +1,5 @@
 package vn.com.fpt.jobservice.jobs.steps;
+import org.quartz.JobExecutionException;
 import org.springframework.http.HttpHeaders;
 
 import org.quartz.JobExecutionContext;
@@ -7,13 +8,13 @@ import vn.com.fpt.jobservice.jobs.base.BaseJob;
 import vn.com.fpt.jobservice.jobs.base.BaseJobStep;
 import vn.com.fpt.jobservice.utils.CallExternalAPI;
 
-public class BatchRenewalSPro extends BaseJobStep {
-    public BatchRenewalSPro(BaseJob baseJob) {
+public class BatchTicketCreationSPro extends BaseJobStep {
+    public BatchTicketCreationSPro(BaseJob baseJob) {
         super(baseJob);
     }
 
     @Override
-    protected void execute(JobExecutionContext context) {
+    protected void execute(JobExecutionContext context) throws JobExecutionException {
         final String uServiceURL = (String) context.get("uServiceURL");
         final Task task = (Task) context.get("task");
 
@@ -21,7 +22,7 @@ public class BatchRenewalSPro extends BaseJobStep {
                 uServiceURL,
                 task.getTicketId(),
                 task.getPhaseId(),
-                task.getTaskType().getProcessId());
+                task.getSubProcessId());
         HttpHeaders headers = new HttpHeaders();
         CallExternalAPI.exchangeGet(createBatchURL, headers, Object.class);
     }

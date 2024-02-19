@@ -1,5 +1,6 @@
 package vn.com.fpt.jobservice.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fpt.fis.integration.grpc.*;
 import com.fpt.fis.integration.grpc.IntegrationServiceGrpcGrpc.IntegrationServiceGrpcBlockingStub;
 import lombok.extern.slf4j.Slf4j;
@@ -30,17 +31,17 @@ public class IntegrationServiceGrpc {
         return integrationServiceBlockingStub.getIntegration(request);
     }
 
-    public ExecuteIntegrationResult verifyIntegrations(IntegrationStructure request) {
+    public ExecuteIntegrationResult verifyIntegrations(String request) throws Exception {
         log.debug("getIntegrationById - START");
-        ExecuteIntegrationRequest grpcRequest = ExecuteIntegrationRequest.newBuilder().setRequest(Utils.objectToString(request)).build();
+        ExecuteIntegrationRequest grpcRequest = ExecuteIntegrationRequest.newBuilder().setRequest(request).build();
         log.debug("getIntegrationById - END");
 
         return integrationServiceBlockingStub.verifyIntegration(grpcRequest);
     }
 
-    public ExecuteIntegrationResult executeIntegration(IntegrationStructure request) {
+    public ExecuteIntegrationResult executeIntegration(String request) throws Exception {
         log.debug("getIntegrationById - START");
-        ExecuteIntegrationRequest grpcRequest = ExecuteIntegrationRequest.newBuilder().setRequest(Utils.objectToString(request)).build();
+        ExecuteIntegrationRequest grpcRequest = ExecuteIntegrationRequest.newBuilder().setRequest(request).build();
         log.debug("getIntegrationById - END");
 
         return integrationServiceBlockingStub.executeIntegration(grpcRequest);

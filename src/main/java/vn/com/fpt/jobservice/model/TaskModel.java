@@ -1,5 +1,6 @@
 package vn.com.fpt.jobservice.model;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,10 +14,7 @@ import vn.com.fpt.jobservice.task_service.grpc.TaskGrpc;
 import vn.com.fpt.jobservice.utils.TaskStatus;
 import vn.com.fpt.jobservice.utils.Utils;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Data
 @NoArgsConstructor
@@ -50,18 +48,23 @@ public class TaskModel {
     private String createdBy;
     private String modifiedBy;
 
-    public static TaskModel fromGrpc(TaskGrpc taskGrpc) {
+    public static TaskModel fromGrpc(TaskGrpc taskGrpc, TaskTypeRepository taskTypeRepo) {
         List<Object> taskInputData;
         if (!String.valueOf(taskGrpc.getTaskInputDataList()).equals("[]")) {
             taskInputData = Utils.convertRepeatedAny2List(taskGrpc.getTaskInputDataList());
         } else {
             taskInputData = new ArrayList<Object>();
         }
+        Optional<TaskType> taskType = taskTypeRepo.findById(taskGrpc.getTaskTypeId());
+        TaskType taskTypeEntity = null;
+        if (taskType.isPresent()) {
+            taskTypeEntity = taskType.get();
+        }
         return TaskModel.builder()
                 .id(taskGrpc.getId())
                 .name(taskGrpc.getName())
                 .taskTypeId(taskGrpc.getTaskTypeId())
-                .taskTypeId(taskGrpc.getTaskTypeId())
+                .taskType(taskTypeEntity)
                 .taskInputData(taskInputData)
                 .integrationId(taskGrpc.getIntegrationId())
                 .integrationName(taskGrpc.getIntegrationName())
@@ -85,7 +88,7 @@ public class TaskModel {
                 .build();
     }
 
-    public Task toEntity(TaskTypeRepository ttRepository) {
+    public Task toEntity(TaskTypeRepository taskTypeRepo) throws JsonProcessingException {
         Task taskEntity = new Task();
 
         if (this.getId() != null) {
@@ -95,12 +98,13 @@ public class TaskModel {
         }
         taskEntity.setName(this.getName());
         if (this.getTaskTypeId() != null) {
-            TaskType taskType = ttRepository.findById(this.getTaskTypeId()).orElseThrow(() -> new ResourceNotFoundException("TaskType", "id", this.getTaskTypeId()));
+            TaskType taskType = taskTypeRepo.findById(this.getTaskTypeId()).orElseThrow(() -> new ResourceNotFoundException("TaskType", "id", this.getTaskTypeId()));
             taskEntity.setTaskType(taskType);
         }
         if (this.getMaxRetries() != null) {
             taskEntity.setMaxRetries(this.getMaxRetries());
         }
+        taskEntity.setTaskInputData(Utils.objectToString(this.getTaskInputData()));
         taskEntity.setTicketId(this.getTicketId());
         taskEntity.setPhaseId(this.getPhaseId());
         taskEntity.setPhaseName(this.getPhaseName());

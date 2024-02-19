@@ -43,13 +43,4 @@ public class IntegrationStructure {
   private Map<String, String> mappingConfig;
 
   private Map<String, Map<String, String>> auth;
-
-  public String convertToJson() {
-    try {
-      return objectMapper.writeValueAsString(this);
-    } catch (JsonProcessingException e) {
-      log.error(e.getMessage());
-      return null;
-    }
-  }
 }

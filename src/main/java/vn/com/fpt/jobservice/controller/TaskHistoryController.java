@@ -18,7 +18,7 @@ public class TaskHistoryController {
 
     @GetMapping()
     public PagedResponse<TaskHistoryModel> readAll(@RequestParam(value = "page", defaultValue = "0") int pageIndex, @RequestParam(value = "size", defaultValue = "20") int pageSize, @RequestParam(value = "search", defaultValue = "") String searchQuery) {
-        return taskHistoryService.readAll(PageRequest.of(pageIndex, pageSize), searchQuery);
+        return taskHistoryService.readAll(PageRequest.of(pageIndex - 1, pageSize), searchQuery);
     }
 
     @GetMapping("/{id}")

@@ -5,12 +5,12 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Value;
 import vn.com.fpt.jobservice.jobs.base.SystemJob;
-import vn.com.fpt.jobservice.jobs.steps.BatchRenewalIntegration;
-import vn.com.fpt.jobservice.jobs.steps.BatchRenewalSPro;
+import vn.com.fpt.jobservice.jobs.steps.BatchTicketCreationIntegration;
+import vn.com.fpt.jobservice.jobs.steps.BatchTicketCreationSPro;
 import vn.com.fpt.jobservice.jobs.steps.ShowJobContext;
 
 @Slf4j
-public class BatchRenewalContract extends SystemJob {
+public class BatchTicketCreation extends SystemJob {
     @Value("${u-service-api}")
     String uServiceURL;
 
@@ -22,9 +22,9 @@ public class BatchRenewalContract extends SystemJob {
         this.steps.add(new ShowJobContext(this));
 
         if (this.task.getIntegrationId() != null && this.task.getIntegrationId() != 0) {
-            this.steps.add(new BatchRenewalIntegration(this));
+            this.steps.add(new BatchTicketCreationIntegration(this));
         } else {
-            this.steps.add(new BatchRenewalSPro(this));
+            this.steps.add(new BatchTicketCreationSPro(this));
         }
     }
 
@@ -33,6 +33,7 @@ public class BatchRenewalContract extends SystemJob {
         // Declare data for job steps
         context.put("uServiceURL", uServiceURL);
         context.put("integrationURL", integrationURL);
+
         super.executeInternal(context);
     }
 }

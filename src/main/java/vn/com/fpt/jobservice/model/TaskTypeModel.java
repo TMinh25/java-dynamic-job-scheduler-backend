@@ -16,7 +16,6 @@ public class TaskTypeModel {
     private String name;
     private String className;
     private TaskTypeType type;
-    private Long processId;
 
     public TaskType toEntity() {
         TaskType taskTypeEntity = new TaskType();
@@ -24,7 +23,6 @@ public class TaskTypeModel {
         taskTypeEntity.setName(this.getName());
         taskTypeEntity.setClassName(this.getClassName());
         taskTypeEntity.setType(this.getType());
-        taskTypeEntity.setProcessId(this.getProcessId());
         return taskTypeEntity;
     }
 }

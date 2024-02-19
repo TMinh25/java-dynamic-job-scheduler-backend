@@ -23,7 +23,7 @@ public class TaskServiceGrpc extends ReactorTaskServiceGrpc.TaskServiceImplBase 
     public Mono<TaskResponse> createTask(TaskCreateRequest request) {
         try {
             TaskGrpc grpcTask = request.getTask();
-            TaskModel taskModel = TaskModel.fromGrpc(grpcTask);
+            TaskModel taskModel = TaskModel.fromGrpc(grpcTask, taskTypeRepository);
             Task task = taskModel.toEntity(taskTypeRepository);
 
             task = taskService.createTask(task);
@@ -46,7 +46,7 @@ public class TaskServiceGrpc extends ReactorTaskServiceGrpc.TaskServiceImplBase 
         try {
             String taskId = request.getId();
             TaskGrpc grpcTask = request.getTask();
-            TaskModel taskModel = TaskModel.fromGrpc(grpcTask);
+            TaskModel taskModel = TaskModel.fromGrpc(grpcTask, taskTypeRepository);
 
             Task task = taskService.updateTaskById(taskId, taskModel);
 
@@ -68,7 +68,7 @@ public class TaskServiceGrpc extends ReactorTaskServiceGrpc.TaskServiceImplBase 
             Long phaseId = request.getPhaseId();
             TaskGrpc grpcTask = request.getTask();
 
-            TaskModel taskModel = TaskModel.fromGrpc(grpcTask);
+            TaskModel taskModel = TaskModel.fromGrpc(grpcTask, taskTypeRepository);
 
             Task taskFound = taskService.readTaskByTicketIdAndPhaseId(ticketId, phaseId);
             Task task = taskService.updateTaskById(taskFound.getId(), taskModel);
