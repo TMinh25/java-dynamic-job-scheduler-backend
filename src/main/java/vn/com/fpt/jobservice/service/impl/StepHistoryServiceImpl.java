@@ -29,7 +29,7 @@ public class StepHistoryServiceImpl implements StepHistoryService {
 
     @Override
     public List<StepHistoryModel> readAllStepOfTaskHistory(Long taskHistoryId) {
-        log.info("readAllStepOfTaskHistory - START");
+        log.debug("readAllStepOfTaskHistory - START");
         List<StepHistory> histories = stepHistoryRepository.findByTaskHistoryIdOrderByStepDesc(taskHistoryId);
 
         List<StepHistoryModel> historyModels = new ArrayList<>();
@@ -38,26 +38,26 @@ public class StepHistoryServiceImpl implements StepHistoryService {
             historyModels.add(historyModel);
         }
 
-        log.info("readAllStepOfTaskHistory - END");
+        log.debug("readAllStepOfTaskHistory - END");
         return historyModels;
     }
 
     @Override
     public StepHistory insertNewStepOfTaskHistory(Long taskHistoryId, StepHistory history) {
-        log.info("insertNewStepOfTaskHistory - START");
+        log.debug("insertNewStepOfTaskHistory - START");
         TaskHistory taskHistory = taskHistoryRepository.findById(taskHistoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("TaskHistory", "id", taskHistoryId));
         history.setTaskHistory(taskHistory);
         history.setTask(taskHistory.getTask());
         history.setStartedAt(new Date());
         history.setStatus(TaskStatus.PROCESSING);
-        log.info("insertNewStepOfTaskHistory - END");
+        log.debug("insertNewStepOfTaskHistory - END");
         return stepHistoryRepository.save(history);
     }
 
     @Override
     public StepHistory updateProcessingStepOfTaskHistory(Long taskHistoryId, StepHistory history) {
-        log.info("updateProcessingStepOfTaskHistory - START");
+        log.debug("updateProcessingStepOfTaskHistory - START");
         StepHistory stepHistory = stepHistoryRepository.findFirstByTaskHistoryIdAndStatus(taskHistoryId, TaskStatus.PROCESSING)
                 .orElseThrow(() -> new ResourceNotFoundException("StepHistory", "taskHistoryId", taskHistoryId));
 
@@ -66,16 +66,16 @@ public class StepHistoryServiceImpl implements StepHistoryService {
             stepHistory.setEndedAt(new Date());
             stepHistory.calculateExecutionTime();
         }
-        log.info("updateProcessingStepOfTaskHistory - END");
+        log.debug("updateProcessingStepOfTaskHistory - END");
         return stepHistoryRepository.save(stepHistory);
     }
 
     @Override
     public void deleteAllStepsOfTaskHistory(Long taskHistoryId) {
-        log.info("deleteAllHistoriesOfTask - START");
+        log.debug("deleteAllHistoriesOfTask - START");
         List<StepHistory> histories = stepHistoryRepository.findByTaskHistoryIdOrderByStepDesc(taskHistoryId);
 
         stepHistoryRepository.deleteAll(histories);
-        log.info("deleteAllHistoriesOfTask - END");
+        log.debug("deleteAllHistoriesOfTask - END");
     }
 }

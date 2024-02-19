@@ -97,6 +97,9 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
     public void deleteAllHistoriesOfTask(String taskId) {
         log.debug("deleteAllHistoriesOfTask - START");
         List<TaskHistory> histories = taskHistoryRepo.findByTaskIdOrderByStartedAtDesc(taskId);
+        for (TaskHistory history : histories) {
+            stepHistoryService.deleteAllStepsOfTaskHistory(history.getId());
+        }
 
         taskHistoryRepo.deleteAll(histories);
         log.debug("deleteAllHistoriesOfTask - END");

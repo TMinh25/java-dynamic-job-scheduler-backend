@@ -1,15 +1,19 @@
 package vn.com.fpt.jobservice.entity;
 
-import java.util.Date;
-import java.util.List;
-
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import lombok.Data;
+import lombok.SneakyThrows;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import vn.com.fpt.jobservice.model.TaskHistoryModel;
 import vn.com.fpt.jobservice.utils.TaskStatus;
 import vn.com.fpt.jobservice.utils.Utils;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Entity
 @Table(name = "task_histories")
@@ -47,10 +51,6 @@ public class TaskHistory {
     @Column(name = "execution_time")
     private Long executionTime;
 
-//    @OneToMany(mappedBy = "taskHistory", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-//    private List<StepHistory> stepHistories;
-
-
     public TaskHistory() {
     }
 
@@ -69,16 +69,26 @@ public class TaskHistory {
         this.executionTime = Utils.calculateDateDifferenceInMillis(this.startedAt, this.endedAt);
     }
 
+    @SneakyThrows
     public TaskHistoryModel toModel() {
+        List<Map<String, String>> logList = new ArrayList<>();
+        ObjectMapper objectMapper = new ObjectMapper();
+        if (this.logs != null) {
+            logList = objectMapper.readValue(this.logs, new TypeReference<List<Map<String, String>>>() {
+            });
+        }
+
         return TaskHistoryModel.builder()
                 .id(this.id)
                 .taskId(this.task.getId())
+                .task(this.task.toModel())
                 .step(this.getStep())
                 .status(this.getStatus())
                 .startedAt(this.getStartedAt())
                 .endedAt(this.getEndedAt())
                 .errorMessage(this.getErrorMessage())
                 .executionTime(this.getExecutionTime())
+                .logs(logList)
                 .build();
     }
 }

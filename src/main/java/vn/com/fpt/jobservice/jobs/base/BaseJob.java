@@ -24,7 +24,7 @@ public abstract class BaseJob extends QuartzJobBean implements InterruptableJob 
     public String type;
     protected Task task;
     protected String jobUUID;
-    protected List<BaseTaskStep> steps = new ArrayList<>();
+    protected List<BaseJobStep> steps = new ArrayList<>();
     protected List<LogModel> logs = new ArrayList<>();
     protected volatile boolean toStopFlag = true;
 
@@ -37,16 +37,19 @@ public abstract class BaseJob extends QuartzJobBean implements InterruptableJob 
     StepHistoryService stepHistoryService;
 
     public void logger(String msg) {
-        String loggingOutput = String.format("[%s] %s", this.getClass().getName(), msg);
+        // String loggingOutput = String.format("[%s] %s", this.getClass().getName(), msg);
+        String loggingOutput = String.format("%s", msg);
         log.info(loggingOutput);
         this.logs.add(LogModel.builder().time(new Date()).content(loggingOutput).build());
         this.context.put("logs", logs);
     }
 
     protected abstract void defineSteps();
+    protected void addStep(BaseJobStep step) {
+        this.steps.add(step);
+    }
 
-
-    private void preStepExecute(int currentStep, BaseTaskStep step, TaskHistory taskHistory) {
+    private void preStepExecute(int currentStep, BaseJobStep step, TaskHistory taskHistory) {
         logger(String.format("Job execute step #%s: %s", currentStep, step.getClass().getName()));
         StepHistory stepHistory = new StepHistory();
         stepHistory.setStep(currentStep);
@@ -82,7 +85,7 @@ public abstract class BaseJob extends QuartzJobBean implements InterruptableJob 
         final TaskHistory taskHistory = (TaskHistory) context.get("taskHistory");
 
         int currentStep = 0;
-        for (BaseTaskStep step : steps) {
+        for (BaseJobStep step : steps) {
             currentStep++;
             if (toStopFlag) {
                 try {
