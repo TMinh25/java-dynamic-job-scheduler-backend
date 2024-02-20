@@ -13,10 +13,9 @@ import vn.com.fpt.jobservice.service.AppJobsListener;
 import vn.com.fpt.jobservice.service.AppTriggerListener;
 import vn.com.fpt.jobservice.service.JobService;
 
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.util.Properties;
-
-import javax.sql.DataSource;
 
 @Configuration
 public class QuartzSchedulerConfig {
@@ -43,7 +42,6 @@ public class QuartzSchedulerConfig {
     public SchedulerFactoryBean schedulerFactoryBean() throws IOException, SchedulerException {
 
         SchedulerFactoryBean factory = new SchedulerFactoryBean();
-        // factory.getScheduler().clear();
 
         factory.setOverwriteExistingJobs(true);
         factory.setDataSource(dataSource);
@@ -56,7 +54,6 @@ public class QuartzSchedulerConfig {
         AutowiringSpringBeanJobFactory jobFactory = new AutowiringSpringBeanJobFactory();
         jobFactory.setApplicationContext(applicationContext);
         factory.setJobFactory(jobFactory);
-        // jobService.clear();
 
         return factory;
     }
@@ -71,5 +68,4 @@ public class QuartzSchedulerConfig {
         propertiesFactoryBean.afterPropertiesSet();
         return propertiesFactoryBean.getObject();
     }
-
 }
