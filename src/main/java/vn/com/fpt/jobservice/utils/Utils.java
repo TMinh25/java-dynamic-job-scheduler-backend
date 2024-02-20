@@ -136,7 +136,6 @@ public class Utils {
         }
     }
 
-
     public static String objectToString(Object obj) throws JsonProcessingException {
         String res = null;
         try {
