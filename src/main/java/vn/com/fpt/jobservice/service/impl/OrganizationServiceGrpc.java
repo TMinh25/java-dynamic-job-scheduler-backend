@@ -41,6 +41,7 @@ public class OrganizationServiceGrpc {
                     .build();
 
             return organizationClient.createDepartment(createDepartmentRequest);
+
         } catch (Exception e) {
             log.error("createDepartment: ", e);
         }

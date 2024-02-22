@@ -71,7 +71,6 @@ public class SyncOrgMappingChart extends SystemJob {
                     organizationServiceGrpc.createDepartment(dataListAfterChange);
                 }
 
-                throw new Exception();
             } catch (Exception e) {
                 throw new JobExecutionException(e);
             }
