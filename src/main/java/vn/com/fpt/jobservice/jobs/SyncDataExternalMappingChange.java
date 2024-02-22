@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class SyncOrgMappingChart extends SystemJob {
+public class SyncDataExternalMappingChange extends SystemJob {
 
     @Autowired
     IntegrationServiceGrpc integrationServiceGrpc;
@@ -68,7 +68,7 @@ public class SyncOrgMappingChart extends SystemJob {
                     dataList.forEach(it -> dataListAfterChange.add(Utils.remapObjectByKeys(it, remapKeys)));
 
                 if (!dataListAfterChange.isEmpty()) {
-                    organizationServiceGrpc.createDepartment(dataListAfterChange);
+                    organizationServiceGrpc.executedForDataSync(dataListAfterChange);
                 }
 
             } catch (Exception e) {

@@ -4,8 +4,8 @@ import com.google.protobuf.Any;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Service;
-import vn.com.fpt.jobservice.organization.grpc.CreateDepartmentRequest;
-import vn.com.fpt.jobservice.organization.grpc.DepartmentMapping;
+import vn.com.fpt.jobservice.organization.grpc.DataSyncRequest;
+import vn.com.fpt.jobservice.organization.grpc.DataMapping;
 import vn.com.fpt.jobservice.organization.grpc.OrganizationServiceGrpc.OrganizationServiceBlockingStub;
 import vn.com.fpt.jobservice.utils.Utils;
 
@@ -22,31 +22,31 @@ public class OrganizationServiceGrpc {
     @GrpcClient("organization-service")
     private OrganizationServiceBlockingStub organizationClient;
 
-    public Object createDepartment(List<Map<String, Object>> request) {
+    public Object executedForDataSync(List<Map<String, Object>> request) {
 
         try {
-            List<DepartmentMapping> departmentMappingList = new ArrayList<>();
+            List<DataMapping> dataMappingList = new ArrayList<>();
 
             request.forEach(it -> {
-                DepartmentMapping departmentMapping = DepartmentMapping.newBuilder()
+                DataMapping dataMapping = DataMapping.newBuilder()
                         .putAllParam(it.entrySet().stream()
                                 .collect(Collectors.toMap(Map.Entry::getKey,
                                         e -> (String) e.getValue())))
                         .build();
-                departmentMappingList.add(departmentMapping);
+                dataMappingList.add(dataMapping);
             });
 
-            CreateDepartmentRequest createDepartmentRequest = CreateDepartmentRequest.newBuilder()
-                    .addAllDepartmentMapping(departmentMappingList)
+            DataSyncRequest dataSyncRequest = DataSyncRequest.newBuilder()
+                    .addAllDataMapping(dataMappingList)
                     .build();
 
-            return organizationClient.createDepartment(createDepartmentRequest);
+            return organizationClient.executedForDataSync(dataSyncRequest);
 
         } catch (Exception e) {
             log.error("createDepartment: ", e);
         }
-        return new Object();
 
+        return new Object();
     }
 
 }
