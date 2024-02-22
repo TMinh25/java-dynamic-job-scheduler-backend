@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+package vn.com.fpt.jobservice.organization.grpc;
+
+import "google/protobuf/any.proto";
+
+message CreateDepartmentRequest {
+  repeated DepartmentMapping departmentMapping = 1;
+}
+
+message DepartmentMapping {
+  map <string, string> param = 1;
+}
+
+message CreateDepartmentResponse {
+  string result = 1;
+}
+
+service OrganizationService {
+  rpc CreateDepartment(CreateDepartmentRequest) returns (CreateDepartmentResponse);
+}

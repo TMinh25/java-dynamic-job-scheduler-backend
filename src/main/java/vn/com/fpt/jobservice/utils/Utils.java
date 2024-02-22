@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
@@ -118,6 +119,19 @@ public class Utils {
         return output;
     }
 
+    public static Map<String, Object> remapObjectByKeys(Map<String, Object> input,
+                                                        List<Map<String, String>> newKeys) {
+        Map<String, Object> output = new HashMap<>();
+
+        newKeys.forEach(it-> it.forEach((oldKey, newKey) -> {
+            if (it.containsKey(oldKey)) {
+                output.put(newKey, input.get(oldKey));
+            }
+        }));
+
+        return output;
+    }
+
     private static Object getNestedData(Map<String, Object> input, String key) {
         try {
 
@@ -160,11 +174,33 @@ public class Utils {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
-            return objectMapper.readValue(Utils.objectToString(json), new TypeReference<Map<String, Object>>() {});
+            return objectMapper.readValue(Utils.objectToString(json), new TypeReference<>() {
+            });
         } catch (IOException e) {
             log.error(e.getMessage());
             return null;
         }
+    }
+
+    public static List<Map<String, String>> convertMapKeyObjectsToMapString(List<Object> mapKeys) {
+        if (mapKeys == null) return new ArrayList<>();
+
+        List<Map<String, String>> remapKeys = new ArrayList<>();
+
+        mapKeys.forEach(it -> {
+            try {
+                JSONObject mJSONObject = new JSONObject(Utils.objectToString(it));
+                Map<String, String> remapKey = new HashMap<>();
+
+                remapKey.put(mJSONObject.get("from").toString(), mJSONObject.get("to").toString());
+                remapKeys.add(remapKey);
+
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        });
+
+        return remapKeys;
     }
 
     public static long calculateDateDifferenceInMillis(Date date1, Date date2) {
