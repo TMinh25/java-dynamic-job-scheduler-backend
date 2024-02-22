@@ -117,6 +117,9 @@ public class TaskServiceImpl implements TaskService {
             taskType = taskTypeRepository.findById(task.getTaskType().getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Task type", "id", task.getTaskType().getId()));
             task.setName(taskType.getName());
+            if (task.getTicketId() != null) {
+                task.setName(String.format("%s - ID Ticket %s", task.getName(), task.getTicketId()));
+            }
             task.setTaskType(taskType);
         }
 

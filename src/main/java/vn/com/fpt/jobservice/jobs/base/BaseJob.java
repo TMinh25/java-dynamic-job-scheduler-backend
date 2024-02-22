@@ -50,7 +50,7 @@ public abstract class BaseJob extends QuartzJobBean implements InterruptableJob 
     }
 
     private void preStepExecute(int currentStep, BaseJobStep step, TaskHistory taskHistory) {
-        logger(String.format("Job execute step #%s: %s", currentStep, step.getClass().getName()));
+        logger(String.format("Job execute step #%s: %s", currentStep, step.getClass().getSimpleName()));
         StepHistory stepHistory = new StepHistory();
         stepHistory.setStep(currentStep);
         stepHistory.setStepName(step.getClass().getName());
@@ -73,7 +73,7 @@ public abstract class BaseJob extends QuartzJobBean implements InterruptableJob 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         this.context = context;
-        logger("executing...");
+        logger("Job executing...");
 
         JobKey key = context.getJobDetail().getKey();
         this.jobUUID = key.getName();
@@ -91,6 +91,7 @@ public abstract class BaseJob extends QuartzJobBean implements InterruptableJob 
                 try {
                     preStepExecute(currentStep, step, taskHistory);
                     step.execute(context);
+                    Thread.sleep(5000);
                     postStepExecute(taskHistory);
                 } catch (Exception e) {
                     logger(e.getMessage());
@@ -102,6 +103,7 @@ public abstract class BaseJob extends QuartzJobBean implements InterruptableJob 
                 break;
             }
         }
+        logger("Job finished!");
     }
 
     @Override
