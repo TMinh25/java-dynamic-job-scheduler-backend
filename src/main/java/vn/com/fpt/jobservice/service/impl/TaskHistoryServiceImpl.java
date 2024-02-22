@@ -53,18 +53,12 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
     }
 
     @Override
-    public List<TaskHistoryModel> readAllHistoryOfTask(String taskId) {
+    public PagedResponse<TaskHistoryModel> readAllHistoryOfTask(Pageable pageable, String taskId) {
         log.debug("readAllHistoryOfTask - START");
-        List<TaskHistory> histories = taskHistoryRepo.findByTaskIdOrderByStartedAtDesc(taskId);
-
-        List<TaskHistoryModel> historyModels = new ArrayList<>();
-        for (TaskHistory history : histories) {
-            TaskHistoryModel historyModel = history.toModel();
-            historyModels.add(historyModel);
-        }
-
+        Page<TaskHistory> histories = taskHistoryRepo.findByTaskIdOrderByStartedAtDesc(pageable, taskId);
+        Page<TaskHistoryModel> historyModels = histories.map(TaskHistory::toModel);
         log.debug("readAllHistoryOfTask - END");
-        return historyModels;
+        return new PagedResponse<>(historyModels);
     }
 
     @Override

@@ -16,6 +16,8 @@ import java.util.Optional;
 
 @Repository
 public interface TaskHistoryRepository extends JpaRepository<TaskHistory, Long> {
+    Page<TaskHistory> findByTaskIdOrderByStartedAtDesc(Pageable pageable, String taskId);
+
     List<TaskHistory> findByTaskIdOrderByStartedAtDesc(String taskId);
 
     Optional<TaskHistory> findFirstByTaskIdAndStatus(String taskId, TaskStatus status);

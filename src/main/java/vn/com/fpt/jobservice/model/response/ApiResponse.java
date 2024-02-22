@@ -10,11 +10,5 @@ public class ApiResponse<T> {
     private int statusCode;
     private String messageCode;
     private String message;
-    private ResponseData<T> responseData;
-}
-
-@Data
-class ResponseData<T> {
-    private int totalData;
-    private List<T> data;
+    private ApiResponseData<T> responseData;
 }
