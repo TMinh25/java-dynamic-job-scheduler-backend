@@ -28,7 +28,7 @@ public class OrganizationServiceGrpc {
                 DataMapping dataMapping = DataMapping.newBuilder()
                         .putAllParam(it.entrySet().stream()
                                 .collect(Collectors.toMap(Map.Entry::getKey,
-                                        e -> (String) e.getValue())))
+                                        e -> e.getValue().toString())))
                         .build();
                 dataMappingList.add(dataMapping);
             });

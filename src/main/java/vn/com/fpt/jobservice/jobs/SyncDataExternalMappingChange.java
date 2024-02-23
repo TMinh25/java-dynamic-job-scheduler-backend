@@ -72,6 +72,9 @@ public class SyncDataExternalMappingChange extends SystemJob {
 
                 dataList.forEach(it -> dataListAfterChange.add(Utils.remapObjectByKeys(it, remapKeys)));
 
+
+                System.out.println("--------"+new Gson().toJson(dataListAfterChange));
+
                 if (dataListAfterChange.isEmpty()) {
                     logger("Job Execution is failed by there aren't field were matched.");
                     throw new JobExecutionException();
