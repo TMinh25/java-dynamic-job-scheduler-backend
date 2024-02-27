@@ -156,10 +156,11 @@ public class Utils {
         }));
 
         if (!anonymousObject.isEmpty()) {
-            Map<String, Object> merged = mergeObjects(anonymousObject);
-            Map<String, Object> output1 = mergeObjects(output, merged);
+            Map<String, Object> objectMerged = mergeObjects(anonymousObject);
+            Map<String, Object> outputStated = mergeObjects(output, objectMerged);
+
             output.clear();
-            output.putAll(output1);
+            output.putAll(outputStated);
         }
         return output;
     }
