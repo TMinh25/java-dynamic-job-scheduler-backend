@@ -10,6 +10,7 @@ import vn.com.fpt.jobservice.entity.TaskType;
 import vn.com.fpt.jobservice.exception.ResourceNotFoundException;
 import vn.com.fpt.jobservice.model.TaskTypeModel;
 import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
+import vn.com.fpt.jobservice.utils.TaskTypeType;
 
 import java.util.List;
 
@@ -20,8 +21,8 @@ public class TaskTypeController {
     TaskTypeRepository taskTypeRepo;
 
     @GetMapping()
-    public List<TaskType> readAllTasks() {
-        return taskTypeRepo.findAll();
+    public List<TaskType> readAllTaskTypes(@RequestParam(value = "type", defaultValue = "MANUAL") TaskTypeType type) {
+        return taskTypeRepo.findByType(type);
     }
 
     @GetMapping("/{id}")

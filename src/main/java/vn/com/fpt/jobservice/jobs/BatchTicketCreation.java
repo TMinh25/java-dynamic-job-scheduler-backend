@@ -5,22 +5,21 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import vn.com.fpt.jobservice.jobs.base.SystemJob;
+import vn.com.fpt.jobservice.jobs.base.BaseJob;
 import vn.com.fpt.jobservice.jobs.steps.BatchTicketCreationIntegration;
+import vn.com.fpt.jobservice.jobs.steps.BatchTicketCreationManual;
 import vn.com.fpt.jobservice.jobs.steps.BatchTicketCreationSPro;
 import vn.com.fpt.jobservice.jobs.steps.ShowJobContext;
 import vn.com.fpt.jobservice.service.impl.IntegrationServiceGrpc;
+import vn.com.fpt.jobservice.utils.TaskTypeType;
 
 @Slf4j
-public class BatchTicketCreation extends SystemJob {
+public class BatchTicketCreation extends BaseJob {
     @Value("${u-service-api}")
     String uServiceURL;
 
     @Value("${integration-api}")
     String integrationURL;
-
-    @Autowired
-    IntegrationServiceGrpc integrationServiceGrpc;
 
     @Override
     protected void defineSteps() {
@@ -31,6 +30,10 @@ public class BatchTicketCreation extends SystemJob {
         } else {
             this.steps.add(new BatchTicketCreationSPro(this));
         }
+
+        if (this.task.getTaskType().getType() == TaskTypeType.MANUAL) {
+            this.steps.add(new BatchTicketCreationManual(this));
+        }
     }
 
     @Override
@@ -38,7 +41,6 @@ public class BatchTicketCreation extends SystemJob {
         // Declare data for job steps
         context.put("uServiceURL", uServiceURL);
         context.put("integrationURL", integrationURL);
-        context.put("integrationServiceGrpc", integrationServiceGrpc);
 
         super.executeInternal(context);
     }
