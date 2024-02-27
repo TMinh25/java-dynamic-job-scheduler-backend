@@ -14,7 +14,7 @@ public class TaskType {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", unique = true, columnDefinition = "varchar(255) collate utf8mb4_unicode_ci")
+    @Column(name = "name", columnDefinition = "varchar(255) collate utf8mb4_unicode_ci")
     private String name;
 
     @Column(name = "class_name")

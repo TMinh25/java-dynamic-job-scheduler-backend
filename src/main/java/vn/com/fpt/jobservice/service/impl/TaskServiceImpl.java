@@ -1,6 +1,5 @@
 package vn.com.fpt.jobservice.service.impl;
 
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.SchedulerException;
 import org.springframework.beans.BeanUtils;
@@ -13,8 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.entity.TaskType;
 import vn.com.fpt.jobservice.exception.ResourceNotFoundException;
-import vn.com.fpt.jobservice.jobs.base.IntegrationJob;
-import vn.com.fpt.jobservice.jobs.base.SystemJob;
+import vn.com.fpt.jobservice.jobs.base.BaseJob;
 import vn.com.fpt.jobservice.model.PagedResponse;
 import vn.com.fpt.jobservice.model.TaskModel;
 import vn.com.fpt.jobservice.repositories.TaskRepository;
@@ -28,6 +26,7 @@ import vn.com.fpt.jobservice.utils.TaskTypeType;
 import vn.com.fpt.jobservice.utils.Utils;
 
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -137,12 +136,16 @@ public class TaskServiceImpl implements TaskService {
             task.generateNextInvocation();
             TaskType taskType = task.getTaskType();
             String jobClassName = "vn.com.fpt.jobservice.jobs." + taskType.getClassName();
-            if (taskType.getType() == TaskTypeType.SYSTEM) { // Job mặc định của hệ thống
+            List<TaskTypeType> taskTypes = Arrays.asList(
+                    TaskTypeType.SYSTEM,
+                    TaskTypeType.INTEGRATION,
+                    TaskTypeType.MANUAL);
+            if (taskTypes.contains(taskType.getType())) { // Job của hệ thống
                 Class<?> jobClass = Class.forName(jobClassName);
 
-                if (SystemJob.class.isAssignableFrom(jobClass)) {
+                if (BaseJob.class.isAssignableFrom(jobClass)) {
                     @SuppressWarnings("unchecked")
-                    Class<? extends SystemJob> systemJob = (Class<? extends SystemJob>) jobClass;
+                    Class<? extends BaseJob> systemJob = (Class<? extends BaseJob>) jobClass;
 
                     jobService.scheduleCronJob(
                             task.getJobUUID(),
@@ -150,24 +153,11 @@ public class TaskServiceImpl implements TaskService {
                             task.getNextInvocation(),
                             task.getCronExpression());
                 } else {
-                    throw new Exception(jobClassName + " is not a subclass of SystemJob!");
-                }
-            } else if (taskType.getType() == TaskTypeType.INTEGRATION) { // Job tích hợp
-                Class<?> jobClass = Class.forName(jobClassName);
-                if (IntegrationJob.class.isAssignableFrom(jobClass)) {
-                    @SuppressWarnings("unchecked")
-                    Class<? extends IntegrationJob> integrationJob = (Class<? extends IntegrationJob>) jobClass;
-
-                    jobService.scheduleCronJob(
-                            task.getJobUUID(),
-                            integrationJob,
-                            task.getNextInvocation(),
-                            task.getCronExpression());
-                } else {
-                    throw new Exception(jobClassName + " is not a subclass of IntegrationJob!");
+                    throw new Exception(jobClassName + " is not a subclass of BaseJob!");
                 }
             } else if (taskType.getType() == TaskTypeType.CUSTOM) { // Job tự định nghĩa
                 log.info("Custom job");
+                throw new Error("Job is not defined!");
             }
         } catch (Exception e) {
             log.error(e.getMessage(), (Object) e.getStackTrace());

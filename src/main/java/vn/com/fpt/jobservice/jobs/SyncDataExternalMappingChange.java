@@ -4,30 +4,22 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fpt.fis.integration.grpc.ExecuteIntegrationResult;
 import com.fpt.fis.integration.grpc.GetIntegrationResult;
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
-import vn.com.fpt.jobservice.jobs.base.SystemJob;
-import vn.com.fpt.jobservice.jobs.steps.BatchTicketCreationIntegration;
+import vn.com.fpt.jobservice.jobs.base.BaseJob;
 import vn.com.fpt.jobservice.model.response.ApiResponse;
 import vn.com.fpt.jobservice.service.impl.IntegrationServiceGrpc;
 import vn.com.fpt.jobservice.service.impl.OrganizationServiceGrpc;
-import vn.com.fpt.jobservice.utils.CallExternalAPI;
 import vn.com.fpt.jobservice.utils.Utils;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Component
-public class SyncDataExternalMappingChange extends SystemJob {
+public class SyncDataExternalMappingChange extends BaseJob {
 
     @Autowired
     IntegrationServiceGrpc integrationServiceGrpc;
@@ -37,14 +29,12 @@ public class SyncDataExternalMappingChange extends SystemJob {
 
     @Override
     protected void defineSteps() {
-
     }
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         super.executeInternal(context);
         if (this.task.getIntegrationId() != null && this.task.getIntegrationId() != 0) {
-
             try {
                 ObjectMapper objectMapper = new ObjectMapper();
 
@@ -53,9 +43,11 @@ public class SyncDataExternalMappingChange extends SystemJob {
                         getIntegrationResult.getStructure()
                 );
 
-                ApiResponse<Map<String, Object>> response = objectMapper.readValue(executeIntegrationResult.getResult(),
-                        new TypeReference<>() {
-                        });
+                ApiResponse<Map<String, Object>> response = objectMapper.readValue(
+                        executeIntegrationResult.getResult(),
+                        new TypeReference<ApiResponse<Map<String, Object>>>() {
+                        }
+                );
 
                 List<Map<String, Object>> dataList = response.getResponseData().getData();
                 List<Map<String, String>> remapKeys = Utils.convertMapKeyObjectsToMapString(

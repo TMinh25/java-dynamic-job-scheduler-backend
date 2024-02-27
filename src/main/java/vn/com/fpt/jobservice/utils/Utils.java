@@ -20,7 +20,7 @@ import java.util.*;
 @Slf4j
 public class Utils {
 
-    private static final ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);;
+    private static final ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     public static String[] getNullPropertyNames(Object source) {
         final BeanWrapper src = new BeanWrapperImpl(source);
@@ -30,8 +30,7 @@ public class Utils {
         for (PropertyDescriptor pd : pds) {
             // Check if the property is null
             Object srcValue = src.getPropertyValue(pd.getName());
-            if (srcValue == null)
-                emptyNames.add(pd.getName());
+            if (srcValue == null) emptyNames.add(pd.getName());
         }
 
         String[] result = new String[emptyNames.size()];
@@ -45,8 +44,7 @@ public class Utils {
         BeanWrapper wrappedDst = new BeanWrapperImpl(dst);
         for (PropertyDescriptor propertyDescriptor : wrappedSrc.getPropertyDescriptors()) {
             String propertyName = propertyDescriptor.getName();
-            if ("class".equalsIgnoreCase(propertyName))
-                continue;
+            if ("class".equalsIgnoreCase(propertyName)) continue;
 
             Object srcValue = wrappedSrc.getPropertyValue(propertyName);
             Object dstValue = wrappedDst.getPropertyValue(propertyName);
@@ -61,8 +59,7 @@ public class Utils {
 
     public static Date convertProtocTimestamp2Date(Timestamp ts) {
         if (ts.getSeconds() != 0 && ts.getNanos() != 0) {
-            return Date.from(Instant
-                    .ofEpochSecond(ts.getSeconds(), ts.getNanos()));
+            return Date.from(Instant.ofEpochSecond(ts.getSeconds(), ts.getNanos()));
         }
         return null;
     }
@@ -73,10 +70,7 @@ public class Utils {
             long seconds = millis / 1000;
             int nanos = (int) ((millis % 1000) * 1_000_000);
 
-            return Timestamp.newBuilder()
-                    .setSeconds(seconds)
-                    .setNanos(nanos)
-                    .build();
+            return Timestamp.newBuilder().setSeconds(seconds).setNanos(nanos).build();
         }
         return Timestamp.newBuilder().setSeconds(0).setNanos(0).build();
     }
@@ -87,7 +81,8 @@ public class Utils {
             ObjectMapper objectMapper = new ObjectMapper();
             for (Any any : inputList) {
                 try {
-                    T convertedObject = objectMapper.readValue(any.getValue().toStringUtf8(), new TypeReference<T>() {});
+                    T convertedObject = objectMapper.readValue(any.getValue().toStringUtf8(), new TypeReference<T>() {
+                    });
                     outputList.add(convertedObject);
                 } catch (Exception e) {
                     log.error("Error converting taskInputData: " + e.getMessage());
@@ -95,9 +90,8 @@ public class Utils {
             }
             return outputList;
         } catch (Exception e) {
-            log.error(String.format("Can not convert taskInputData to List<%s>: %s",
-                    new TypeReference<T>() {}.getClass().getName(),
-                    e.getMessage()));
+            log.error(String.format("Can not convert taskInputData to List<%s>: %s", new TypeReference<T>() {
+            }.getClass().getName(), e.getMessage()));
         }
         return new ArrayList<T>();
     }
@@ -120,8 +114,7 @@ public class Utils {
         return output;
     }
 
-    public static Map<String, Object> remapObjectByKeys(Map<String, Object> input,
-                                                        List<Map<String, String>> newKeys) {
+    public static Map<String, Object> remapObjectByKeys(Map<String, Object> input, List<Map<String, String>> newKeys) {
         Map<String, Object> output = new HashMap<>();
 
         List<Map<String, Object>> anonymousObject = new ArrayList<>();
@@ -133,13 +126,10 @@ public class Utils {
                 JSONObject jsonObject = new JSONObject();
 
                 if (it.containsKey(oldKey)) {
-                     jsonObject = convertToJsonObject(newKey,
-                            input.get(oldKey) == null ? "null"
-                                    : input.get(oldKey).toString());
-                } else if (oldKey.contains(".")){
+                    jsonObject = convertToJsonObject(newKey, input.get(oldKey) == null ? "null" : input.get(oldKey).toString());
+                } else if (oldKey.contains(".")) {
                     Object nestedData = getNestedData(input, oldKey);
-                     jsonObject = convertToJsonObject(newKey,
-                            nestedData == null ? "null" : nestedData.toString());
+                    jsonObject = convertToJsonObject(newKey, nestedData == null ? "null" : nestedData.toString());
                 }
 
                 Map<String, Object> objectMap = jsonToMap(jsonObject.toString());
@@ -152,7 +142,6 @@ public class Utils {
             } else if (it.containsKey(oldKey)) {
                 output.put(newKey, input.get(oldKey));
             }
-
         }));
 
         if (!anonymousObject.isEmpty()) {
@@ -207,7 +196,7 @@ public class Utils {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
-            return objectMapper.readValue(Utils.objectToString(json), new TypeReference<>() {
+            return objectMapper.readValue(Utils.objectToString(json), new TypeReference<Map<String, Object>>() {
             });
         } catch (IOException e) {
             log.error(e.getMessage());

@@ -3,7 +3,7 @@ package vn.com.fpt.jobservice.service;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.springframework.stereotype.Service;
-import vn.com.fpt.jobservice.jobs.base.SystemJob;
+import vn.com.fpt.jobservice.jobs.base.BaseJob;
 
 import java.text.ParseException;
 import java.util.Date;
@@ -23,7 +23,7 @@ public class TaskSchedulerService {
     public void scheduleTask(String cronExpression, Runnable task) throws SchedulerException, ParseException {
         Scheduler scheduler = new StdSchedulerFactory().getScheduler();
         JobDetail jobDetail = JobBuilder.newJob()
-                .ofType(SystemJob.class)
+                .ofType(BaseJob.class)
                 .withIdentity("job", "JOB_SERVICE")
                 .build();
 
