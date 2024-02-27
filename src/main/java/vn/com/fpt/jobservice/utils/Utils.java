@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -123,12 +124,44 @@ public class Utils {
                                                         List<Map<String, String>> newKeys) {
         Map<String, Object> output = new HashMap<>();
 
-        newKeys.forEach(it-> it.forEach((oldKey, newKey) -> {
-            if (it.containsKey(oldKey)) {
+        List<Map<String, Object>> anonymousObject = new ArrayList<>();
+
+        newKeys.forEach(it -> it.forEach((oldKey, newKey) -> {
+
+            if (newKey.contains(".")) {
+
+                JSONObject jsonObject = new JSONObject();
+
+                if (it.containsKey(oldKey)) {
+                     jsonObject = convertToJsonObject(newKey,
+                            input.get(oldKey) == null ? "null"
+                                    : input.get(oldKey).toString());
+                } else if (oldKey.contains(".")){
+                    Object nestedData = getNestedData(input, oldKey);
+                     jsonObject = convertToJsonObject(newKey,
+                            nestedData == null ? "null" : nestedData.toString());
+                }
+
+                Map<String, Object> objectMap = jsonToMap(jsonObject.toString());
+                anonymousObject.add(objectMap);
+
+            } else if (oldKey.contains(".")) {
+                Object nestedData = getNestedData(input, oldKey);
+                output.put(newKey, nestedData);
+
+            } else if (it.containsKey(oldKey)) {
                 output.put(newKey, input.get(oldKey));
             }
+
         }));
 
+        if (!anonymousObject.isEmpty()) {
+            Map<String, Object> objectMerged = mergeObjects(anonymousObject);
+            Map<String, Object> outputStated = mergeObjects(output, objectMerged);
+
+            output.clear();
+            output.putAll(outputStated);
+        }
         return output;
     }
 
@@ -205,5 +238,83 @@ public class Utils {
 
     public static long calculateDateDifferenceInMillis(Date date1, Date date2) {
         return Math.abs(date1.getTime() - date2.getTime());
+    }
+
+    public static Map<String, Object> mergeObjects(List<Map<String, Object>> objects) {
+        Map<String, Object> objectMerged = new HashMap<>();
+
+        for (Map<String, Object> obj : objects) {
+            objectMerged = mergeObjects(obj, objectMerged);
+        }
+
+        return objectMerged;
+    }
+
+    public static Map<String, Object> mergeObjects(Map<String, Object> obj1, Map<String, Object> obj2) {
+        Map<String, Object> objectMerged = new HashMap<>();
+
+        for (String key : obj1.keySet()) {
+            if (obj2.containsKey(key)) {
+                Object value1 = obj1.get(key);
+                Object value2 = obj2.get(key);
+                if (value1 instanceof Map && value2 instanceof Map) {
+                    objectMerged.put(key, mergeObjects((Map<String, Object>) value1, (Map<String, Object>) value2));
+                } else if (value1 instanceof List && value2 instanceof List) {
+                    ((List<Object>) value1).addAll((List<Object>) value2);
+                    objectMerged.put(key, value1);
+                } else {
+                    objectMerged.put(key, value1);
+                    objectMerged.put(key, value2);
+                }
+            } else {
+                objectMerged.put(key, obj1.get(key));
+            }
+        }
+
+        for (String key : obj2.keySet()) {
+            if (!objectMerged.containsKey(key)) {
+                objectMerged.put(key, obj2.get(key));
+            }
+        }
+
+        return objectMerged;
+    }
+
+    public static JSONObject convertToJsonObject(String input, String value) {
+
+        JSONObject jsonObject = new JSONObject();
+        JSONObject currentObject = jsonObject;
+
+        String[] parts = input.split("\\.");
+
+        for (int i = 0; i < parts.length; i++) {
+            if (parts[i].startsWith("[") && parts[i].endsWith("]")) {
+
+                String key = parts[i].substring(1, parts[i].length() - 1);
+
+                JSONArray jsonArray = new JSONArray();
+                JSONObject innerObject = new JSONObject();
+                jsonArray.put(innerObject);
+
+                currentObject.put(key, jsonArray);
+                currentObject = innerObject;
+
+            } else {
+                currentObject.put(parts[i], value);
+
+                if (i < parts.length - 1) {
+                    JSONObject innerObject = new JSONObject();
+                    currentObject.put(parts[i], innerObject);
+                    currentObject = innerObject;
+                }
+            }
+        }
+
+        return jsonObject;
+    }
+
+    public static Map<String, Object> jsonToMap(String json) {
+        JSONObject jsonObject = new JSONObject(json);
+        return jsonObject.toMap();
     }
 }

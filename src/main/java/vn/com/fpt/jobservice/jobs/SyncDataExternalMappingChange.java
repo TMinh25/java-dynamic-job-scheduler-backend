@@ -64,14 +64,28 @@ public class SyncDataExternalMappingChange extends SystemJob {
 
                 List<Map<String, Object>> dataListAfterChange = new ArrayList<>();
 
-                if (dataList != null)
-                    dataList.forEach(it -> dataListAfterChange.add(Utils.remapObjectByKeys(it, remapKeys)));
+                if (dataList == null) {
+                    logger("Job Execution is failed by ExecuteIntegration get result has no data!");
+                    throw new JobExecutionException();
+                }
+                logger("Execute Integration got " + dataList.size() + " record(s)");
 
-                if (!dataListAfterChange.isEmpty()) {
-                    organizationServiceGrpc.executedForDataSync(dataListAfterChange);
+                dataList.forEach(it -> dataListAfterChange.add(Utils.remapObjectByKeys(it, remapKeys)));
+
+                if (dataListAfterChange.isEmpty()) {
+                    logger("Job Execution is failed by there aren't field were matched.");
+                    throw new JobExecutionException();
                 }
 
+                logger("Data got " + dataListAfterChange.size() + " record(s) matching");
+                logger("Data starts synchronizing ...");
+
+                organizationServiceGrpc.executedForDataSync(dataListAfterChange);
+
+                logger("Data has been synchronized!");
+
             } catch (Exception e) {
+                logger("Job Execution is failed by " + e.getMessage());
                 throw new JobExecutionException(e);
             }
 
