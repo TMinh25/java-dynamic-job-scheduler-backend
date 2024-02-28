@@ -5,6 +5,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import vn.com.fpt.jobservice.jobs.base.BaseJob;
 import vn.com.fpt.jobservice.jobs.steps.BatchTicketCreationIntegration;
 import vn.com.fpt.jobservice.jobs.steps.BatchTicketCreationManual;
@@ -14,12 +15,16 @@ import vn.com.fpt.jobservice.service.impl.IntegrationServiceGrpc;
 import vn.com.fpt.jobservice.utils.TaskTypeType;
 
 @Slf4j
+@Component
 public class BatchTicketCreation extends BaseJob {
     @Value("${u-service-api}")
     String uServiceURL;
 
     @Value("${integration-api}")
     String integrationURL;
+
+    @Autowired
+    IntegrationServiceGrpc integrationServiceGrpc;
 
     @Override
     protected void defineSteps() {
@@ -41,6 +46,7 @@ public class BatchTicketCreation extends BaseJob {
         // Declare data for job steps
         context.put("uServiceURL", uServiceURL);
         context.put("integrationURL", integrationURL);
+        context.put("integrationServiceGrpc", integrationServiceGrpc);
 
         super.executeInternal(context);
     }
