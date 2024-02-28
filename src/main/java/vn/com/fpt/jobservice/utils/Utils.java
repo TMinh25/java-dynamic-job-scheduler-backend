@@ -124,27 +124,33 @@ public class Utils {
 
         newKeys.forEach(it -> it.forEach((oldKey, newKey) -> {
 
-            if (newKey.contains(".")) {
+            boolean conditionOfNewKey = newKey.contains(".")
+                    || (newKey.startsWith("[") && newKey.endsWith("]"));
+
+            boolean conditionOfOldKey = oldKey.contains(".")
+                    || (oldKey.startsWith("[") && oldKey.endsWith("]"));
+
+            if (conditionOfNewKey) {
 
                 JSONObject jsonObject = new JSONObject();
 
-                if (oldKey.contains(".")) {
+                if (conditionOfOldKey) {
 
                     Object nestedData = getNestedData(input, oldKey);
                     jsonObject = convertToJsonObject(newKey,
-                            nestedData == null ? "null" : nestedData.toString());
+                            nestedData == null ? "null" : nestedData);
 
                 } else if (it.containsKey(oldKey)) {
 
                     jsonObject = convertToJsonObject(newKey,
                             input.get(oldKey) == null ? "null"
-                                    : input.get(oldKey).toString());
+                                    : input.get(oldKey));
                 }
 
                 Map<String, Object> objectMap = jsonToMap(jsonObject.toString());
                 anonymousObject.add(objectMap);
 
-            } else if (oldKey.contains(".")) {
+            } else if (conditionOfOldKey) {
                 Object nestedData = getNestedData(input, oldKey);
                 output.put(newKey, nestedData);
 
@@ -270,7 +276,10 @@ public class Utils {
         return objectMerged;
     }
 
-    public static JSONObject convertToJsonObject(String input, String value) {
+    /**
+     * This code define "to"
+     * */
+    public static JSONObject convertToJsonObject(String input, Object value) {
 
         JSONObject jsonObject = new JSONObject();
         JSONObject currentObject = jsonObject;
@@ -285,18 +294,17 @@ public class Utils {
                 JSONArray jsonArray = new JSONArray();
                 JSONObject innerObject = new JSONObject();
 
-                if (i + 1 < parts.length && parts[i + 1].equals("_string_")) {
-                    jsonArray.put(value);
-                    currentObject.put(key, jsonArray);
+                if (i + 1 == parts.length) {
+                    currentObject.put(key, value);
                 } else {
                     jsonArray.put(innerObject);
                     currentObject.put(key, jsonArray);
                     currentObject = innerObject;
                 }
+
             } else {
 
-                if (!parts[i].equals("_string_"))
-                    currentObject.put(parts[i], value);
+                currentObject.put(parts[i], value);
 
                 if (i < parts.length - 1) {
                     JSONObject innerObject = new JSONObject();
@@ -309,7 +317,10 @@ public class Utils {
         return jsonObject;
     }
 
-    public static String getValueByJsonObjectArray(JSONObject jsonObject, String keys) {
+   /**
+    * This code define "from"
+    * */
+    public static Object getValueByJsonObjectArray(JSONObject jsonObject, String keys) {
         String[] keyArray = keys.split("\\.");
         JSONObject currentData = jsonObject;
         try {
@@ -328,8 +339,17 @@ public class Utils {
                     }
                 }
             }
-            Object data = currentData.get(keyArray[keyArray.length - 1]);
-            return data == null ? "null" : data.toString();
+
+            String lastKey = keyArray[keyArray.length - 1];
+
+            if (lastKey.startsWith("[") && lastKey.endsWith("]")) {
+                lastKey = lastKey.substring(1, lastKey.length() - 1);
+                JSONArray data = new JSONArray(currentData.getJSONArray(lastKey));
+                return data;
+
+            }else
+                return  currentData.getJSONObject(lastKey);
+
         } catch (Exception e) {
             e.printStackTrace();
             return null;
