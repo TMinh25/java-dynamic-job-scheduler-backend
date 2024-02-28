@@ -27,12 +27,12 @@ public class BatchTicketCreation extends BaseJob {
 
         if (this.task.getIntegrationId() != null && this.task.getIntegrationId() != 0) {
             this.steps.add(new BatchTicketCreationIntegration(this));
+
+            if (this.task.getTaskType().getType() == TaskTypeType.MANUAL) {
+                this.steps.add(new BatchTicketCreationManual(this));
+            }
         } else {
             this.steps.add(new BatchTicketCreationSPro(this));
-        }
-
-        if (this.task.getTaskType().getType() == TaskTypeType.MANUAL) {
-            this.steps.add(new BatchTicketCreationManual(this));
         }
     }
 

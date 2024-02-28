@@ -306,4 +306,14 @@ public class Utils {
         JSONObject jsonObject = new JSONObject(json);
         return jsonObject.toMap();
     }
+
+    public static Comparator<String> getNestedFieldComparator() {
+        return Comparator.comparingInt(Utils::getDepth)
+                .thenComparing(Comparator.naturalOrder());
+    }
+
+    public static int getDepth(String field) {
+        // Count the number of dots to determine the depth of nesting
+        return (int) field.chars().filter(ch -> ch == '.').count();
+    }
 }
