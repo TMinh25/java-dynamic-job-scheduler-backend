@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,8 @@ import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 public class Utils {
@@ -125,11 +128,17 @@ public class Utils {
 
                 JSONObject jsonObject = new JSONObject();
 
-                if (it.containsKey(oldKey)) {
-                    jsonObject = convertToJsonObject(newKey, input.get(oldKey) == null ? "null" : input.get(oldKey).toString());
-                } else if (oldKey.contains(".")) {
+                if (oldKey.contains(".")) {
+
                     Object nestedData = getNestedData(input, oldKey);
-                    jsonObject = convertToJsonObject(newKey, nestedData == null ? "null" : nestedData.toString());
+                    jsonObject = convertToJsonObject(newKey,
+                            nestedData == null ? "null" : nestedData.toString());
+
+                } else if (it.containsKey(oldKey)) {
+
+                    jsonObject = convertToJsonObject(newKey,
+                            input.get(oldKey) == null ? "null"
+                                    : input.get(oldKey).toString());
                 }
 
                 Map<String, Object> objectMap = jsonToMap(jsonObject.toString());
@@ -156,6 +165,11 @@ public class Utils {
 
     private static Object getNestedData(Map<String, Object> input, String key) {
         try {
+            Pattern pattern = Pattern.compile("\\[.*\\]");
+            Matcher matcher = pattern.matcher(key);
+
+            if (matcher.find())
+                return getValueByJsonObjectArray(new JSONObject(input), key);
 
             String[] nestedKeys = key.split("\\.");
             Map<String, Object> nestedData = input;
@@ -166,7 +180,9 @@ public class Utils {
             }
 
             String lastKey = nestedKeys[nestedKeys.length - 1];
+
             return nestedData.get(lastKey);
+
         } catch (Exception e) {
             return null;
         }
@@ -225,20 +241,6 @@ public class Utils {
         return remapKeys;
     }
 
-    public static long calculateDateDifferenceInMillis(Date date1, Date date2) {
-        return Math.abs(date1.getTime() - date2.getTime());
-    }
-
-    public static Map<String, Object> mergeObjects(List<Map<String, Object>> objects) {
-        Map<String, Object> objectMerged = new HashMap<>();
-
-        for (Map<String, Object> obj : objects) {
-            objectMerged = mergeObjects(obj, objectMerged);
-        }
-
-        return objectMerged;
-    }
-
     public static Map<String, Object> mergeObjects(Map<String, Object> obj1, Map<String, Object> obj2) {
         Map<String, Object> objectMerged = new HashMap<>();
 
@@ -259,7 +261,6 @@ public class Utils {
                 objectMerged.put(key, obj1.get(key));
             }
         }
-
         for (String key : obj2.keySet()) {
             if (!objectMerged.containsKey(key)) {
                 objectMerged.put(key, obj2.get(key));
@@ -283,13 +284,19 @@ public class Utils {
 
                 JSONArray jsonArray = new JSONArray();
                 JSONObject innerObject = new JSONObject();
-                jsonArray.put(innerObject);
 
-                currentObject.put(key, jsonArray);
-                currentObject = innerObject;
-
+                if (i + 1 < parts.length && parts[i + 1].equals("_string_")) {
+                    jsonArray.put(value);
+                    currentObject.put(key, jsonArray);
+                } else {
+                    jsonArray.put(innerObject);
+                    currentObject.put(key, jsonArray);
+                    currentObject = innerObject;
+                }
             } else {
-                currentObject.put(parts[i], value);
+
+                if (!parts[i].equals("_string_"))
+                    currentObject.put(parts[i], value);
 
                 if (i < parts.length - 1) {
                     JSONObject innerObject = new JSONObject();
@@ -300,6 +307,33 @@ public class Utils {
         }
 
         return jsonObject;
+    }
+
+    public static String getValueByJsonObjectArray(JSONObject jsonObject, String keys) {
+        String[] keyArray = keys.split("\\.");
+        JSONObject currentData = jsonObject;
+        try {
+            for (String key : keyArray) {
+                if (!key.equalsIgnoreCase(keyArray[keyArray.length - 1])) {
+                    if (key.startsWith("[") && key.endsWith("]")) {
+                        String arrayKeys = key.substring(1, key.length() - 1);
+                        String[] temp = arrayKeys.split("\\]\\[");
+                        String arrayKey = temp[0];
+                        int index = (temp.length <= 1) ? 0 :
+                                Integer.parseInt(temp[1].replaceAll("\\D+", ""));
+                        JSONArray array = currentData.getJSONArray(arrayKey);
+                        currentData = array.getJSONObject(index);
+                    } else {
+                        currentData = currentData.getJSONObject(key);
+                    }
+                }
+            }
+            Object data = currentData.get(keyArray[keyArray.length - 1]);
+            return data == null ? "null" : data.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static Map<String, Object> jsonToMap(String json) {
@@ -316,4 +350,19 @@ public class Utils {
         // Count the number of dots to determine the depth of nesting
         return (int) field.chars().filter(ch -> ch == '.').count();
     }
+    
+    public static Map<String, Object> mergeObjects(List<Map<String, Object>> objects) {
+        Map<String, Object> objectMerged = new HashMap<>();
+
+        for (Map<String, Object> obj : objects) {
+            objectMerged = mergeObjects(obj, objectMerged);
+        }
+
+        return objectMerged;
+    }
+
+    public static long calculateDateDifferenceInMillis(Date date1, Date date2) {
+        return Math.abs(date1.getTime() - date2.getTime());
+    }
+
 }

@@ -31,6 +31,16 @@ public class SyncDataExternalMappingChange extends BaseJob {
     protected void defineSteps() {
     }
 
+    /**
+     *  Input data with "from":
+     *  - array ends with object : key.[key2][1].key22 vs key,key22 =object, [key2]= array, [1]= position of element in list ( fist value don't need add [0])
+     *  - array ends with array: key.[key2][1]
+     *  - with object: key.key1.key2...keyn
+     *  Input data with "to":
+     *  - array ends with object: key.[key1].key2.[key...keyn].keyn+1 result like this: {"key":{"key1":["key2":"...","key":...["keyn":["keyn+1":"..."]]]}}
+     *  - array ends with array: key.[key1]._string_ result like this: {"key":{"key1":["2","3"]}}
+     * */
+
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         super.executeInternal(context);
