@@ -10,8 +10,10 @@ import com.google.protobuf.Timestamp;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.quartz.JobExecutionException;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
+import vn.com.fpt.jobservice.model.MappingModel;
 
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
@@ -117,18 +119,34 @@ public class Utils {
         return output;
     }
 
-    public static Map<String, Object> remapObjectByKeys(Map<String, Object> input, List<Map<String, String>> newKeys) {
+    public static Map<String, Object> remapObjectByKeys(Map<String, Object> input,
+                                                        List<Map<String, MappingModel>> newKeys) {
         Map<String, Object> output = new HashMap<>();
 
         List<Map<String, Object>> anonymousObject = new ArrayList<>();
 
-        newKeys.forEach(it -> it.forEach((oldKey, newKey) -> {
+        newKeys.forEach(it -> it.forEach((oldKey, mappingKey) -> {
+            String newKey = mappingKey.getTo();
+
+            if (oldKey == null) {
+                if (mappingKey.isRequired())
+                    try {
+                        throw new JobExecutionException("Job Execution is failed by oldKey == null and required =true");
+                    } catch (JobExecutionException e) {
+                        e.printStackTrace();
+                    }
+
+                output.put(newKey, mappingKey.getDefaultValue());
+                return;
+            }
 
             boolean conditionOfNewKey = newKey.contains(".")
-                    || (newKey.startsWith("[") && newKey.endsWith("]"));
+                    || (newKey.startsWith("[")
+                    && newKey.endsWith("]"));
 
             boolean conditionOfOldKey = oldKey.contains(".")
-                    || (oldKey.startsWith("[") && oldKey.endsWith("]"));
+                    || (oldKey.startsWith("[")
+                    && oldKey.endsWith("]"));
 
             if (conditionOfNewKey) {
 
@@ -226,17 +244,22 @@ public class Utils {
         }
     }
 
-    public static List<Map<String, String>> convertMapKeyObjectsToMapString(List<Object> mapKeys) {
+    public static List<Map<String, MappingModel>> convertMapKeyObjectsToMapString(List<Object> mapKeys) {
         if (mapKeys == null) return new ArrayList<>();
 
-        List<Map<String, String>> remapKeys = new ArrayList<>();
+        List<Map<String, MappingModel>> remapKeys = new ArrayList<>();
 
         mapKeys.forEach(it -> {
             try {
                 JSONObject mJSONObject = new JSONObject(Utils.objectToString(it));
-                Map<String, String> remapKey = new HashMap<>();
+                Map<String, MappingModel> remapKey = new HashMap<>();
 
-                remapKey.put(mJSONObject.get("from").toString(), mJSONObject.get("to").toString());
+                remapKey.put(mJSONObject.get("from").toString(), new MappingModel(
+                        mJSONObject.get("required") != null && Boolean.parseBoolean(mJSONObject.get("required").toString()),
+                        mJSONObject.get("defaultValue") == null ? "" : mJSONObject.get("defaultValue").toString(),
+                        mJSONObject.get("to") == null ? "" : mJSONObject.get("to").toString())
+                );
+
                 remapKeys.add(remapKey);
 
             } catch (JsonProcessingException e) {

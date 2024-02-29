@@ -9,6 +9,7 @@ import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import vn.com.fpt.jobservice.jobs.base.BaseJob;
+import vn.com.fpt.jobservice.model.MappingModel;
 import vn.com.fpt.jobservice.model.response.ApiResponse;
 import vn.com.fpt.jobservice.service.impl.IntegrationServiceGrpc;
 import vn.com.fpt.jobservice.service.impl.OrganizationServiceGrpc;
@@ -60,7 +61,7 @@ public class SyncDataExternalMappingChange extends BaseJob {
                 );
 
                 List<Map<String, Object>> dataList = response.getResponseData().getData();
-                List<Map<String, String>> remapKeys = Utils.convertMapKeyObjectsToMapString(
+                List<Map<String, MappingModel>> remapKeys = Utils.convertMapKeyObjectsToMapString(
                         task.toModel().getTaskInputData()
                 );
 
