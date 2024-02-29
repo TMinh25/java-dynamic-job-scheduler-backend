@@ -34,7 +34,7 @@ public class BatchTicketCreationManual extends BaseJobStep {
             logger("integrationResultObject: " + integrationResultObject.toString());
             TicketCreateModel ticketCreateRequest = (TicketCreateModel) integrationResultObject.get("responseData");
             HttpHeaders headers = new HttpHeaders();
-            BatchResponseModel ticketCreateResponse = CallExternalAPI.exchangePost(
+            BatchResponseModel ticketCreateResponse = CallExternalAPI.exchangePostWithCredential(
                     uServiceURL + "/batch/create-ticket",
                     headers,
                     ticketCreateRequest,

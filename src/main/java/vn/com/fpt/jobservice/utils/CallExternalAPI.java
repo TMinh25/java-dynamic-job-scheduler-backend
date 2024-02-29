@@ -43,9 +43,25 @@ public class CallExternalAPI {
         }
     }
 
-    public static <T> T exchangePost(String url, HttpHeaders headers, Object requestBody, Class<T> responseType) {
+    public static <T> T exchangePostWithCredential(String url, HttpHeaders headers, Object requestBody, Class<T> responseType) {
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.setInterceptors(Collections.singletonList(new CustomInterceptor()));
+
+        try {
+            HttpEntity<Object> requestEntity = new HttpEntity<>(requestBody, headers);
+            ResponseEntity<T> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    requestEntity,
+                    responseType);
+            return response.getBody();
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    public static <T> T exchangePost(String url, HttpHeaders headers, Object requestBody, Class<T> responseType) {
+        RestTemplate restTemplate = new RestTemplate();
 
         try {
             HttpEntity<Object> requestEntity = new HttpEntity<>(requestBody, headers);
