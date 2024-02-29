@@ -1,23 +1,27 @@
 package vn.com.fpt.jobservice.controller;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fpt.fis.integration.grpc.ExecuteIntegrationResult;
 import com.fpt.fis.integration.grpc.GetIntegrationListResult;
 import com.fpt.fis.integration.grpc.GetIntegrationResult;
+import lombok.extern.slf4j.Slf4j;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import vn.com.fpt.jobservice.model.response.ApiResponse;
-import vn.com.fpt.jobservice.model.response.ApiResponseData;
+import vn.com.fpt.jobservice.model.response.DataSourceDTO;
 import vn.com.fpt.jobservice.service.impl.IntegrationServiceGrpc;
+import vn.com.fpt.jobservice.utils.Utils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/integrations")
+@Slf4j
 public class IntegrationController {
     @Autowired
     IntegrationServiceGrpc integrationServiceGrpc;
@@ -29,24 +33,59 @@ public class IntegrationController {
     }
 
     @GetMapping("/field-mapping/{id}")
-    public List<String> getFieldMapping(@PathVariable("id") Long id) throws Exception {
+    public List<DataSourceDTO> getFieldMapping(@PathVariable("id") Long id) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
 
         GetIntegrationResult integrationData = integrationServiceGrpc.getIntegrationById(id);
-        String structureStr = integrationData.getStructure();
+        ExecuteIntegrationResult result = integrationServiceGrpc.executeIntegration(integrationData.getStructure());
 
-        ExecuteIntegrationResult result = integrationServiceGrpc.executeIntegration(structureStr);
-        ApiResponse<Map<String, Object>> response = objectMapper.readValue(result.getResult(), new TypeReference<ApiResponse<Map<String, Object>>>() {});
-        ApiResponseData<Map<String, Object>> data = response.getResponseData();
+        JSONObject jsonObject = new JSONObject(result.getResult());
+        Set<String> allKeys = extractFieldNames(jsonObject, "");
 
-        Set<String> allKeys = new HashSet<String>();
+        List<DataSourceDTO> dataSources = allKeys.stream()
+                .map(item -> DataSourceDTO.builder().id(item).name(item.replace(".", " - ")).build())
+                .collect(Collectors.toList());
 
-        for (Map<String, Object> map : data.getData()) {
-            Set<String> keySet = map.keySet();
-            allKeys.addAll(keySet);
+
+        return dataSources;
+    }
+
+    private static Set<String> extractFieldNames(JSONObject jsonObject, String parentFieldName) {
+        Set<String> result = new TreeSet<>(Utils.getNestedFieldComparator());
+        for (String key : jsonObject.keySet()) {
+            Object value = jsonObject.get(key);
+
+            if (value instanceof JSONObject) {
+                // If the value is a JSONObject, recursively call the function with the new parent field name
+                Set<String> extractedObject = extractFieldNames((JSONObject) value, getParentFieldName(parentFieldName, key));
+                result.addAll(extractedObject);
+            } else if (value instanceof JSONArray) {
+                // If the value is a JSONArray, iterate through its elements
+                JSONArray jsonArray = (JSONArray) value;
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    Object arrayElement = jsonArray.get(i);
+                    if (arrayElement instanceof JSONObject) {
+                        // If the array element is a JSONObject, recursively call the function with the new parent field name
+                        String currentKey = "[" + key + "]";
+                        Set<String> extractedObject = extractFieldNames((JSONObject) arrayElement, getParentFieldName(parentFieldName, currentKey));
+                        result.addAll(extractedObject);
+                    }
+                }
+            } else {
+                // If the value is not an object or array, print the field name
+                String finalFieldName = getParentFieldName(parentFieldName, key);
+                result.add(finalFieldName);
+            }
         }
+        return result;
+    }
 
-        return new ArrayList<String>(allKeys);
+    private static String getParentFieldName(String parentFieldName, String childFieldName) {
+        if (parentFieldName.isEmpty()) {
+            return childFieldName;
+        } else {
+            return parentFieldName + "." + childFieldName;
+        }
     }
 
     @GetMapping("/execute/{id}")

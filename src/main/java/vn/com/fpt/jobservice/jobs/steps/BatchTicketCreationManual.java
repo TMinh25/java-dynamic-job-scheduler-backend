@@ -4,6 +4,7 @@ import com.fpt.fis.integration.grpc.ExecuteIntegrationResult;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.http.HttpHeaders;
+import org.springframework.web.client.HttpClientErrorException;
 import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.jobs.base.BaseJob;
 import vn.com.fpt.jobservice.jobs.base.BaseJobStep;
@@ -17,6 +18,10 @@ import java.util.Map;
 public class BatchTicketCreationManual extends BaseJobStep {
     public BatchTicketCreationManual(BaseJob baseJob) {
         super(baseJob);
+    }
+
+    private String removeHtmlTags(String html) {
+        return html.replaceAll("\"\\\\<.*?\\\\>\"", "");
     }
 
     @Override
@@ -36,6 +41,8 @@ public class BatchTicketCreationManual extends BaseJobStep {
                     BatchResponseModel.class);
 
             logger("Ticket create result: " + ticketCreateResponse.toString());
+        } catch (HttpClientErrorException e) {
+            throw new JobExecutionException(removeHtmlTags(e.getResponseBodyAsString()));
         } catch (Exception e) {
             throw new JobExecutionException(e);
         }
