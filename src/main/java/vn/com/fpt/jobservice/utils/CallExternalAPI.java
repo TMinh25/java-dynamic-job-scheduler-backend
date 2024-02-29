@@ -15,19 +15,6 @@ import java.util.Collections;
 
 @Slf4j
 public class CallExternalAPI {
-    private static class CustomInterceptor implements ClientHttpRequestInterceptor {
-        @Override
-        public ClientHttpResponse intercept(
-                org.springframework.http.HttpRequest request,
-                byte[] body,
-                ClientHttpRequestExecution execution) throws IOException {
-
-            request.getHeaders().set("Cookie", "withCredentials=true");
-
-            return execution.execute(request, body);
-        }
-    }
-
     public static <T> T exchangeGet(String url, HttpHeaders headers, Class<T> responseType) {
         RestTemplate restTemplate = new RestTemplate();
         try {
@@ -35,23 +22,6 @@ public class CallExternalAPI {
             ResponseEntity<T> response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
-                    requestEntity,
-                    responseType);
-            return response.getBody();
-        } catch (Exception e) {
-            throw e;
-        }
-    }
-
-    public static <T> T exchangePostWithCredential(String url, HttpHeaders headers, Object requestBody, Class<T> responseType) {
-        RestTemplate restTemplate = new RestTemplate();
-        restTemplate.setInterceptors(Collections.singletonList(new CustomInterceptor()));
-
-        try {
-            HttpEntity<Object> requestEntity = new HttpEntity<>(requestBody, headers);
-            ResponseEntity<T> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.POST,
                     requestEntity,
                     responseType);
             return response.getBody();
