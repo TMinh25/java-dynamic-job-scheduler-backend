@@ -40,6 +40,11 @@ public class TaskController {
         return taskService.createTask(task);
     }
 
+    @GetMapping("read-status")
+    public Boolean readStatusByTicketAndPhase(@RequestParam(value = "ticketId", required = true) Long ticketId, @RequestParam(value = "phaseId", required = true) Long phaseId) throws Exception {
+        return taskService.readStatusByTicketIdAndPhaseId(ticketId, phaseId);
+    }
+
     @GetMapping("/{id}")
     public TaskModel readTaskById(@PathVariable(value = "id") String id) throws Exception {
         return taskService.readTaskById(id);
@@ -61,10 +66,10 @@ public class TaskController {
         return taskService.updateTaskById(task.getId(), taskModel);
     }
 
-    @GetMapping("/jobs")
-    public List<JobModel> getAllJobs() {
-        return jobService.getAllJobs();
-    }
+//    @GetMapping("/jobs")
+//    public List<JobModel> getAllJobs() {
+//        return jobService.getAllJobs();
+//    }
 
     @GetMapping("/trigger/{id}")
     public boolean triggerJob(@PathVariable(value = "id") String id) throws Exception {

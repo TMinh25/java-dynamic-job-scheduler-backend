@@ -66,7 +66,7 @@ public class IntegrationController {
                     Object arrayElement = jsonArray.get(i);
                     if (arrayElement instanceof JSONObject) {
                         // If the array element is a JSONObject, recursively call the function with the new parent field name
-                        String currentKey = "[" + key + "]";
+                        String currentKey = getArrayFieldName(key);
                         Set<String> extractedObject = extractFieldNames((JSONObject) arrayElement, getParentFieldName(parentFieldName, currentKey));
                         result.addAll(extractedObject);
                     }
@@ -78,6 +78,10 @@ public class IntegrationController {
             }
         }
         return result;
+    }
+
+    private static String getArrayFieldName(String fieldName) {
+        return "[" + fieldName + "]";
     }
 
     private static String getParentFieldName(String parentFieldName, String childFieldName) {

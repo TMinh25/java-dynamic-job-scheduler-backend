@@ -1,13 +1,12 @@
 package vn.com.fpt.jobservice.service;
 
-import java.util.List;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-
 import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.model.PagedResponse;
 import vn.com.fpt.jobservice.model.TaskModel;
+
+import java.util.List;
 
 public interface TaskService {
     PagedResponse<Task> searchTasks(Pageable pageable, String searchQuery);
@@ -17,6 +16,8 @@ public interface TaskService {
     TaskModel readTaskById(String id) throws Exception;
 
     Task readTaskByTicketIdAndPhaseId(Long ticketId, Long phaseId) throws Exception;
+
+    Boolean readStatusByTicketIdAndPhaseId(Long ticketId, Long phaseId) throws Exception;
 
     Task readTaskByJobUUID(String jobUUID);
 

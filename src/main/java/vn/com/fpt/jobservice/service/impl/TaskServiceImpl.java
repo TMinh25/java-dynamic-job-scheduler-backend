@@ -88,6 +88,14 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    public Boolean readStatusByTicketIdAndPhaseId(Long ticketId, Long phaseId) throws Exception {
+        log.debug("readTaskStatusByTicketIdAndPhaseId - START");
+        Task task = readTaskByTicketIdAndPhaseId(ticketId, phaseId);
+        log.debug("readTaskStatusByTicketIdAndPhaseId - END");
+        return task.getActive();
+    }
+
+    @Override
     public Task readTaskByJobUUID(String jobUUID) {
         log.debug("readTaskByJobUUID - START");
         Task entity = taskRepository.findByJobUUID(jobUUID)

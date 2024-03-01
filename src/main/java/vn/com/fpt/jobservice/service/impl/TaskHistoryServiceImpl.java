@@ -19,9 +19,7 @@ import vn.com.fpt.jobservice.service.TaskHistoryService;
 import vn.com.fpt.jobservice.utils.TaskStatus;
 import vn.com.fpt.jobservice.utils.Utils;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
