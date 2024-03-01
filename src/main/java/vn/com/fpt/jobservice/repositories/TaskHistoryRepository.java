@@ -22,7 +22,6 @@ public interface TaskHistoryRepository extends JpaRepository<TaskHistory, Long> 
 
     Optional<TaskHistory> findFirstByTaskIdAndStatus(String taskId, TaskStatus status);
 
-
     Page<TaskHistory> findAll(Specification<TaskHistory> specification, Pageable pageable);
 
     default Page<TaskHistory> searchByString(Pageable pageable, String searchQuery) {

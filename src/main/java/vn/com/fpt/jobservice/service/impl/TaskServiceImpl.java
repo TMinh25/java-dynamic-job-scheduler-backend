@@ -26,10 +26,7 @@ import vn.com.fpt.jobservice.utils.TaskTypeType;
 import vn.com.fpt.jobservice.utils.Utils;
 
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -70,11 +67,11 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public TaskModel readTaskById(String id) throws Exception {
+    public Task readTaskById(String id) {
         log.debug("readTaskById - START");
         Task entity = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task", "id", id));
         log.debug("readTaskById - END");
-        return entity.toModel();
+        return entity;
     }
 
     @Override
@@ -85,6 +82,14 @@ public class TaskServiceImpl implements TaskService {
                         String.format("Task not found with ticketId = '%s' and phaseId = '%s'", ticketId, phaseId)));
         log.debug("readTaskById - END");
         return entity;
+    }
+
+    @Override
+    public Boolean readActiveByTicketIdAndPhaseId(Long ticketId, Long phaseId) throws Exception {
+        log.debug("readTaskStatusByTicketIdAndPhaseId - START");
+        Task task = readTaskByTicketIdAndPhaseId(ticketId, phaseId);
+        log.debug("readTaskStatusByTicketIdAndPhaseId - END");
+        return task.getActive();
     }
 
     @Override
@@ -124,14 +129,14 @@ public class TaskServiceImpl implements TaskService {
 
         Task newTaskEntity = taskRepository.save(task);
         if (newTaskEntity.canScheduleJob()) {
-            scheduleJob(newTaskEntity);
+            scheduleTask(newTaskEntity);
         }
         log.debug("createTask - END");
         return newTaskEntity;
     }
 
     @Override
-    public boolean scheduleJob(Task task) {
+    public Boolean scheduleTask(Task task) {
         try {
             task.generateNextInvocation();
             TaskType taskType = task.getTaskType();
@@ -164,6 +169,20 @@ public class TaskServiceImpl implements TaskService {
             return false;
         }
         return true;
+    }
+
+    @Override
+    @Transactional
+    public Boolean unscheduleTask(Task task) {
+        Set<TaskStatus> cannotUnscheduleTaskStatus = new HashSet<>(Set.of(TaskStatus.PROCESSING, TaskStatus.SUCCESS));
+        if (cannotUnscheduleTaskStatus.contains(task.getStatus())) {
+            log.error(String.format("Error unscheduling job with ID: %s. The job status is %s. ", task.getId(), task.getStatus()));
+            return false;
+        } else {
+            task.setStatus(TaskStatus.CANCELED);
+            updateTask(task.getId(), task.toModel());
+            return true;
+        }
     }
 
     @Override
@@ -213,7 +232,7 @@ public class TaskServiceImpl implements TaskService {
         String jobUUID = task.getJobUUID();
         if (task.canScheduleJob()) {
             if (!jobService.isJobWithNamePresent(task.getJobUUID())) {
-                scheduleJob(task);
+                scheduleTask(task);
             } else {
                 String cronExpression = task.getCronExpression();
                 Date nextInvocation = null;
@@ -235,7 +254,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public boolean triggerJob(String taskId) throws Exception {
+    public Boolean triggerJob(String taskId) throws Exception {
         try {
             Task task = taskRepository.findById(taskId)
                     .orElseThrow(() -> new ResourceNotFoundException("Task", "id", taskId));

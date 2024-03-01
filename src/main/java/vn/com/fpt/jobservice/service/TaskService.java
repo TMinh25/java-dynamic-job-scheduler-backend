@@ -1,22 +1,23 @@
 package vn.com.fpt.jobservice.service;
 
-import java.util.List;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-
 import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.model.PagedResponse;
 import vn.com.fpt.jobservice.model.TaskModel;
+
+import java.util.List;
 
 public interface TaskService {
     PagedResponse<Task> searchTasks(Pageable pageable, String searchQuery);
 
     PagedResponse<Task> readAllTasks(Pageable pageable);
 
-    TaskModel readTaskById(String id) throws Exception;
+    Task readTaskById(String id);
 
     Task readTaskByTicketIdAndPhaseId(Long ticketId, Long phaseId) throws Exception;
+
+    Boolean readActiveByTicketIdAndPhaseId(Long ticketId, Long phaseId) throws Exception;
 
     Task readTaskByJobUUID(String jobUUID);
 
@@ -30,9 +31,11 @@ public interface TaskService {
 
     List<Task> getPendingTasks();
 
-    boolean scheduleJob(Task task) throws Exception;
+    Boolean scheduleTask(Task task) throws Exception;
 
-    boolean triggerJob(String taskId) throws Exception;
+    Boolean unscheduleTask(Task task);
+
+    Boolean triggerJob(String taskId) throws Exception;
 
     ResponseEntity<Object> interuptJob(String taskId);
 }
