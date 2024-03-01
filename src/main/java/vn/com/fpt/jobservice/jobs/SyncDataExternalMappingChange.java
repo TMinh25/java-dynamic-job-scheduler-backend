@@ -9,6 +9,7 @@ import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import vn.com.fpt.jobservice.jobs.base.BaseJob;
+import vn.com.fpt.jobservice.model.MappingModel;
 import vn.com.fpt.jobservice.model.response.ApiResponse;
 import vn.com.fpt.jobservice.service.impl.IntegrationServiceGrpc;
 import vn.com.fpt.jobservice.service.impl.OrganizationServiceGrpc;
@@ -31,6 +32,16 @@ public class SyncDataExternalMappingChange extends BaseJob {
     protected void defineSteps() {
     }
 
+    /**
+     *  Input data with "from":
+     *  - array ends with object : key.[key2][1].key22 vs key,key22 =object, [key2]= array, [1]= position of element (The first number starts with 0) in list (get all value don't need add)
+     *  - array ends with array: key.[key2][1]
+     *  - with object: key.key1.key2...keyn
+     *  Input data with "to":
+     *  - array ends with object: key.[key1].key2.[key...keyn].keyn+1 result like this: {"key":{"key1":["key2":"...","key":...["keyn":["keyn+1":"..."]]]}}
+     *  - array ends with array: key.[key1] result like this: {"key":{"key1":["2","3"]}}
+     * */
+
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         super.executeInternal(context);
@@ -50,7 +61,7 @@ public class SyncDataExternalMappingChange extends BaseJob {
                 );
 
                 List<Map<String, Object>> dataList = response.getResponseData().getData();
-                List<Map<String, String>> remapKeys = Utils.convertMapKeyObjectsToMapString(
+                List<Map<String, MappingModel>> remapKeys = Utils.convertMapKeyObjectsToMapString(
                         task.toModel().getTaskInputData()
                 );
 
