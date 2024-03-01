@@ -129,13 +129,10 @@ public class Utils {
             String newKey = mappingKey.getTo();
 
             if (oldKey == null) {
-                if (mappingKey.isRequired())
-                    try {
-                        throw new JobExecutionException("Job Execution is failed by oldKey == null and required =true");
-                    } catch (JobExecutionException e) {
-                        e.printStackTrace();
-                    }
-
+                if (mappingKey.isRequired()) {
+                    log.error("Job Execution is failed by oldKey == null and required =true");
+                    return;
+                }
                 output.put(newKey, mappingKey.getDefaultValue());
                 return;
             }
@@ -263,7 +260,7 @@ public class Utils {
                 remapKeys.add(remapKey);
 
             } catch (JsonProcessingException e) {
-                e.printStackTrace();
+                log.error(e.getMessage());
             }
         });
 
@@ -374,7 +371,7 @@ public class Utils {
                 return  currentData.getJSONObject(lastKey);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             return null;
         }
     }
@@ -393,7 +390,7 @@ public class Utils {
         // Count the number of dots to determine the depth of nesting
         return (int) field.chars().filter(ch -> ch == '.').count();
     }
-    
+
     public static Map<String, Object> mergeObjects(List<Map<String, Object>> objects) {
         Map<String, Object> objectMerged = new HashMap<>();
 
