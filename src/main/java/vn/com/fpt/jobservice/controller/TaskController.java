@@ -51,7 +51,7 @@ public class TaskController {
     }
 
     @PutMapping("/unschedule-task")
-    public Boolean unscheduleTask(@RequestParam(value = "ticketId", required = false) Long ticketId, @RequestParam(value = "phaseId", required = false) Long phaseId, @RequestParam(value = "id", required = false) String id) throws Exception {
+    public Boolean unscheduleTask(@RequestParam(value = "ticketId", required = false) Long ticketId, @RequestParam(value = "phaseId", required = false) Long phaseId, @RequestParam(value = "id", required = false) String id, @RequestParam(value = "update", required = true, defaultValue = "false") Boolean isUpdate) throws Exception {
         Task task;
 
         if (id != null) {
@@ -62,7 +62,7 @@ public class TaskController {
             throw new IllegalArgumentException("Either 'id' or both 'ticketId' and 'phaseId' are required.");
         }
 
-        return taskService.unscheduleTask(task);
+        return taskService.unscheduleTask(task, isUpdate);
     }
 
     @PutMapping("/{id}")

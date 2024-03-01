@@ -173,14 +173,16 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
-    public Boolean unscheduleTask(Task task) {
+    public Boolean unscheduleTask(Task task, Boolean isUpdate) {
         Set<TaskStatus> cannotUnscheduleTaskStatus = new HashSet<>(Set.of(TaskStatus.PROCESSING, TaskStatus.SUCCESS));
         if (cannotUnscheduleTaskStatus.contains(task.getStatus())) {
             log.error(String.format("Error unscheduling job with ID: %s. The job status is %s. ", task.getId(), task.getStatus()));
             return false;
         } else {
             task.setStatus(TaskStatus.CANCELED);
-            updateTask(task.getId(), task.toModel());
+            if (isUpdate) {
+                updateTask(task.getId(), task.toModel());
+            }
             return true;
         }
     }
