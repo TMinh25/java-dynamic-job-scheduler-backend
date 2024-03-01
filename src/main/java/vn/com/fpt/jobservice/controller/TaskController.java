@@ -37,7 +37,7 @@ public class TaskController {
 
     @GetMapping("/read-status")
     public Boolean readStatusByTicketAndPhase(@RequestParam(value = "ticketId", required = true) Long ticketId, @RequestParam(value = "phaseId", required = true) Long phaseId) throws Exception {
-        return taskService.readStatusByTicketIdAndPhaseId(ticketId, phaseId);
+        return taskService.readActiveByTicketIdAndPhaseId(ticketId, phaseId);
     }
 
     @GetMapping("/{id}")

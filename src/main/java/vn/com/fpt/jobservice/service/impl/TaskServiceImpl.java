@@ -85,7 +85,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Boolean readStatusByTicketIdAndPhaseId(Long ticketId, Long phaseId) throws Exception {
+    public Boolean readActiveByTicketIdAndPhaseId(Long ticketId, Long phaseId) throws Exception {
         log.debug("readTaskStatusByTicketIdAndPhaseId - START");
         Task task = readTaskByTicketIdAndPhaseId(ticketId, phaseId);
         log.debug("readTaskStatusByTicketIdAndPhaseId - END");

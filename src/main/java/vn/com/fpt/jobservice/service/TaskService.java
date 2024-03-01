@@ -17,7 +17,7 @@ public interface TaskService {
 
     Task readTaskByTicketIdAndPhaseId(Long ticketId, Long phaseId) throws Exception;
 
-    Boolean readStatusByTicketIdAndPhaseId(Long ticketId, Long phaseId) throws Exception;
+    Boolean readActiveByTicketIdAndPhaseId(Long ticketId, Long phaseId) throws Exception;
 
     Task readTaskByJobUUID(String jobUUID);
 
