@@ -1,21 +1,16 @@
 package vn.com.fpt.jobservice.controller;
 
-import com.fpt.fis.integration.grpc.GetIntegrationListResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.com.fpt.jobservice.entity.Task;
-import vn.com.fpt.jobservice.model.JobModel;
 import vn.com.fpt.jobservice.model.PagedResponse;
 import vn.com.fpt.jobservice.model.TaskModel;
 import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
 import vn.com.fpt.jobservice.service.JobService;
 import vn.com.fpt.jobservice.service.TaskService;
-import vn.com.fpt.jobservice.service.impl.IntegrationServiceGrpc;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/tasks")
@@ -40,19 +35,34 @@ public class TaskController {
         return taskService.createTask(task);
     }
 
-    @GetMapping("read-status")
+    @GetMapping("/read-status")
     public Boolean readStatusByTicketAndPhase(@RequestParam(value = "ticketId", required = true) Long ticketId, @RequestParam(value = "phaseId", required = true) Long phaseId) throws Exception {
         return taskService.readStatusByTicketIdAndPhaseId(ticketId, phaseId);
     }
 
     @GetMapping("/{id}")
     public TaskModel readTaskById(@PathVariable(value = "id") String id) throws Exception {
-        return taskService.readTaskById(id);
+        return taskService.readTaskById(id).toModel();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteTaskById(@PathVariable(value = "id") String id) throws Exception {
         return taskService.deleteTaskById(id);
+    }
+
+    @PutMapping("/unschedule-task")
+    public Boolean unscheduleTask(@RequestParam(value = "ticketId", required = false) Long ticketId, @RequestParam(value = "phaseId", required = false) Long phaseId, @RequestParam(value = "id", required = false) String id) throws Exception {
+        Task task;
+
+        if (id != null) {
+            task = taskService.readTaskById(id);
+        } else if (ticketId != null && phaseId != null) {
+            task = taskService.readTaskByTicketIdAndPhaseId(ticketId, phaseId);
+        } else {
+            throw new IllegalArgumentException("Either 'id' or both 'ticketId' and 'phaseId' are required.");
+        }
+
+        return taskService.unscheduleTask(task);
     }
 
     @PutMapping("/{id}")

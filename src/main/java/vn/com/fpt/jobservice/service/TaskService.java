@@ -13,7 +13,7 @@ public interface TaskService {
 
     PagedResponse<Task> readAllTasks(Pageable pageable);
 
-    TaskModel readTaskById(String id) throws Exception;
+    Task readTaskById(String id);
 
     Task readTaskByTicketIdAndPhaseId(Long ticketId, Long phaseId) throws Exception;
 
@@ -31,9 +31,11 @@ public interface TaskService {
 
     List<Task> getPendingTasks();
 
-    boolean scheduleJob(Task task) throws Exception;
+    Boolean scheduleTask(Task task) throws Exception;
 
-    boolean triggerJob(String taskId) throws Exception;
+    Boolean unscheduleTask(Task task);
+
+    Boolean triggerJob(String taskId) throws Exception;
 
     ResponseEntity<Object> interuptJob(String taskId);
 }

@@ -20,8 +20,7 @@ import java.text.ParseException;
 import java.util.*;
 
 @Entity
-@Table(name = "tasks", uniqueConstraints = @UniqueConstraint(name = "unique_phase_ticket", columnNames = {"ticket_id",
-        "phase_id"}))
+@Table(name = "tasks")
 @Data
 @Slf4j
 @EqualsAndHashCode(callSuper = true)
@@ -99,8 +98,20 @@ public class Task extends BaseEntity {
     @Column(name = "job_uuid", unique = true)
     private String jobUUID;
 
-//    @Column(name = "synchronize_data")
-//    private String synchronizeData;
+    @Column(name = "ticket_phase_unique_constraints", unique = true)
+    private String ticketPhaseUniqueConstraints;
+
+    private void enforceUniqueConstraint() {
+        if (this.ticketId != null && this.phaseId != null) {
+            Set<TaskStatus> checkedStatuses = new HashSet<>(Set.of(TaskStatus.PENDING, TaskStatus.PROCESSING));
+
+            if (checkedStatuses.contains(this.status)) {
+                this.ticketPhaseUniqueConstraints = String.format("%s_%s", this.ticketId, this.phaseId);
+            } else {
+                this.ticketPhaseUniqueConstraints = null;
+            }
+        }
+    }
 
     @PrePersist
     public void taskCreate() {
@@ -111,6 +122,7 @@ public class Task extends BaseEntity {
         if (this.status == null) {
             this.status = TaskStatus.PENDING;
         }
+        this.enforceUniqueConstraint();
         try {
             log.debug("Calculating next invocation: " + id);
             if (this.canScheduleJob()) {
@@ -133,6 +145,7 @@ public class Task extends BaseEntity {
             if (this.getStatus() == TaskStatus.CANCELED) {
                 this.active = false;
             }
+            this.enforceUniqueConstraint();
             this.modifiedAt = new Date();
         } catch (ParseException e) {
             log.error("Error calculating next execution time: ", e);

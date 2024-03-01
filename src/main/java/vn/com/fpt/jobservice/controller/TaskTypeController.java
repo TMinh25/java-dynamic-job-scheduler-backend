@@ -1,14 +1,9 @@
 package vn.com.fpt.jobservice.controller;
 
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import vn.com.fpt.jobservice.entity.TaskType;
 import vn.com.fpt.jobservice.exception.ResourceNotFoundException;
-import vn.com.fpt.jobservice.model.TaskTypeModel;
 import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
 import vn.com.fpt.jobservice.utils.TaskTypeType;
 
