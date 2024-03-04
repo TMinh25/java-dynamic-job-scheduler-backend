@@ -179,8 +179,9 @@ public class TaskServiceImpl implements TaskService {
             log.error(String.format("Error unscheduling job with ID: %s. The job status is %s. ", task.getId(), task.getStatus()));
             return false;
         } else {
-            task.setStatus(TaskStatus.CANCELED);
             if (isUpdate) {
+                task.setStatus(TaskStatus.CANCELED);
+                task.setActive(false);
                 updateTask(task.getId(), task.toModel());
             }
             return true;
@@ -248,6 +249,7 @@ public class TaskServiceImpl implements TaskService {
         } else {
             task.setNextInvocation(null);
             task = taskRepository.save(task);
+            jobService.unscheduleJob(jobUUID);
             jobService.deleteJob(jobUUID);
         }
 
