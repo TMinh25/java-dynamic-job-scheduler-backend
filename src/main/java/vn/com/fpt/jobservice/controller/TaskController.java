@@ -6,6 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.com.fpt.jobservice.entity.Task;
+import vn.com.fpt.jobservice.exception.ResourceNotFoundException;
 import vn.com.fpt.jobservice.model.PagedResponse;
 import vn.com.fpt.jobservice.model.TaskModel;
 import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
@@ -52,17 +53,21 @@ public class TaskController {
 
     @PutMapping("/unschedule-task")
     public Boolean unscheduleTask(@RequestParam(value = "ticketId", required = false) Long ticketId, @RequestParam(value = "phaseId", required = false) Long phaseId, @RequestParam(value = "id", required = false) String id, @RequestParam(value = "update", required = true, defaultValue = "false") Boolean isUpdate) throws Exception {
-        Task task;
+        try {
+            Task task;
 
-        if (id != null) {
-            task = taskService.readTaskById(id);
-        } else if (ticketId != null && phaseId != null) {
-            task = taskService.readTaskByTicketIdAndPhaseId(ticketId, phaseId);
-        } else {
-            throw new IllegalArgumentException("Either 'id' or both 'ticketId' and 'phaseId' are required.");
+            if (id != null) {
+                task = taskService.readTaskById(id);
+            } else if (ticketId != null && phaseId != null) {
+                task = taskService.readTaskByTicketIdAndPhaseId(ticketId, phaseId);
+            } else {
+                throw new IllegalArgumentException("Either 'id' or both 'ticketId' and 'phaseId' are required.");
+            }
+
+            return taskService.unscheduleTask(task, isUpdate);
+        } catch (ResourceNotFoundException e) {
+            return true;
         }
-
-        return taskService.unscheduleTask(task, isUpdate);
     }
 
     @PutMapping("/{id}")
