@@ -240,7 +240,7 @@ public class Task extends BaseEntity {
             return true;
         }
 
-        if (this.status == TaskStatus.SUCCESS) {
+        if (this.status == TaskStatus.SUCCESS || this.status == TaskStatus.CANCELED) {
             return false;
         }
 
