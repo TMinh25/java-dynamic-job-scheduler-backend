@@ -33,7 +33,7 @@ public interface TaskService {
 
     Boolean scheduleTask(Task task) throws Exception;
 
-    Boolean unscheduleTask(Task task);
+    Boolean unscheduleTask(Task task, Boolean isUpdate);
 
     Boolean triggerJob(String taskId) throws Exception;
 
