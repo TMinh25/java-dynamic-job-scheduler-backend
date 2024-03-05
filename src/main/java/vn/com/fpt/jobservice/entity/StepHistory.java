@@ -46,7 +46,8 @@ public class StepHistory {
     @Column(name = "ended_at")
     private Date endedAt;
 
-    @Column(name = "error_message")
+    @Lob
+    @Column(name = "error_message", columnDefinition = "TEXT")
     private String errorMessage;
 
     @Column(name = "execution_time")

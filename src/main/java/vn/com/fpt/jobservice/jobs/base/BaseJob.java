@@ -91,7 +91,6 @@ public abstract class BaseJob extends QuartzJobBean implements InterruptableJob 
                 try {
                     preStepExecute(currentStep, step, taskHistory);
                     step.execute(context);
-                    Thread.sleep(5000);
                     postStepExecute(taskHistory);
                 } catch (Exception e) {
                     logger(e.getMessage());
