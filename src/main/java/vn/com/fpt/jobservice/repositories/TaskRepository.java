@@ -25,7 +25,7 @@ public interface TaskRepository extends JpaRepository<Task, String> {
             " WHERE t.phaseId = :phaseId AND t.ticketId = :ticketId" +
             " ORDER BY t.createdAt DESC" +
             " LIMIT 1")
-    Optional<Task> findFirstByPhaseIdAndTicketIdOrderByCreatedAtDesc(@Param("phaseId") Long phaseId, @Param("ticketId") Long ticketId);
+    Optional<Task> findFirstByTicketIdAndPhaseIdOrderByCreatedAtDesc(@Param("ticketId") Long ticketId, @Param("phaseId") Long phaseId);
 
     Optional<Task> findByJobUUID(String jobUUID);
 
