@@ -77,8 +77,8 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Task readTaskByTicketIdAndPhaseId(Long ticketId, Long phaseId) throws Exception {
         log.debug("readTaskById - START");
-        Task entity = taskRepository.findFirstByPhaseIdAndTicketIdOrderByCreatedAtDesc(ticketId, phaseId)
-                .orElseThrow(() -> new Exception(
+        Task entity = taskRepository.findFirstByTicketIdAndPhaseIdOrderByCreatedAtDesc(ticketId, phaseId)
+                .orElseThrow(() -> new ResourceNotFoundException(
                         String.format("Task not found with ticketId = '%s' and phaseId = '%s'", ticketId, phaseId)));
         log.debug("readTaskById - END");
         return entity;
