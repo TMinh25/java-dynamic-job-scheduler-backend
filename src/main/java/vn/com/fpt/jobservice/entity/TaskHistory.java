@@ -32,6 +32,7 @@ public class TaskHistory {
     @Column(name = "step")
     private Long step;
 
+    @Lob
     @Column(name = "error_message", columnDefinition = "TEXT")
     private String errorMessage;
 

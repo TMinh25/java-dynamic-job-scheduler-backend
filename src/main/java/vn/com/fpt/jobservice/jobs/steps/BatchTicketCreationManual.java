@@ -30,9 +30,8 @@ public class BatchTicketCreationManual extends BaseJobStep {
         final Task task = (Task) context.get("task");
         final ExecuteIntegrationResult integrationResult = (ExecuteIntegrationResult) context.get("integrationResult");
         try {
-            Map integrationResultObject = Utils.stringToObject(integrationResult.getResult(), Map.class);
-            logger("integrationResultObject: " + integrationResultObject.toString());
-            TicketCreateModel ticketCreateRequest = (TicketCreateModel) integrationResultObject.get("responseData");
+            TicketCreateModel ticketCreateRequest = Utils.stringToObject(integrationResult.getResult(), TicketCreateModel.class);
+            logger("ticketCreateRequest: " + ticketCreateRequest.toString());
             HttpHeaders headers = new HttpHeaders();
             BatchResponseModel ticketCreateResponse = CallExternalAPI.exchangePost(
                     uServiceURL + "/batch/create-ticket",
@@ -42,7 +41,7 @@ public class BatchTicketCreationManual extends BaseJobStep {
 
             logger("Ticket create result: " + ticketCreateResponse.toString());
         } catch (HttpClientErrorException e) {
-            throw new JobExecutionException(removeHtmlTags(e.getResponseBodyAsString()));
+            throw new JobExecutionException(e.getResponseBodyAsString());
         } catch (Exception e) {
             throw new JobExecutionException(e);
         }

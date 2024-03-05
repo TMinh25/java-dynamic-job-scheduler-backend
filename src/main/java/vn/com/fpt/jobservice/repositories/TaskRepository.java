@@ -1,26 +1,31 @@
 package vn.com.fpt.jobservice.repositories;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
-import jakarta.persistence.criteria.Predicate;
 import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.utils.TaskStatus;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TaskRepository extends JpaRepository<Task, String> {
     List<Task> findByStatusAndNextInvocationBefore(TaskStatus status, Date nextInvocation);
 
-    Optional<Task> findByTicketIdAndPhaseId(Long ticketId, Long phaseId);
+    @Query("SELECT t FROM Task t" +
+            " WHERE t.phaseId = :phaseId AND t.ticketId = :ticketId" +
+            " ORDER BY t.createdAt DESC" +
+            " LIMIT 1")
+    Optional<Task> findFirstByPhaseIdAndTicketIdOrderByCreatedAtDesc(@Param("phaseId") Long phaseId, @Param("ticketId") Long ticketId);
 
     Optional<Task> findByJobUUID(String jobUUID);
 

@@ -30,7 +30,7 @@ public class BatchTicketCreationIntegration extends BaseJobStep {
             logger("- method   : " + result.getItem().getMethod());
             logger("- structure: " + result.getStructure());
             ExecuteIntegrationResult res = integrationServiceGrpc.executeIntegration(result.getStructure());
-            logger("Execute integration result: " + res.toString());
+            logger("Execute integration result: " + res);
             context.put("integrationResult", res);
         } catch (Exception e) {
             throw new JobExecutionException(e);
