@@ -1,21 +1,16 @@
 package vn.com.fpt.jobservice.jobs.steps;
 
 import com.fpt.fis.integration.grpc.*;
-import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.jobs.base.BaseJob;
 import vn.com.fpt.jobservice.jobs.base.BaseJobStep;
-import vn.com.fpt.jobservice.model.response.IntegrationStructure;
 import vn.com.fpt.jobservice.service.impl.IntegrationServiceGrpc;
-import vn.com.fpt.jobservice.utils.Utils;
 
-public class BatchTicketCreationIntegration extends BaseJobStep {
+public class GetIntegrationResultGRPC extends BaseJobStep {
 
-    public BatchTicketCreationIntegration(BaseJob baseJob) {
+    public GetIntegrationResultGRPC(BaseJob baseJob) {
         super(baseJob);
     }
 
@@ -31,7 +26,7 @@ public class BatchTicketCreationIntegration extends BaseJobStep {
             logger("- structure: " + result.getStructure());
             ExecuteIntegrationResult res = integrationServiceGrpc.executeIntegration(result.getStructure());
             logger("Execute integration result: " + res);
-            context.put("integrationResult", res);
+            context.put("integrationResult", res.getResult());
         } catch (Exception e) {
             throw new JobExecutionException(e);
         }

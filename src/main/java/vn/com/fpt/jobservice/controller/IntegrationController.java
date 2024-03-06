@@ -39,8 +39,14 @@ public class IntegrationController {
         GetIntegrationResult integrationData = integrationServiceGrpc.getIntegrationById(id);
         ExecuteIntegrationResult result = integrationServiceGrpc.executeIntegration(integrationData.getStructure());
 
-        JSONObject jsonObject = new JSONObject(result.getResult());
-        Set<String> allKeys = extractFieldNames(jsonObject, "");
+        Set<String> allKeys = new HashSet<>();
+        if (Utils.isJsonObject(result.getResult())) {
+            JSONObject jsonObject = new JSONObject(result.getResult());
+            allKeys = extractFieldNames(jsonObject, "");
+        } else if (Utils.isJsonArray(result.getResult())) {
+            JSONArray jsonArray = new JSONArray(result.getResult());
+            allKeys = extractArrayFieldNames(jsonArray);
+        }
 
         List<DataSourceDTO> dataSources = allKeys.stream()
                 .map(item -> DataSourceDTO.builder().id(item).name(item.replace(".", " - ")).build())
@@ -75,6 +81,19 @@ public class IntegrationController {
                 // If the value is not an object or array, print the field name
                 String finalFieldName = getParentFieldName(parentFieldName, key);
                 result.add(finalFieldName);
+            }
+        }
+        return result;
+    }
+
+    private static Set<String> extractArrayFieldNames(JSONArray jsonArray) {
+        Set<String> result = new TreeSet<>(Utils.getNestedFieldComparator());
+        for (int i = 0; i < jsonArray.length(); i++) {
+            Object arrayElement = jsonArray.get(i);
+
+            if (arrayElement instanceof JSONObject) {
+                Set<String> extractedKeys = extractFieldNames((JSONObject) arrayElement, "[]");
+                result.addAll(extractedKeys);
             }
         }
         return result;
