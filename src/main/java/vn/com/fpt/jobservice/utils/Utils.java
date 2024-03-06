@@ -4,21 +4,19 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
-import vn.com.fpt.jobservice.model.MappingModel;
 
 import java.beans.PropertyDescriptor;
-import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Slf4j
 public class Utils {
@@ -110,9 +108,9 @@ public class Utils {
         return res;
     }
 
-    public static <T> T stringToObject(String str, Class<T> type) throws JsonProcessingException {
+    public static <T> T stringToObject(String str, TypeReference<T> typeRef) throws JsonProcessingException {
         try {
-            return mapper.readValue(str, type);
+            return mapper.readValue(str, typeRef);
         } catch (Exception e) {
             log.error("stringToObject failed :" + str, e);
             throw e;
@@ -148,14 +146,23 @@ public class Utils {
         return objectMerged;
     }
 
+    public static Map<String, Object> mergeObjects(List<Map<String, Object>> objects) {
+        Map<String, Object> objectMerged = new HashMap<>();
+
+        for (Map<String, Object> obj : objects) {
+            objectMerged = mergeObjects(obj, objectMerged);
+        }
+
+        return objectMerged;
+    }
+
     public static Map<String, Object> jsonToMap(String json) {
         JSONObject jsonObject = new JSONObject(json);
         return jsonObject.toMap();
     }
 
     public static Comparator<String> getNestedFieldComparator() {
-        return Comparator.comparingInt(Utils::getDepth)
-                .thenComparing(Comparator.naturalOrder());
+        return Comparator.comparingInt(Utils::getDepth).thenComparing(Comparator.naturalOrder());
     }
 
     public static int getDepth(String field) {
@@ -167,13 +174,31 @@ public class Utils {
         return Math.abs(date1.getTime() - date2.getTime());
     }
 
-    public static <T> List<T> convertStringToList(String jsonString, TypeReference<List<T>> valueTypeRef) {
+    public static <T> List<T> stringToList(String jsonString, TypeReference<List<T>> valueTypeRef) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.readValue(jsonString, valueTypeRef);
         } catch (Exception e) {
             log.error(e.getMessage());
             return Collections.emptyList();
+        }
+    }
+
+    public static boolean isJsonObject(String jsonString) {
+        try {
+            JsonElement jsonElement = JsonParser.parseString(jsonString);
+            return jsonElement.isJsonObject();
+        } catch (JsonSyntaxException e) {
+            return false;
+        }
+    }
+
+    public static boolean isJsonArray(String jsonString) {
+        try {
+            JsonElement jsonElement = JsonParser.parseString(jsonString);
+            return jsonElement.isJsonArray();
+        } catch (JsonSyntaxException e) {
+            return false;
         }
     }
 }

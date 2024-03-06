@@ -10,7 +10,7 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan("vn.com.fpt.jobservice")
 @EnableAutoConfiguration
 public class JobServiceApplication {
-    public static void main(String[] args) throws JsonProcessingException {
+    public static void main(String[] args) {
         SpringApplication.run(JobServiceApplication.class, args);
     }
 }

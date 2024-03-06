@@ -31,11 +31,20 @@ public class BatchTicketCreationManual extends BaseJobStep {
         final Task task = (Task) context.get("task");
         final Map<String, Object> keyMappedResult = (Map<String, Object>) context.get("keyMappedResult");
         try {
+            if (task.getSubProcessId() == null) {
+                throw new JobExecutionException("Process ID is required to created ticket!");
+            }
+
             TicketCreateModel ticketCreateRequest = TicketCreateModel.fromMap(keyMappedResult);
             logger("ticketCreateRequest: " + ticketCreateRequest.toString());
+
+            logger(String.format("Creating ticket for process: %s", task.getSubProcessId()));
+            logger("- url   : " + uServiceURL + "/batch/create-ticket?processId=" + task.getSubProcessId());
+            logger("- method: POST");
+
             HttpHeaders headers = new HttpHeaders();
             BatchResponseModel ticketCreateResponse = CallExternalAPI.exchangePost(
-                    uServiceURL + "/batch/create-ticket",
+                    uServiceURL + "/batch/create-ticket?processId=" + task.getSubProcessId(),
                     headers,
                     ticketCreateRequest,
                     BatchResponseModel.class);

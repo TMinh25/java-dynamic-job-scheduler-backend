@@ -1,11 +1,13 @@
 package vn.com.fpt.jobservice.utils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +42,35 @@ public class DataMapper {
         return path.contains("[") && path.contains("]");
     }
 
+    public static Map<String, Object> remapData(List<Map<String, Object>> input, List<MapperObject> remapKeys) {
+        Map<String, Object> keyMappedResult = DataMapper.remapData(new HashMap<>(), remapKeys);
+
+        List<MapperObject> listRemapKeys = new ArrayList<>();
+        for (int i = 0; i < remapKeys.size(); ) {
+            MapperObject mapperObject = remapKeys.get(i);
+            String fromKey = mapperObject.getFrom();
+            String toKey = mapperObject.getTo();
+            if (fromKey != null && fromKey.startsWith("[].")) {
+                remapKeys.remove(i);
+                mapperObject.setFrom(fromKey.substring(3));
+                listRemapKeys.add(mapperObject);
+            } else {
+                i++;
+            }
+        }
+
+        List<Map<String, Object>> listKeyMapped = new ArrayList<>();
+        for (Map<String, Object> valueRecord : input) {
+            Map<String, Object> mappedRecord = DataMapper.remapData(valueRecord, listRemapKeys);
+            listKeyMapped.add(mappedRecord);
+        }
+
+        Map<String, Object> arrayMerged = Utils.mergeObjects(listKeyMapped);
+        keyMappedResult = Utils.mergeObjects(keyMappedResult, arrayMerged);
+
+        return keyMappedResult;
+    }
+
     public static Map<String, Object> remapData(Map<String, Object> input, List<MapperObject> remapKeys) {
         Map<String, Object> output = new HashMap<>();
 
@@ -51,15 +82,17 @@ public class DataMapper {
 
             if (fromKey == null) {
                 if (defaultValue != null) {
-                    output.put(toKey, defaultValue);
-                    continue;
+                    JSONObject jsonObject = getToValue(toKey, new JSONObject(output), defaultValue);
+                    Map<String, Object> objectMap = Utils.jsonToMap(jsonObject.toString());
+                    output.clear();
+                    output.putAll(objectMap);
+                } else {
+                    if (isRequired) {
+                        throw new NullPointerException(String.format("Data field is required: %S", toKey));
+                    }
                 }
-                if (isRequired) {
-                    throw new NullPointerException(String.format("Data field is required: %S", toKey));
-                }
+                continue;
             }
-
-            assert fromKey != null;
 
             boolean isNestedFromKey = fromKey.contains(".") || isArrayKey(fromKey);
             boolean isNestedToKey = toKey.contains(".") || isArrayKey(toKey);
@@ -67,7 +100,7 @@ public class DataMapper {
             if (isNestedToKey) {
                 JSONObject jsonObject;
                 if (isNestedFromKey) {
-                    Object nestedData = getNestedData(input, output, fromKey);
+                    Object nestedData = getNestedData(input, fromKey);
                     jsonObject = getToValue(toKey, new JSONObject(output), nestedData);
                 } else {
                     jsonObject = getToValue(toKey, new JSONObject(output), input.get(fromKey));
@@ -77,7 +110,7 @@ public class DataMapper {
                 output.clear();
                 output.putAll(objectMap);
             } else if (isNestedFromKey) {
-                Object nestedData = getNestedData(input, output, fromKey);
+                Object nestedData = getNestedData(input, fromKey);
                 output.put(toKey, nestedData);
             } else {
                 output.put(toKey, input.get(fromKey));
@@ -88,7 +121,7 @@ public class DataMapper {
     }
 
 
-    public static Object getNestedData(Map<String, Object> input, Map<String, Object> output, String path) {
+    public static Object getNestedData(Map<String, Object> input, String path) {
         try {
             if (isArrayPath(path)) {
                 return getFromValue(new JSONObject(input), path);
@@ -160,11 +193,16 @@ public class DataMapper {
             if (!isArrayKey(keyPart)) {
                 if (!currentArray.isEmpty()) {
                     if (isLastPart) {
-                        for (int innerI = 0; innerI < ((JSONArray) value).length(); innerI++) {
-                            String valueObject = String.valueOf(((JSONArray) value).get(innerI));
-                            JSONObject tempObject = currentArray.getJSONObject(innerI);
-                            tempObject.put(keyPart, valueObject);
-                            currentArray.put(innerI, tempObject);
+                        if (value instanceof JSONArray) {
+                            for (int innerI = 0; innerI < ((JSONArray) value).length(); innerI++) {
+                                String valueObject = String.valueOf(((JSONArray) value).get(innerI));
+                                JSONObject tempObject = currentArray.getJSONObject(innerI);
+                                tempObject.put(keyPart, valueObject);
+                                currentArray.put(innerI, tempObject);
+                            }
+                        } else {
+                            JSONObject firstObject = currentArray.getJSONObject(0);
+                            firstObject.put(keyPart, value);
                         }
                     } else {
                         if (currentObject.has(keyPart) && currentObject.get(keyPart) instanceof JSONArray) {
@@ -208,6 +246,16 @@ public class DataMapper {
                             }
                             currentObject.put(keyPart, currentArray);
                         }
+                    }
+                } else {
+                    if (currentObject.has(keyPart) && currentObject.get(keyPart) instanceof JSONArray) {
+                        currentArray = currentObject.getJSONArray(keyPart);
+                    } else {
+                        JSONObject tempJsonObject = new JSONObject();
+                        JSONArray tempJsonArray = new JSONArray();
+                        tempJsonArray.put(tempJsonObject);
+                        currentArray = tempJsonArray;
+                        currentObject.put(keyPart, tempJsonArray);
                     }
                 }
             }

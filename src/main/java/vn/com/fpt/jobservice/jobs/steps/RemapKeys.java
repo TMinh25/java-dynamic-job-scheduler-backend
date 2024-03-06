@@ -10,6 +10,7 @@ import vn.com.fpt.jobservice.utils.DataMapper;
 import vn.com.fpt.jobservice.utils.DataMapper.MapperObject;
 import vn.com.fpt.jobservice.utils.Utils;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,10 +29,17 @@ public class RemapKeys extends BaseJobStep {
 
         try {
             String taskInputData = task.getTaskInputData();
-            List<MapperObject> remapKeys = Utils.convertStringToList(taskInputData, new TypeReference<List<MapperObject>>() {
-            });
-            Map<String, Object> valuemap = Utils.stringToObject(valueContext, Map.class);
-            Map<String, Object> keyMappedResult = DataMapper.remapData(valuemap, remapKeys);
+            List<MapperObject> remapKeys = Utils.stringToList(taskInputData, new TypeReference<>() {});
+
+            Map<String, Object> keyMappedResult = new HashMap<>();
+
+            if (Utils.isJsonObject(valueContext)) {
+                Map<String, Object> valueMap = Utils.stringToObject(valueContext, new TypeReference<>() {});
+                keyMappedResult = DataMapper.remapData(valueMap, remapKeys);
+            } else if (Utils.isJsonArray(valueContext)) {
+                List<Map<String, Object>> valueList = Utils.stringToList(valueContext, new TypeReference<>() {});
+                keyMappedResult = DataMapper.remapData(valueList, remapKeys);
+            }
             logger("keyMappedResult: " + keyMappedResult.toString());
             context.put("keyMappedResult", keyMappedResult);
         } catch (Exception e) {
