@@ -1,8 +1,10 @@
 package vn.com.fpt.jobservice.jobs.steps;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fpt.fis.integration.grpc.ExecuteIntegrationResult;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.HttpClientErrorException;
 import vn.com.fpt.jobservice.entity.Task;
@@ -16,21 +18,20 @@ import vn.com.fpt.jobservice.utils.Utils;
 import java.util.Map;
 
 public class BatchTicketCreationManual extends BaseJobStep {
+    @Autowired
+    ObjectMapper objectMapper = new ObjectMapper();
+
     public BatchTicketCreationManual(BaseJob baseJob) {
         super(baseJob);
-    }
-
-    private String removeHtmlTags(String html) {
-        return html.replaceAll("\"\\\\<.*?\\\\>\"", "");
     }
 
     @Override
     protected void execute(JobExecutionContext context) throws JobExecutionException {
         final String uServiceURL = (String) context.get("uServiceURL");
         final Task task = (Task) context.get("task");
-        final ExecuteIntegrationResult integrationResult = (ExecuteIntegrationResult) context.get("integrationResult");
+        final Map<String, Object> keyMappedResult = (Map<String, Object>) context.get("keyMappedResult");
         try {
-            TicketCreateModel ticketCreateRequest = Utils.stringToObject(integrationResult.getResult(), TicketCreateModel.class);
+            TicketCreateModel ticketCreateRequest = TicketCreateModel.fromMap(keyMappedResult);
             logger("ticketCreateRequest: " + ticketCreateRequest.toString());
             HttpHeaders headers = new HttpHeaders();
             BatchResponseModel ticketCreateResponse = CallExternalAPI.exchangePost(

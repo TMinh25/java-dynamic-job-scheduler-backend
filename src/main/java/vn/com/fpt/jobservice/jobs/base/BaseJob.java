@@ -24,8 +24,8 @@ public abstract class BaseJob extends QuartzJobBean implements InterruptableJob 
     public String type;
     protected Task task;
     protected String jobUUID;
-    protected List<BaseJobStep> steps = new ArrayList<>();
-    protected List<LogModel> logs = new ArrayList<>();
+    private final List<BaseJobStep> steps = new ArrayList<>();
+    private final List<LogModel> logs = new ArrayList<>();
     protected volatile boolean toStopFlag = true;
 
     protected JobExecutionContext context;
@@ -44,7 +44,8 @@ public abstract class BaseJob extends QuartzJobBean implements InterruptableJob 
         this.context.put("logs", logs);
     }
 
-    protected abstract void defineSteps();
+    protected abstract void defineSteps() throws JobExecutionException;
+
     protected void addStep(BaseJobStep step) {
         this.steps.add(step);
     }

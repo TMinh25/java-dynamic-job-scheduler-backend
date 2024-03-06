@@ -1,0 +1,217 @@
+package vn.com.fpt.jobservice.utils;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Slf4j
+public class DataMapper {
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class MapperObject {
+        private String to;
+        private String from;
+        private Boolean required;
+        private String defaultValue;
+
+        public MapperObject() {
+            // Default constructor for Jackson
+        }
+
+        public MapperObject(String to, String from, Boolean required, String defaultValue) {
+            this.to = to;
+            this.from = from;
+            this.required = required;
+            this.defaultValue = defaultValue;
+        }
+    }
+
+    private static Boolean isArrayKey(String key) {
+        return key.startsWith("[") && key.endsWith("]");
+    }
+
+    private static Boolean isArrayPath(String path) {
+        return path.contains("[") && path.contains("]");
+    }
+
+    public static Map<String, Object> remapData(Map<String, Object> input, List<MapperObject> remapKeys) {
+        Map<String, Object> output = new HashMap<>();
+
+        for (MapperObject mapperObject : remapKeys) {
+            String fromKey = mapperObject.getFrom();
+            String toKey = mapperObject.getTo();
+            Boolean isRequired = mapperObject.getRequired();
+            String defaultValue = mapperObject.getDefaultValue();
+
+            if (fromKey == null) {
+                if (defaultValue != null) {
+                    output.put(toKey, defaultValue);
+                    continue;
+                }
+                if (isRequired) {
+                    throw new NullPointerException(String.format("Data field is required: %S", toKey));
+                }
+            }
+
+            assert fromKey != null;
+
+            boolean isNestedFromKey = fromKey.contains(".") || isArrayKey(fromKey);
+            boolean isNestedToKey = toKey.contains(".") || isArrayKey(toKey);
+
+            if (isNestedToKey) {
+                JSONObject jsonObject;
+                if (isNestedFromKey) {
+                    Object nestedData = getNestedData(input, output, fromKey);
+                    jsonObject = getToValue(toKey, new JSONObject(output), nestedData);
+                } else {
+                    jsonObject = getToValue(toKey, new JSONObject(output), input.get(fromKey));
+                }
+
+                Map<String, Object> objectMap = Utils.jsonToMap(jsonObject.toString());
+                output.clear();
+                output.putAll(objectMap);
+            } else if (isNestedFromKey) {
+                Object nestedData = getNestedData(input, output, fromKey);
+                output.put(toKey, nestedData);
+            } else {
+                output.put(toKey, input.get(fromKey));
+            }
+        }
+
+        return output;
+    }
+
+
+    public static Object getNestedData(Map<String, Object> input, Map<String, Object> output, String path) {
+        try {
+            if (isArrayPath(path)) {
+                return getFromValue(new JSONObject(input), path);
+            }
+
+            String[] nestedKeys = path.split("\\.");
+            Map<String, Object> nestedData = input;
+
+            for (int i = 0; i < nestedKeys.length - 1; i++) {
+                String nestedKey = nestedKeys[i];
+                nestedData = (Map<String, Object>) nestedData.get(nestedKey);
+            }
+
+            String lastKey = nestedKeys[nestedKeys.length - 1];
+            return nestedData.get(lastKey);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return null;
+        }
+    }
+
+    public static Object getFromValue(JSONObject input, String fromKey) {
+        String[] keyArray = fromKey.split("\\.");
+        JSONObject currentData = input;
+        JSONArray currentArray = null;
+
+        try {
+            String lastKey = keyArray[keyArray.length - 1];
+
+            for (String key : keyArray) {
+                if (!key.equalsIgnoreCase(lastKey)) {
+                    if (isArrayKey(key)) {
+                        String arrayKey = key.substring(1, key.length() - 1);
+                        currentArray = currentData.getJSONArray(arrayKey);
+                    } else {
+                        currentData = currentData.getJSONObject(key);
+                    }
+                }
+            }
+
+            if (isArrayKey(lastKey)) {
+                lastKey = lastKey.substring(1, lastKey.length() - 1);
+                return currentData.getJSONArray(lastKey);
+            } else if (currentArray != null) {
+                JSONArray outputArray = new JSONArray();
+                for (Object object : currentArray) {
+                    JSONObject convertedObject = (JSONObject) object;
+                    outputArray.put(convertedObject.get(lastKey));
+                }
+                return outputArray;
+            } else {
+                return currentData.getJSONObject(lastKey);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return null;
+        }
+    }
+
+    public static JSONObject getToValue(String input, JSONObject output, Object value) {
+        JSONObject currentObject = output;
+        JSONArray currentArray = new JSONArray();
+        String[] keyParts = input.split("\\.");
+
+        for (int i = 0; i < keyParts.length; i++) {
+            String keyPart = keyParts[i];
+            boolean isLastPart = i == keyParts.length - 1;
+
+            if (!isArrayKey(keyPart)) {
+                if (!currentArray.isEmpty()) {
+                    if (isLastPart) {
+                        for (int innerI = 0; innerI < ((JSONArray) value).length(); innerI++) {
+                            String valueObject = String.valueOf(((JSONArray) value).get(innerI));
+                            JSONObject tempObject = currentArray.getJSONObject(innerI);
+                            tempObject.put(keyPart, valueObject);
+                            currentArray.put(innerI, tempObject);
+                        }
+                    } else {
+                        if (currentObject.has(keyPart) && currentObject.get(keyPart) instanceof JSONArray) {
+                            currentArray = currentObject.getJSONArray(keyPart);
+                        } else {
+                            JSONObject tempObject = new JSONObject();
+                            JSONObject innerObject = new JSONObject();
+                            innerObject.put(keyPart, tempObject);
+                            currentArray.clear();
+                            for (Object v : (JSONArray) value) {
+                                currentArray.put(innerObject);
+                            }
+                        }
+                    }
+                } else {
+                    if (isLastPart) {
+                        currentObject.put(keyPart, value);
+                    } else {
+                        if (currentObject.has(keyPart)) {
+                            currentObject = currentObject.getJSONObject(keyPart);
+                        } else {
+                            JSONObject tempObject = new JSONObject();
+                            currentObject.put(keyPart, tempObject);
+                            currentObject = tempObject;
+                        }
+                    }
+                }
+            } else {
+                keyPart = keyPart.substring(1, keyPart.length() - 1);
+
+                if (value instanceof JSONArray) {
+                    if (isLastPart) {
+                        currentObject.put(keyPart, value);
+                    } else {
+                        if (currentObject.has(keyPart) && currentObject.get(keyPart) instanceof JSONArray) {
+                            currentArray = currentObject.getJSONArray(keyPart);
+                        } else {
+                            for (Object v : (JSONArray) value) {
+                                JSONObject innerObject = new JSONObject();
+                                currentArray.put(innerObject);
+                            }
+                            currentObject.put(keyPart, currentArray);
+                        }
+                    }
+                }
+            }
+        }
+        return output;
+    }
+}

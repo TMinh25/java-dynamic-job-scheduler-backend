@@ -7,10 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import vn.com.fpt.jobservice.jobs.base.BaseJob;
-import vn.com.fpt.jobservice.jobs.steps.BatchTicketCreationIntegration;
-import vn.com.fpt.jobservice.jobs.steps.BatchTicketCreationManual;
-import vn.com.fpt.jobservice.jobs.steps.BatchTicketCreationSPro;
-import vn.com.fpt.jobservice.jobs.steps.ShowJobContext;
+import vn.com.fpt.jobservice.jobs.steps.*;
 import vn.com.fpt.jobservice.service.impl.IntegrationServiceGrpc;
 import vn.com.fpt.jobservice.utils.TaskTypeType;
 
@@ -20,24 +17,23 @@ public class BatchTicketCreation extends BaseJob {
     @Value("${u-service-api}")
     String uServiceURL;
 
-    @Value("${integration-api}")
-    String integrationURL;
-
     @Autowired
     IntegrationServiceGrpc integrationServiceGrpc;
 
     @Override
     protected void defineSteps() {
-        this.steps.add(new ShowJobContext(this));
+        this.addStep(new ShowJobContext(this));
 
         if (this.task.getIntegrationId() != null && this.task.getIntegrationId() != 0) {
-            this.steps.add(new BatchTicketCreationIntegration(this));
+            this.addStep(new GetIntegrationResultGRPC(this));
+
+            this.addStep(new RemapKeys(this, "integrationResult"));
 
             if (this.task.getTaskType().getType() == TaskTypeType.MANUAL) {
-                this.steps.add(new BatchTicketCreationManual(this));
+                this.addStep(new BatchTicketCreationManual(this));
             }
         } else {
-            this.steps.add(new BatchTicketCreationSPro(this));
+            this.addStep(new BatchTicketCreationSPro(this));
         }
     }
 
@@ -45,7 +41,6 @@ public class BatchTicketCreation extends BaseJob {
     public void executeInternal(JobExecutionContext context) throws JobExecutionException {
         // Declare data for job steps
         context.put("uServiceURL", uServiceURL);
-        context.put("integrationURL", integrationURL);
         context.put("integrationServiceGrpc", integrationServiceGrpc);
 
         super.executeInternal(context);
