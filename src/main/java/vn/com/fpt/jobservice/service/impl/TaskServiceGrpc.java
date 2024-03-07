@@ -115,4 +115,44 @@ public class TaskServiceGrpc extends ReactorTaskServiceGrpc.TaskServiceImplBase 
             return Mono.error(e);
         }
     }
+
+    @Override
+    public Mono<TaskActiveResponse> readTaskActiveByTicketIdAndPhaseId(TaskTriggerRequestByTicketIdAndPhaseId request) {
+        try {
+            Long ticketId = request.getTicketId();
+            Long phaseId = request.getPhaseId();
+            Boolean taskActive = taskService.readActiveByTicketIdAndPhaseId(ticketId, phaseId);
+            TaskActiveResponse response = TaskActiveResponse.newBuilder().setActive(taskActive).build();
+            return Mono.just(response);
+        } catch (Exception e) {
+            log.error("TaskServiceGrpcImpl triggerTaskByTicketIdAndPhaseId err(): ", e);
+            return Mono.error(e);
+        }
+    }
+
+    @Override
+    public Mono<TaskTriggerResponse> unscheduleTaskByTicketIdAndPhaseId(UnscheduleTaskRequest request) {
+        try {
+            String id = request.getId();
+            long ticketId = request.getTicketId();
+            long phaseId = request.getPhaseId();
+            boolean isUpdate = request.getUpdate();
+
+            Task task;
+
+            if (!id.isEmpty()) {
+                task = taskService.readTaskById(id);
+            } else if (ticketId != 0 && phaseId != 0) {
+                task = taskService.readTaskByTicketIdAndPhaseId(ticketId, phaseId);
+            } else {
+                throw new IllegalArgumentException("Either 'id' or both 'ticketId' and 'phaseId' are required.");
+            }
+            Boolean success = taskService.unscheduleTask(task, isUpdate);
+            TaskTriggerResponse response = TaskTriggerResponse.newBuilder().setSuccess(success).build();
+            return Mono.just(response);
+        } catch (Exception e) {
+            log.error("TaskServiceGrpcImpl triggerTaskByTicketIdAndPhaseId err(): ", e);
+            return Mono.error(e);
+        }
+    }
 }

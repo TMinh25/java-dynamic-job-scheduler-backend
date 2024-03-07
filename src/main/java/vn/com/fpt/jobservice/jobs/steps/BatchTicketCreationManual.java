@@ -2,6 +2,7 @@ package vn.com.fpt.jobservice.jobs.steps;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fpt.fis.integration.grpc.ExecuteIntegrationResult;
+import org.json.JSONObject;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,7 @@ public class BatchTicketCreationManual extends BaseJobStep {
             }
 
             TicketCreateModel ticketCreateRequest = TicketCreateModel.fromMap(keyMappedResult);
-            logger("ticketCreateRequest: " + ticketCreateRequest.toString());
+            logger("ticketCreateRequest: " + new JSONObject(ticketCreateRequest));
 
             logger(String.format("Creating ticket for process: %s", task.getSubProcessId()));
             logger("- url   : " + uServiceURL + "/batch/create-ticket?processId=" + task.getSubProcessId());
