@@ -13,6 +13,10 @@ service TaskService {
 
   rpc TriggerTaskByTaskId(TaskTriggerRequestByTaskId) returns (TaskTriggerResponse);
   rpc TriggerTaskByTicketIdAndPhaseId(TaskTriggerRequestByTicketIdAndPhaseId) returns (TaskTriggerResponse);
+
+  rpc ReadTaskActiveByTicketIdAndPhaseId(TaskTriggerRequestByTicketIdAndPhaseId) returns (TaskActiveResponse);
+
+  rpc UnscheduleTaskByTicketIdAndPhaseId(UnscheduleTaskRequest) returns (TaskTriggerResponse);
 }
 
 message TaskGrpc {
@@ -78,6 +82,17 @@ message TaskTriggerRequestByTicketIdAndPhaseId {
   int64 phaseId = 2;
 }
 
+message UnscheduleTaskRequest {
+  string id = 1;
+  int64 ticketId = 2;
+  int64 phaseId = 3;
+  bool update = 4;
+}
+
 message TaskTriggerResponse {
   bool success = 1;
+}
+
+message TaskActiveResponse {
+  bool active = 1;
 }
