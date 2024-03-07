@@ -43,14 +43,15 @@ public class DataMapper {
     }
 
     public static Map<String, Object> remapData(List<Map<String, Object>> input, List<MapperObject> remapKeys) {
-        Map<String, Object> keyMappedResult = DataMapper.remapData(new HashMap<>(), remapKeys);
-
         List<MapperObject> listRemapKeys = new ArrayList<>();
         for (int i = 0; i < remapKeys.size(); ) {
             MapperObject mapperObject = remapKeys.get(i);
             String fromKey = mapperObject.getFrom();
             String toKey = mapperObject.getTo();
-            if (fromKey != null && fromKey.startsWith("[].")) {
+            if (fromKey == null && isArrayPath(toKey)) {
+                remapKeys.remove(i);
+                listRemapKeys.add(mapperObject);
+            } else if (fromKey != null && fromKey.startsWith("[].")) {
                 remapKeys.remove(i);
                 mapperObject.setFrom(fromKey.substring(3));
                 listRemapKeys.add(mapperObject);
@@ -64,6 +65,8 @@ public class DataMapper {
             Map<String, Object> mappedRecord = DataMapper.remapData(valueRecord, listRemapKeys);
             listKeyMapped.add(mappedRecord);
         }
+
+        Map<String, Object> keyMappedResult = DataMapper.remapData(new HashMap<>(), remapKeys);
 
         Map<String, Object> arrayMerged = Utils.mergeObjects(listKeyMapped);
         keyMappedResult = Utils.mergeObjects(keyMappedResult, arrayMerged);
