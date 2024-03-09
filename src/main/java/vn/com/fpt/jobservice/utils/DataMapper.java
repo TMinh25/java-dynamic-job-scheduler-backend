@@ -1,7 +1,6 @@
 package vn.com.fpt.jobservice.utils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
@@ -21,6 +20,7 @@ public class DataMapper {
         private String from;
         private Boolean required;
         private String defaultValue;
+        private Boolean isInserted = false;
 
         public MapperObject() {
             // Default constructor for Jackson
@@ -76,8 +76,11 @@ public class DataMapper {
 
     public static Map<String, Object> remapData(Map<String, Object> input, List<MapperObject> remapKeys) {
         Map<String, Object> output = new HashMap<>();
+        JSONArray currentArray = null;
 
-        for (MapperObject mapperObject : remapKeys) {
+        for (int i = 0; i < remapKeys.size(); i++) {
+            MapperObject mapperObject = remapKeys.get(i);
+
             String fromKey = mapperObject.getFrom();
             String toKey = mapperObject.getTo();
             Boolean isRequired = mapperObject.getRequired();
@@ -96,9 +99,10 @@ public class DataMapper {
                 }
                 continue;
             }
-
-            boolean isNestedFromKey = fromKey.contains(".") || isArrayKey(fromKey);
-            boolean isNestedToKey = toKey.contains(".") || isArrayKey(toKey);
+            boolean isArrayFromKey = isArrayPath(fromKey);
+            boolean isNestedFromKey = fromKey.contains(".") || isArrayFromKey;
+            boolean isArrayToKey = isArrayPath(toKey);
+            boolean isNestedToKey = toKey.contains(".") || isArrayToKey;
 
             if (isNestedToKey) {
                 JSONObject jsonObject;
@@ -106,7 +110,13 @@ public class DataMapper {
                     Object nestedData = getNestedData(input, fromKey);
                     jsonObject = getToValue(toKey, new JSONObject(output), nestedData);
                 } else {
-                    jsonObject = getToValue(toKey, new JSONObject(output), input.get(fromKey));
+                    if (isArrayToKey && !mapperObject.getIsInserted()) {
+                        mapperObject.setIsInserted(true);
+                        remapKeys.add(mapperObject);
+                        continue;
+                    } else {
+                        jsonObject = getToValue(toKey, new JSONObject(output), input.get(fromKey));
+                    }
                 }
 
                 Map<String, Object> objectMap = Utils.jsonToMap(jsonObject.toString());
@@ -204,8 +214,11 @@ public class DataMapper {
                                 currentArray.put(innerI, tempObject);
                             }
                         } else {
-                            JSONObject firstObject = currentArray.getJSONObject(0);
-                            firstObject.put(keyPart, value);
+                            for (int innerI = 0; innerI < currentArray.length(); innerI++) {
+                                JSONObject tempObject = currentArray.getJSONObject(innerI);
+                                tempObject.put(keyPart, value);
+                                currentArray.put(innerI, tempObject);
+                            }
                         }
                     } else {
                         if (currentObject.has(keyPart) && currentObject.get(keyPart) instanceof JSONArray) {

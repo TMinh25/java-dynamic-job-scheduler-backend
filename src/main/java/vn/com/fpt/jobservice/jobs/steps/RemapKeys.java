@@ -1,6 +1,8 @@
 package vn.com.fpt.jobservice.jobs.steps;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import vn.com.fpt.jobservice.entity.Task;
@@ -40,7 +42,7 @@ public class RemapKeys extends BaseJobStep {
                 List<Map<String, Object>> valueList = Utils.stringToList(valueContext, new TypeReference<>() {});
                 keyMappedResult = DataMapper.remapData(valueList, remapKeys);
             }
-            logger("keyMappedResult: " + keyMappedResult.toString());
+            logger("keyMappedResult: " + new JSONObject(keyMappedResult));
             context.put("keyMappedResult", keyMappedResult);
         } catch (Exception e) {
             throw new JobExecutionException(e);

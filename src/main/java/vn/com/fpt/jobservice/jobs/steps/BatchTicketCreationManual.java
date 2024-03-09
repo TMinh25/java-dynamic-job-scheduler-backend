@@ -17,6 +17,7 @@ import vn.com.fpt.jobservice.utils.CallExternalAPI;
 import vn.com.fpt.jobservice.utils.Utils;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class BatchTicketCreationManual extends BaseJobStep {
     @Autowired
@@ -51,6 +52,10 @@ public class BatchTicketCreationManual extends BaseJobStep {
                     BatchResponseModel.class);
 
             logger("Ticket create result: " + ticketCreateResponse.toString());
+
+            if (!Objects.equals(ticketCreateResponse.getMessageCode(), "200")) {
+                throw new Exception(ticketCreateResponse.getMessage());
+            }
         } catch (HttpClientErrorException e) {
             throw new JobExecutionException(e.getResponseBodyAsString());
         } catch (Exception e) {
