@@ -86,7 +86,7 @@ public class DataMapper {
             Boolean isRequired = mapperObject.getRequired();
             String defaultValue = mapperObject.getDefaultValue();
 
-            if (fromKey == null) {
+            if (fromKey == null || fromKey.isEmpty()) {
                 if (defaultValue != null) {
                     JSONObject jsonObject = getToValue(toKey, new JSONObject(output), defaultValue);
                     Map<String, Object> objectMap = Utils.jsonToMap(jsonObject.toString());
