@@ -1,10 +1,7 @@
 package vn.com.fpt.jobservice.jobs.base;
 
 import lombok.extern.slf4j.Slf4j;
-import org.quartz.InterruptableJob;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.quartz.JobKey;
+import org.quartz.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import vn.com.fpt.jobservice.entity.StepHistory;
@@ -20,6 +17,7 @@ import java.util.Date;
 import java.util.List;
 
 @Slf4j
+@DisallowConcurrentExecution
 public abstract class BaseJob extends QuartzJobBean implements InterruptableJob {
     public String type;
     protected Task task;
