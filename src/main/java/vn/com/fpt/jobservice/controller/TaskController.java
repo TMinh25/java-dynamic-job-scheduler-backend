@@ -26,6 +26,7 @@ public class TaskController {
     JobService jobService;
 
     final String TENANT_ID_HEADER = "Tenant-Id";
+    final String SERVICE_TENANT_ID_HEADER = "X-TenantID";
 
     @GetMapping()
     public PagedResponse<Task> searchTasks(@RequestHeader(TENANT_ID_HEADER) String tenantId, @RequestParam(value = "page", defaultValue = "1") int pageIndex, @RequestParam(value = "size", defaultValue = "10") int pageSize, @RequestParam(value = "search", required = false, defaultValue = "") String searchQuery) {
@@ -55,7 +56,7 @@ public class TaskController {
     }
 
     @GetMapping("/unschedule-task")
-    public Boolean unscheduleTask(@RequestParam(value = "tenantId") String tenantId, @RequestParam(value = "ticketId", required = false) Long ticketId, @RequestParam(value = "phaseId", required = false) Long phaseId, @RequestParam(value = "id", required = false) String id, @RequestParam(value = "update", defaultValue = "false") Boolean isUpdate) throws Exception {
+    public Boolean unscheduleTask(@RequestHeader(SERVICE_TENANT_ID_HEADER) String tenantId, @RequestParam(value = "ticketId", required = false) Long ticketId, @RequestParam(value = "phaseId", required = false) Long phaseId, @RequestParam(value = "id", required = false) String id, @RequestParam(value = "update", defaultValue = "false") Boolean isUpdate) throws Exception {
         try {
             Task task;
             isUpdate = false;
