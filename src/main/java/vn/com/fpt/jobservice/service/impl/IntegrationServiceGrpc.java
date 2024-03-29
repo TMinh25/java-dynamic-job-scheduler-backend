@@ -14,33 +14,33 @@ public class IntegrationServiceGrpc {
     @GrpcClient("integration")
     private IntegrationServiceGrpcBlockingStub integrationServiceBlockingStub;
 
-    public List<IntegrationData> getListIntegration() {
+    public List<IntegrationData> getListIntegration(String tenantId) {
         log.debug("getListIntegration - START");
-        GetIntegrationListRequest request = GetIntegrationListRequest.newBuilder().build();
+        GetIntegrationListRequest request = GetIntegrationListRequest.newBuilder().setTenantId(tenantId).build();
         GetIntegrationListResult result = integrationServiceBlockingStub.getIntegrationList(request);
         log.debug("getListIntegration - END");
         return result.getDataList();
     }
 
-    public GetIntegrationResult getIntegrationById(Long id) {
+    public GetIntegrationResult getIntegrationById(Long id, String tenantId) {
         log.debug("getIntegrationById - START");
-        GetIntegrationRequest request = GetIntegrationRequest.newBuilder().setId(id).build();
+        GetIntegrationRequest request = GetIntegrationRequest.newBuilder().setId(id).setTenantId(tenantId).build();
         log.debug("getIntegrationById - END");
 
         return integrationServiceBlockingStub.getIntegration(request);
     }
 
-    public ExecuteIntegrationResult verifyIntegrations(String request) throws Exception {
+    public ExecuteIntegrationResult verifyIntegrations(String request, String tenantId) throws Exception {
         log.debug("getIntegrationById - START");
-        ExecuteIntegrationRequest grpcRequest = ExecuteIntegrationRequest.newBuilder().setRequest(request).build();
+        ExecuteIntegrationRequest grpcRequest = ExecuteIntegrationRequest.newBuilder().setRequest(request).setTenantId(tenantId).build();
         log.debug("getIntegrationById - END");
 
         return integrationServiceBlockingStub.verifyIntegration(grpcRequest);
     }
 
-    public ExecuteIntegrationResult executeIntegration(String request) throws Exception {
+    public ExecuteIntegrationResult executeIntegration(String request, String tenantId) throws Exception {
         log.debug("getIntegrationById - START");
-        ExecuteIntegrationRequest grpcRequest = ExecuteIntegrationRequest.newBuilder().setRequest(request).build();
+        ExecuteIntegrationRequest grpcRequest = ExecuteIntegrationRequest.newBuilder().setRequest(request).setTenantId(tenantId).build();
         log.debug("getIntegrationById - END");
 
         return integrationServiceBlockingStub.executeIntegration(grpcRequest);

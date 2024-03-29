@@ -23,12 +23,12 @@ public class GetIntegrationResultGRPC extends BaseJobStep {
         final Task task = (Task) context.get("task");
         final IntegrationServiceGrpc integrationServiceGrpc = (IntegrationServiceGrpc) context.get("integrationServiceGrpc");
         try {
-            GetIntegrationResult result = integrationServiceGrpc.getIntegrationById(task.getIntegrationId());
+            GetIntegrationResult result = integrationServiceGrpc.getIntegrationById(task.getIntegrationId(), task.getTenantId());
             logger(String.format("Integration data for id %s:", task.getIntegrationId()));
             logger("- url      : " + result.getItem().getUrl());
             logger("- method   : " + result.getItem().getMethod());
             logger("- structure: " + new JSONObject(result.getStructure()));
-            ExecuteIntegrationResult res = integrationServiceGrpc.executeIntegration(result.getStructure());
+            ExecuteIntegrationResult res = integrationServiceGrpc.executeIntegration(result.getStructure(), task.getTenantId());
             logger("Execute integration result: " + (Utils.isJsonArray(res.getResult()) ? new JSONArray(res.getResult()) : new JSONObject(res.getResult())));
             context.put("integrationResult", res.getResult());
         } catch (Exception e) {

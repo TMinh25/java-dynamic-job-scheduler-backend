@@ -8,10 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import vn.com.fpt.jobservice.model.response.DataSourceDTO;
 import vn.com.fpt.jobservice.model.response.IntegrationItem;
 import vn.com.fpt.jobservice.service.impl.IntegrationServiceGrpc;
@@ -30,9 +27,11 @@ public class IntegrationController {
     @Autowired
     IntegrationServiceGrpc integrationServiceGrpc;
 
+    private final String TENANT_ID_HEADER = "Tenant-Id";
+
     @GetMapping()
-    public List<IntegrationItem> getIntegrationGRPC() {
-        return integrationServiceGrpc.getListIntegration().stream().map(integrationData -> {
+    public List<IntegrationItem> getIntegrationGRPC(@RequestHeader(TENANT_ID_HEADER) String tenantId) {
+        return integrationServiceGrpc.getListIntegration(tenantId).stream().map(integrationData -> {
             try {
                 return IntegrationItem.fromGrpcData(integrationData);
             } catch (JsonProcessingException e) {
@@ -42,11 +41,11 @@ public class IntegrationController {
     }
 
     @GetMapping("/field-mapping/{id}")
-    public List<DataSourceDTO> getFieldMapping(@PathVariable("id") Long id) throws Exception {
+    public List<DataSourceDTO> getFieldMapping(@RequestHeader(TENANT_ID_HEADER) String tenantId, @PathVariable("id") Long id) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
 
-        GetIntegrationResult integrationData = integrationServiceGrpc.getIntegrationById(id);
-        ExecuteIntegrationResult result = integrationServiceGrpc.executeIntegration(integrationData.getStructure());
+        GetIntegrationResult integrationData = integrationServiceGrpc.getIntegrationById(id, tenantId);
+        ExecuteIntegrationResult result = integrationServiceGrpc.executeIntegration(integrationData.getStructure(), tenantId);
 
         Set<String> allKeys = new HashSet<>();
         if (Utils.isJsonObject(result.getResult())) {
@@ -120,10 +119,10 @@ public class IntegrationController {
     }
 
     @GetMapping("/execute/{id}")
-    public ExecuteIntegrationResult executeIntegrationGRPC(@PathVariable("id") Long id) throws Exception {
-        GetIntegrationResult integrationData = integrationServiceGrpc.getIntegrationById(id);
+    public ExecuteIntegrationResult executeIntegrationGRPC(@RequestHeader(TENANT_ID_HEADER) String tenantId, @PathVariable("id") Long id) throws Exception {
+        GetIntegrationResult integrationData = integrationServiceGrpc.getIntegrationById(id, tenantId);
         String structureStr = integrationData.getStructure();
 
-        return integrationServiceGrpc.executeIntegration(structureStr);
+        return integrationServiceGrpc.executeIntegration(structureStr, tenantId);
     }
 }
