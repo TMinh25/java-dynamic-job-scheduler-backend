@@ -66,11 +66,12 @@ public class TaskServiceGrpc extends ReactorTaskServiceGrpc.TaskServiceImplBase 
         try {
             Long ticketId = request.getTicketId();
             Long phaseId = request.getPhaseId();
+            String tenantId = request.getTenantId();
             TaskGrpc grpcTask = request.getTask();
 
             TaskModel taskModel = TaskModel.fromGrpc(grpcTask, taskTypeRepository);
 
-            Task taskFound = taskService.readTaskByTicketIdAndPhaseId(ticketId, phaseId);
+            Task taskFound = taskService.readTaskByTicketIdAndPhaseIdAndTenantId(ticketId, phaseId, tenantId);
             Task task = taskService.updateTaskById(taskFound.getId(), taskModel);
 
             TaskResponse response = TaskResponse
@@ -103,7 +104,8 @@ public class TaskServiceGrpc extends ReactorTaskServiceGrpc.TaskServiceImplBase 
         try {
             Long ticketId = request.getTicketId();
             Long phaseId = request.getPhaseId();
-            Task taskFound = taskService.readTaskByTicketIdAndPhaseId(ticketId, phaseId);
+            String tenantId = request.getTenantId();
+            Task taskFound = taskService.readTaskByTicketIdAndPhaseIdAndTenantId(ticketId, phaseId, tenantId);
 
             boolean success = taskService.triggerJob(taskFound.getId());
 
@@ -121,7 +123,8 @@ public class TaskServiceGrpc extends ReactorTaskServiceGrpc.TaskServiceImplBase 
         try {
             Long ticketId = request.getTicketId();
             Long phaseId = request.getPhaseId();
-            Boolean taskActive = taskService.readActiveByTicketIdAndPhaseId(ticketId, phaseId);
+            String tenantId = request.getTenantId();
+            Boolean taskActive = taskService.readActiveByTicketIdAndPhaseIdAndTenantId(ticketId, phaseId, tenantId);
             TaskActiveResponse response = TaskActiveResponse.newBuilder().setActive(taskActive).build();
             return Mono.just(response);
         } catch (Exception e) {
@@ -136,6 +139,7 @@ public class TaskServiceGrpc extends ReactorTaskServiceGrpc.TaskServiceImplBase 
             String id = request.getId();
             long ticketId = request.getTicketId();
             long phaseId = request.getPhaseId();
+            String tenantId = request.getTenantId();
             boolean isUpdate = request.getUpdate();
 
             Task task;
@@ -143,7 +147,7 @@ public class TaskServiceGrpc extends ReactorTaskServiceGrpc.TaskServiceImplBase 
             if (!id.isEmpty()) {
                 task = taskService.readTaskById(id);
             } else if (ticketId != 0 && phaseId != 0) {
-                task = taskService.readTaskByTicketIdAndPhaseId(ticketId, phaseId);
+                task = taskService.readTaskByTicketIdAndPhaseIdAndTenantId(ticketId, phaseId, tenantId);
             } else {
                 throw new IllegalArgumentException("Either 'id' or both 'ticketId' and 'phaseId' are required.");
             }

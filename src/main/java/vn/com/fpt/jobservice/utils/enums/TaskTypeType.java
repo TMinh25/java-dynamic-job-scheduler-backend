@@ -1,4 +1,4 @@
-package vn.com.fpt.jobservice.utils;
+package vn.com.fpt.jobservice.utils.enums;
 
 public enum TaskTypeType {
     SYSTEM("SYSTEM"),

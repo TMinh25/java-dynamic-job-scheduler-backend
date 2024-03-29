@@ -1,7 +1,7 @@
 package vn.com.fpt.jobservice.jobs.steps;
 
-import com.fpt.fis.integration.grpc.ExecuteIntegrationResult;
-import com.fpt.fis.integration.grpc.GetIntegrationResult;
+import com.fpt.fis.integration.grpc.IntegrationService.ExecuteIntegrationResult;
+import com.fpt.fis.integration.grpc.IntegrationService.GetIntegrationResult;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.quartz.JobExecutionContext;

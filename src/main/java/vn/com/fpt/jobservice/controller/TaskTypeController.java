@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import vn.com.fpt.jobservice.entity.TaskType;
 import vn.com.fpt.jobservice.exception.ResourceNotFoundException;
 import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
-import vn.com.fpt.jobservice.utils.TaskTypeType;
+import vn.com.fpt.jobservice.utils.enums.TaskTypeType;
 
 import java.util.List;
 

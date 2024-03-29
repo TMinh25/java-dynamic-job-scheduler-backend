@@ -1,9 +1,9 @@
 package vn.com.fpt.jobservice.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fpt.fis.integration.grpc.ExecuteIntegrationResult;
-import com.fpt.fis.integration.grpc.GetIntegrationListResult;
-import com.fpt.fis.integration.grpc.GetIntegrationResult;
+import com.fpt.fis.integration.grpc.IntegrationService.ExecuteIntegrationResult;
+import com.fpt.fis.integration.grpc.IntegrationService.GetIntegrationResult;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -13,10 +13,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import vn.com.fpt.jobservice.model.response.DataSourceDTO;
+import vn.com.fpt.jobservice.model.response.IntegrationItem;
 import vn.com.fpt.jobservice.service.impl.IntegrationServiceGrpc;
 import vn.com.fpt.jobservice.utils.Utils;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 @RestController
@@ -27,9 +31,14 @@ public class IntegrationController {
     IntegrationServiceGrpc integrationServiceGrpc;
 
     @GetMapping()
-    public GetIntegrationListResult getIntegrationGRPC() {
-        GetIntegrationListResult result = integrationServiceGrpc.getListIntegration();
-        return result;
+    public List<IntegrationItem> getIntegrationGRPC() {
+        return integrationServiceGrpc.getListIntegration().stream().map(integrationData -> {
+            try {
+                return IntegrationItem.fromGrpcData(integrationData);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        }).toList();
     }
 
     @GetMapping("/field-mapping/{id}")
@@ -51,7 +60,6 @@ public class IntegrationController {
         List<DataSourceDTO> dataSources = allKeys.stream()
                 .map(item -> DataSourceDTO.builder().id(item).name(item.replace(".", " - ")).build())
                 .collect(Collectors.toList());
-
 
         return dataSources;
     }

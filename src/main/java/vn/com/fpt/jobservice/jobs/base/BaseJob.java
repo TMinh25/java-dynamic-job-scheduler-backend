@@ -10,7 +10,7 @@ import vn.com.fpt.jobservice.entity.TaskHistory;
 import vn.com.fpt.jobservice.model.LogModel;
 import vn.com.fpt.jobservice.service.StepHistoryService;
 import vn.com.fpt.jobservice.service.TaskService;
-import vn.com.fpt.jobservice.utils.TaskStatus;
+import vn.com.fpt.jobservice.utils.enums.TaskStatus;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -69,10 +69,8 @@ public abstract class BaseJob extends QuartzJobBean implements InterruptableJob 
         stepHistoryService.updateProcessingStepOfTaskHistory(taskHistory.getId(), stepHistory);
     }
 
-    @Override
-    protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+    protected void initializedData(JobExecutionContext context) throws JobExecutionException {
         this.context = context;
-        logger("Job executing...");
 
         JobKey key = context.getJobDetail().getKey();
         this.jobUUID = key.getName();
@@ -80,7 +78,11 @@ public abstract class BaseJob extends QuartzJobBean implements InterruptableJob 
         context.put("task", this.task);
 
         defineSteps();
+    }
 
+    @Override
+    protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+        logger(LogModel.LOGS.START.get());
         final TaskHistory taskHistory = (TaskHistory) context.get("taskHistory");
 
         int currentStep = 0;
@@ -101,7 +103,11 @@ public abstract class BaseJob extends QuartzJobBean implements InterruptableJob 
                 break;
             }
         }
-        logger("Job finished!");
+        jobFinish();
+    }
+
+    protected void jobFinish() {
+        logger(LogModel.LOGS.FINISH.get());
     }
 
     @Override

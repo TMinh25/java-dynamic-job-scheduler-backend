@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.com.fpt.jobservice.entity.Task;
-import vn.com.fpt.jobservice.utils.TaskStatus;
+import vn.com.fpt.jobservice.utils.enums.TaskStatus;
 
 import java.util.Date;
 import java.util.List;
@@ -31,7 +31,7 @@ public interface TaskRepository extends JpaRepository<Task, String> {
 
     Page<Task> findAll(Specification<Task> specification, Pageable pageable);
 
-    default Page<Task> searchByString(Pageable pageable, String searchQuery) {
+    default Page<Task> searchByString(Pageable pageable, String searchQuery, String tenantId) {
         // Add sorting by createdAt in descending order
         Pageable pageableWithSort = PageRequest.of(
                 pageable.getPageNumber(),
@@ -39,7 +39,7 @@ public interface TaskRepository extends JpaRepository<Task, String> {
                 Sort.by(Sort.Direction.DESC, "createdAt"));
 
         return findAll((Specification<Task>) (root, query, criteriaBuilder) -> {
-            Predicate predicate = criteriaBuilder.conjunction();
+            Predicate predicate = criteriaBuilder.equal(root.get("tenantId"), tenantId);
             if (!searchQuery.isEmpty()) {
                 Predicate ticketIdPredicate = criteriaBuilder.isTrue(criteriaBuilder.literal(false));
                 Predicate phaseIdPredicate = criteriaBuilder.isTrue(criteriaBuilder.literal(false));
@@ -52,11 +52,14 @@ public interface TaskRepository extends JpaRepository<Task, String> {
                 }
 
                 predicate = criteriaBuilder.and(
+                        criteriaBuilder.equal(root.get("tenantId"), tenantId),
                         criteriaBuilder.or(
                                 // criteriaBuilder.like(root.get("id"), "%" + searchQuery + "%"),
                                 criteriaBuilder.like(root.get("name"), "%" + searchQuery + "%"),
                                 ticketIdPredicate,
-                                phaseIdPredicate));
+                                phaseIdPredicate
+                        )
+                );
             }
             return predicate;
         }, pageableWithSort);
