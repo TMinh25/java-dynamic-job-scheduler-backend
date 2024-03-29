@@ -201,4 +201,14 @@ public class Utils {
             return false;
         }
     }
+
+    public static boolean isValidJson(String jsonString) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.readTree(jsonString);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
