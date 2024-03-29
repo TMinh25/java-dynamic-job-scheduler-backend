@@ -55,22 +55,22 @@ public class IntegrationItem {
                 .description(i.getDescription())
                 .structure(i.getStructure());
 
-        if (!i.getParams().isEmpty()) {
+        if (!i.getParams().isEmpty() && Utils.isValidJson(i.getParams())) {
             itemBuilder.params(Utils.stringToObject(i.getParams(), STRING_MAP_TYPE_REF));
         }
-        if (!i.getHeaders().isEmpty()) {
+        if (!i.getHeaders().isEmpty() && Utils.isValidJson(i.getHeaders())) {
             itemBuilder.headers(Utils.stringToObject(i.getHeaders(), STRING_MAP_TYPE_REF));
         }
-        if (!i.getBody().isEmpty()) {
+        if (!i.getBody().isEmpty() && Utils.isValidJson(i.getBody())) {
             itemBuilder.body(Utils.stringToObject(i.getBody(), STRING_OBJECT_MAP_TYPE_REF));
         }
-        if (!i.getOutputConfig().isEmpty()) {
+        if (!i.getOutputConfig().isEmpty() && Utils.isValidJson(i.getOutputConfig())) {
             itemBuilder.outputConfig(Utils.stringToObject(i.getOutputConfig(), STRING_MAP_TYPE_REF));
         }
-        if (!i.getMappingConfig().isEmpty()) {
+        if (!i.getMappingConfig().isEmpty() && Utils.isValidJson(i.getMappingConfig())) {
             itemBuilder.mappingConfig(Utils.stringToObject(i.getMappingConfig(), STRING_MAP_TYPE_REF));
         }
-        if (!i.getAuth().isEmpty()) {
+        if (!i.getAuth().isEmpty() && Utils.isValidJson(i.getAuth())) {
             itemBuilder.auth(Utils.stringToObject(i.getAuth(), AUTH_MAP_TYPE_REF));
         }
 
