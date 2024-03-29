@@ -2,9 +2,7 @@ package vn.com.fpt.jobservice.model;
 
 import lombok.Builder;
 import lombok.Data;
-import vn.com.fpt.jobservice.entity.Task;
-import vn.com.fpt.jobservice.entity.TaskHistory;
-import vn.com.fpt.jobservice.utils.TaskStatus;
+import vn.com.fpt.jobservice.utils.enums.TaskStatus;
 
 import java.util.Date;
 

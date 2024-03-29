@@ -11,7 +11,7 @@ import vn.com.fpt.jobservice.model.StepHistoryModel;
 import vn.com.fpt.jobservice.repositories.StepHistoryRepository;
 import vn.com.fpt.jobservice.repositories.TaskHistoryRepository;
 import vn.com.fpt.jobservice.service.StepHistoryService;
-import vn.com.fpt.jobservice.utils.TaskStatus;
+import vn.com.fpt.jobservice.utils.enums.TaskStatus;
 import vn.com.fpt.jobservice.utils.Utils;
 
 import java.util.ArrayList;

@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.SneakyThrows;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import vn.com.fpt.jobservice.model.TaskHistoryModel;
-import vn.com.fpt.jobservice.utils.TaskStatus;
+import vn.com.fpt.jobservice.utils.enums.TaskStatus;
 import vn.com.fpt.jobservice.utils.Utils;
 
 import java.util.ArrayList;
@@ -52,6 +52,9 @@ public class TaskHistory {
     @Column(name = "execution_time")
     private Long executionTime;
 
+    @Column(name = "tenant_id", nullable = false)
+    private String tenantId;
+
     public TaskHistory() {
     }
 
@@ -72,10 +75,10 @@ public class TaskHistory {
 
     @SneakyThrows
     public TaskHistoryModel toModel() {
-        List<Map<String, String>> logList = new ArrayList<>();
+        List<Map<String, Object>> logList = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
         if (this.logs != null) {
-            logList = objectMapper.readValue(this.logs, new TypeReference<List<Map<String, String>>>() {
+            logList = objectMapper.readValue(this.logs, new TypeReference<List<Map<String, Object>>>() {
             });
         }
 

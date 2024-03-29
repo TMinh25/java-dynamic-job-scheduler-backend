@@ -9,7 +9,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import vn.com.fpt.jobservice.entity.TaskHistory;
-import vn.com.fpt.jobservice.utils.TaskStatus;
+import vn.com.fpt.jobservice.utils.enums.TaskStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,25 +22,21 @@ public interface TaskHistoryRepository extends JpaRepository<TaskHistory, Long> 
 
     Optional<TaskHistory> findFirstByTaskIdAndStatus(String taskId, TaskStatus status);
 
+    Optional<TaskHistory> findFirstByTaskIdOrderByStartedAtDesc(String taskId);
+
     Page<TaskHistory> findAll(Specification<TaskHistory> specification, Pageable pageable);
 
-    default Page<TaskHistory> searchByString(Pageable pageable, String searchQuery) {
+    default Page<TaskHistory> searchByString(Pageable pageable, String tenantId, String searchQuery) {
         Pageable pageableWithSort = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by(Sort.Direction.DESC, "startedAt"));
 
         return findAll((Specification<TaskHistory>) (root, query, criteriaBuilder) -> {
-            Predicate predicate = criteriaBuilder.conjunction();
+            Predicate predicate = criteriaBuilder.equal(root.get("tenantId"), tenantId);
             if (!searchQuery.isEmpty()) {
-                Predicate ticketIdPredicate = criteriaBuilder.isTrue(criteriaBuilder.literal(false));
-//                Predicate phaseIdPredicate = criteriaBuilder.isTrue(criteriaBuilder.literal(false));
 
-//                try {
-//                    Long longValue = Long.parseLong(searchQuery);
-//                    ticketIdPredicate = criteriaBuilder.equal(root.get("ticketId"), longValue);
-//                    phaseIdPredicate = criteriaBuilder.equal(root.get("phaseId"), longValue);
-//                } catch (Exception e) {
-//                }
-
-                predicate = criteriaBuilder.and(criteriaBuilder.or(criteriaBuilder.like(root.get("taskId"), "%" + searchQuery + "%"), ticketIdPredicate));
+                predicate = criteriaBuilder.and(
+                        criteriaBuilder.like(root.get("taskId"), "%" + searchQuery + "%"),
+                        criteriaBuilder.equal(root.get("tenantId"), tenantId)
+                );
             }
             return predicate;
         }, pageableWithSort);

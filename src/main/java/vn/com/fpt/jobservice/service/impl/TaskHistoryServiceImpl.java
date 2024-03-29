@@ -16,7 +16,7 @@ import vn.com.fpt.jobservice.repositories.TaskHistoryRepository;
 import vn.com.fpt.jobservice.repositories.TaskRepository;
 import vn.com.fpt.jobservice.service.StepHistoryService;
 import vn.com.fpt.jobservice.service.TaskHistoryService;
-import vn.com.fpt.jobservice.utils.TaskStatus;
+import vn.com.fpt.jobservice.utils.enums.TaskStatus;
 import vn.com.fpt.jobservice.utils.Utils;
 
 import java.util.List;
@@ -41,9 +41,9 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
     }
 
     @Override
-    public PagedResponse<TaskHistoryModel> readAll(Pageable pageable, String searchQuery) {
+    public PagedResponse<TaskHistoryModel> readAll(Pageable pageable, String tenantId, String searchQuery) {
         log.debug("readAllHistoryOfTask - START");
-        Page<TaskHistory> histories = taskHistoryRepo.searchByString(pageable, searchQuery);
+        Page<TaskHistory> histories = taskHistoryRepo.searchByString(pageable, tenantId, searchQuery);
         Page<TaskHistoryModel> taskHistoryModelPage = histories.map(TaskHistory::toModel);
         log.debug("readAllHistoryOfTask - END");
 
@@ -65,6 +65,7 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
         log.debug("insertNewHistoryOfTask - START");
         Task task = taskRepo.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Task", "taskId", taskId));
+        history.setTenantId(task.getTenantId());
         history.setTask(task);
         log.debug("insertNewHistoryOfTask - END");
         return taskHistoryRepo.save(history);
@@ -82,6 +83,27 @@ public class TaskHistoryServiceImpl implements TaskHistoryService {
             taskHistory.calculateExecutionTime();
         }
         log.debug("updateHistoryOfTask - END");
+        return taskHistoryRepo.save(taskHistory);
+    }
+
+    @Override
+    public TaskHistory findLatestByTaskId(String taskId) {
+        return taskHistoryRepo.findFirstByTaskIdOrderByStartedAtDesc(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("TaskHistories", "taskId", taskId));
+    }
+
+    @Override
+    @Transactional
+    public TaskHistory updateLatestHistoryOfTask(String taskId, TaskHistory history) {
+        log.debug("updateLatestHistoryOfTask - START");
+        TaskHistory taskHistory = taskHistoryRepo.findFirstByTaskIdOrderByStartedAtDesc(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("TaskHistories", "taskId", taskId));
+
+        BeanUtils.copyProperties(history, taskHistory, Utils.getNullPropertyNames(history));
+        if (taskHistory.getStatus() == TaskStatus.SUCCESS || taskHistory.getStatus() == TaskStatus.ERRORED) {
+            taskHistory.calculateExecutionTime();
+        }
+        log.debug("updateLatestHistoryOfTask - END");
         return taskHistoryRepo.save(taskHistory);
     }
 

@@ -42,7 +42,7 @@ public class RemapKeys extends BaseJobStep {
                 List<Map<String, Object>> valueList = Utils.stringToList(valueContext, new TypeReference<>() {});
                 keyMappedResult = DataMapper.remapData(valueList, remapKeys);
             }
-            logger("keyMappedResult: " + new JSONObject(keyMappedResult));
+//            logger("keyMappedResult: " + new JSONObject(keyMappedResult));
             context.put("keyMappedResult", keyMappedResult);
         } catch (Exception e) {
             throw new JobExecutionException(e);

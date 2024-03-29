@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import vn.com.fpt.jobservice.entity.TaskType;
-import vn.com.fpt.jobservice.utils.TaskTypeType;
+import vn.com.fpt.jobservice.utils.enums.TaskTypeType;
 
 @Data
 @NoArgsConstructor

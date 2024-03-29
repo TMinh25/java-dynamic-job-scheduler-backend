@@ -3,7 +3,7 @@ package vn.com.fpt.jobservice.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import vn.com.fpt.jobservice.utils.TaskTypeType;
+import vn.com.fpt.jobservice.utils.enums.TaskTypeType;
 
 @Entity
 @Table(name = "task_types")

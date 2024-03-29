@@ -21,8 +21,8 @@ import vn.com.fpt.jobservice.service.JobService;
 import vn.com.fpt.jobservice.service.TaskHistoryService;
 import vn.com.fpt.jobservice.service.TaskSchedulerService;
 import vn.com.fpt.jobservice.service.TaskService;
-import vn.com.fpt.jobservice.utils.TaskStatus;
-import vn.com.fpt.jobservice.utils.TaskTypeType;
+import vn.com.fpt.jobservice.utils.enums.TaskStatus;
+import vn.com.fpt.jobservice.utils.enums.TaskTypeType;
 import vn.com.fpt.jobservice.utils.Utils;
 
 import java.text.ParseException;
@@ -49,9 +49,9 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public PagedResponse<Task> searchTasks(Pageable pageable, String searchQuery) {
+    public PagedResponse<Task> searchTasks(Pageable pageable, String searchQuery, String tenantId) {
         log.debug("readAllTasks - START");
-        Page<Task> entityPage = taskRepository.searchByString(pageable, searchQuery);
+        Page<Task> entityPage = taskRepository.searchByString(pageable, searchQuery, tenantId);
         // Page<Task> entityPage = taskRepository.findAll(pageable);
         log.debug("readAllTasks - END");
         return new PagedResponse<>(entityPage);
@@ -75,7 +75,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task readTaskByTicketIdAndPhaseId(Long ticketId, Long phaseId) throws Exception {
+    public Task readTaskByTicketIdAndPhaseIdAndTenantId(Long ticketId, Long phaseId, String tenantId) throws Exception {
         log.debug("readTaskById - START");
         Task entity = taskRepository.findFirstByTicketIdAndPhaseIdOrderByCreatedAtDesc(ticketId, phaseId)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -85,9 +85,9 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Boolean readActiveByTicketIdAndPhaseId(Long ticketId, Long phaseId) throws Exception {
+    public Boolean readActiveByTicketIdAndPhaseIdAndTenantId(Long ticketId, Long phaseId, String tenantId) throws Exception {
         log.debug("readTaskStatusByTicketIdAndPhaseId - START");
-        Task task = readTaskByTicketIdAndPhaseId(ticketId, phaseId);
+        Task task = readTaskByTicketIdAndPhaseIdAndTenantId(ticketId, phaseId, tenantId);
         log.debug("readTaskStatusByTicketIdAndPhaseId - END");
         return task.getActive();
     }

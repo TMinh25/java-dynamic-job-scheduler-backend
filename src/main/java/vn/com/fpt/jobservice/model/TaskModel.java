@@ -11,7 +11,7 @@ import vn.com.fpt.jobservice.entity.TaskType;
 import vn.com.fpt.jobservice.exception.ResourceNotFoundException;
 import vn.com.fpt.jobservice.repositories.TaskTypeRepository;
 import vn.com.fpt.jobservice.task_service.grpc.TaskGrpc;
-import vn.com.fpt.jobservice.utils.TaskStatus;
+import vn.com.fpt.jobservice.utils.enums.TaskStatus;
 import vn.com.fpt.jobservice.utils.Utils;
 
 import java.util.*;
@@ -48,6 +48,8 @@ public class TaskModel {
     private String createdBy;
     private String modifiedBy;
 
+    private String tenantId;
+
     public static TaskModel fromGrpc(TaskGrpc taskGrpc, TaskTypeRepository taskTypeRepo) {
         List<Object> taskInputData;
         if (!String.valueOf(taskGrpc.getTaskInputDataList()).equals("[]")) {
@@ -62,6 +64,7 @@ public class TaskModel {
         }
         return TaskModel.builder()
                 .id(taskGrpc.getId())
+                .tenantId(taskGrpc.getTenantId())
                 .name(taskGrpc.getName())
                 .taskTypeId(taskGrpc.getTaskTypeId())
                 .taskType(taskTypeEntity)
@@ -104,6 +107,7 @@ public class TaskModel {
         if (this.getMaxRetries() != null) {
             taskEntity.setMaxRetries(this.getMaxRetries());
         }
+        taskEntity.setTenantId(this.getTenantId());
         taskEntity.setTaskInputData(Utils.objectToString(this.getTaskInputData()));
         taskEntity.setTicketId(this.getTicketId());
         taskEntity.setPhaseId(this.getPhaseId());

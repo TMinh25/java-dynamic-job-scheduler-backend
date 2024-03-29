@@ -1,4 +1,4 @@
-package vn.com.fpt.jobservice.utils;
+package vn.com.fpt.jobservice.utils.enums;
 
 import java.util.HashMap;
 import java.util.Map;

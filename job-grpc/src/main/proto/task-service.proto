@@ -22,28 +22,29 @@ service TaskService {
 message TaskGrpc {
   string id = 1;
   string name = 2;
-  int64 taskTypeId = 3;
-  repeated google.protobuf.Any taskInputData = 4;
-  int64 ticketId = 5;
-  int64 phaseId = 6;
-  string phaseName = 7;
-  int64 subProcessId = 8;
-  int64 integrationId = 9;
-  string integrationName = 10;
-  int32 retryCount = 11;
-  int32 maxRetries = 12;
-  int32 startStep = 13;
-  string cronExpression = 14;
-  google.protobuf.Timestamp nextInvocation = 15;
-  google.protobuf.Timestamp prevInvocation = 16;
-  string jobUUID = 17;
-  string status = 18;
-  bool active = 19;
-  TaskTypeGrpc taskType = 20;
-  google.protobuf.Timestamp createdAt = 21;
-  google.protobuf.Timestamp modifiedAt = 22;
-  string createdBy = 23;
-  string modifiedBy = 24;
+  string tenantId = 3;
+  int64 taskTypeId = 4;
+  repeated google.protobuf.Any taskInputData = 5;
+  int64 ticketId = 6;
+  int64 phaseId = 7;
+  string phaseName = 8;
+  int64 subProcessId = 9;
+  int64 integrationId = 10;
+  string integrationName = 11;
+  int32 retryCount = 12;
+  int32 maxRetries = 13;
+  int32 startStep = 14;
+  string cronExpression = 15;
+  google.protobuf.Timestamp nextInvocation = 16;
+  google.protobuf.Timestamp prevInvocation = 17;
+  string jobUUID = 18;
+  string status = 19;
+  bool active = 20;
+  TaskTypeGrpc taskType = 21;
+  google.protobuf.Timestamp createdAt = 22;
+  google.protobuf.Timestamp modifiedAt = 23;
+  string createdBy = 24;
+  string modifiedBy = 25;
 }
 
 message TaskTypeGrpc {
@@ -70,7 +71,8 @@ message TaskUpdateRequestByTaskId {
 message TaskUpdateRequestByTicketIdAndPhaseId {
   int64 ticketId = 1;
   int64 phaseId = 2;
-  TaskGrpc task = 3;
+  string tenantId = 3;
+  TaskGrpc task = 4;
 }
 
 message TaskTriggerRequestByTaskId {
@@ -80,13 +82,15 @@ message TaskTriggerRequestByTaskId {
 message TaskTriggerRequestByTicketIdAndPhaseId {
   int64 ticketId = 1;
   int64 phaseId = 2;
+  string tenantId = 3;
 }
 
 message UnscheduleTaskRequest {
   string id = 1;
   int64 ticketId = 2;
   int64 phaseId = 3;
-  bool update = 4;
+  string tenantId = 4;
+  bool update = 5;
 }
 
 message TaskTriggerResponse {

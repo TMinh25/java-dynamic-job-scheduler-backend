@@ -1,15 +1,18 @@
 package vn.com.fpt.jobservice.service.impl;
 
+import com.fpt.fis.organization.grpc.DataSyncDepartmentRequest;
+import com.fpt.fis.organization.grpc.DataSyncResponse;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Service;
-import vn.com.fpt.jobservice.organization.grpc.DataSyncRequest;
-import vn.com.fpt.jobservice.organization.grpc.DataMapping;
-import vn.com.fpt.jobservice.organization.grpc.OrganizationServiceGrpc.OrganizationServiceBlockingStub;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import com.fpt.fis.organization.grpc.OrganizationServiceGrpc.*;
+import com.fpt.fis.organization.grpc.DataMappingRequest;
+
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -22,10 +25,10 @@ public class OrganizationServiceGrpc {
     public void executedForDataSync(List<Map<String, Object>> request) {
 
         try {
-            List<DataMapping> dataMappingList = new ArrayList<>();
+            List<DataMappingRequest> dataMappingList = new ArrayList<>();
 
             request.forEach(it -> {
-                DataMapping dataMapping = DataMapping.newBuilder()
+                DataMappingRequest dataMapping = DataMappingRequest.newBuilder()
                         .putAllParam(it.entrySet().stream()
                                 .collect(Collectors.toMap(Map.Entry::getKey,
                                         e -> e.getValue() == null ?
@@ -34,11 +37,12 @@ public class OrganizationServiceGrpc {
                 dataMappingList.add(dataMapping);
             });
 
-            DataSyncRequest dataSyncRequest = DataSyncRequest.newBuilder()
-                    .addAllDataMapping(dataMappingList)
+            DataSyncDepartmentRequest dataSyncRequest = DataSyncDepartmentRequest.newBuilder()
+                    .addAllDataMappings(dataMappingList)
                     .build();
 
-            organizationClient.executedForDataSync(dataSyncRequest);
+            DataSyncResponse response = organizationClient.executedForDataSyncDepartment(dataSyncRequest);
+            log.debug("Sync department response: {}", response);
 
         } catch (Exception e) {
             log.error("createDepartment: ", e);

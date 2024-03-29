@@ -15,9 +15,11 @@ public class TaskHistoryController {
     @Autowired
     TaskHistoryService taskHistoryService;
 
+    final String TENANT_ID_HEADER = "Tenant-Id";
+
     @GetMapping()
-    public PagedResponse<TaskHistoryModel> readAll(@RequestParam(value = "page", defaultValue = "1") int pageIndex, @RequestParam(value = "size", defaultValue = "20") int pageSize, @RequestParam(value = "search", defaultValue = "") String searchQuery) {
-        return taskHistoryService.readAll(PageRequest.of(pageIndex - 1, pageSize), searchQuery);
+    public PagedResponse<TaskHistoryModel> readAll(@RequestHeader(TENANT_ID_HEADER) String tenantId, @RequestParam(value = "page", defaultValue = "1") int pageIndex, @RequestParam(value = "size", defaultValue = "20") int pageSize, @RequestParam(value = "search", defaultValue = "") String searchQuery) {
+        return taskHistoryService.readAll(PageRequest.of(pageIndex - 1, pageSize), tenantId, searchQuery);
     }
 
     @GetMapping("/{id}")

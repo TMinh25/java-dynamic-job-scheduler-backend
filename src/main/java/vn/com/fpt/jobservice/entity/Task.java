@@ -13,7 +13,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import vn.com.fpt.jobservice.model.TaskModel;
 import vn.com.fpt.jobservice.service.TaskSchedulerService;
 import vn.com.fpt.jobservice.task_service.grpc.TaskGrpc;
-import vn.com.fpt.jobservice.utils.TaskStatus;
+import vn.com.fpt.jobservice.utils.enums.TaskStatus;
 import vn.com.fpt.jobservice.utils.Utils;
 
 import java.text.ParseException;
@@ -100,6 +100,9 @@ public class Task extends BaseEntity {
 
     @Column(name = "ticket_phase_unique_constraints", unique = true)
     private String ticketPhaseUniqueConstraints;
+
+    @Column(name = "tenant_id", nullable = false)
+    private String tenantId;
 
     private void enforceUniqueConstraint() {
         if (this.ticketId != null && this.phaseId != null) {

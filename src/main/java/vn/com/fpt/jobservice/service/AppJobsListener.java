@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import vn.com.fpt.jobservice.entity.Task;
 import vn.com.fpt.jobservice.entity.TaskHistory;
 import vn.com.fpt.jobservice.model.LogModel;
-import vn.com.fpt.jobservice.utils.TaskStatus;
+import vn.com.fpt.jobservice.utils.enums.TaskStatus;
 import vn.com.fpt.jobservice.utils.Utils;
 
 @Configuration
@@ -45,6 +45,7 @@ public class AppJobsListener implements JobListener {
         taskHistory.setStep(0L);
         taskHistory.setStatus(TaskStatus.PROCESSING);
         taskHistory.setStartedAt(executionDate);
+        taskHistory.setTenantId(task.getTenantId());
         taskHistory = taskHistoryService.insertNewHistoryOfTask(task.getId(), taskHistory);
         context.put("taskHistory", taskHistory);
         context.put("logs", new ArrayList<>());

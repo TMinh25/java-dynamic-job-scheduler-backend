@@ -10,13 +10,17 @@ import java.util.List;
 public interface TaskHistoryService {
     TaskHistoryModel findById(Long id);
 
-    PagedResponse<TaskHistoryModel> readAll(Pageable pageable, String searchQuery);
+    TaskHistory findLatestByTaskId(String taskId);
+
+    PagedResponse<TaskHistoryModel> readAll(Pageable pageable, String tenantId, String searchQuery);
 
     PagedResponse<TaskHistoryModel> readAllHistoryOfTask(Pageable pageable, String taskId);
 
     TaskHistory insertNewHistoryOfTask(String taskId, TaskHistory history);
 
     TaskHistory updateProcessingHistoryOfTask(String taskId, TaskHistory history);
+
+    TaskHistory updateLatestHistoryOfTask(String taskId, TaskHistory history);
 
     void deleteAllHistoriesOfTask(String taskId);
 }

@@ -3,7 +3,7 @@ package vn.com.fpt.jobservice.repositories;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import vn.com.fpt.jobservice.entity.StepHistory;
-import vn.com.fpt.jobservice.utils.TaskStatus;
+import vn.com.fpt.jobservice.utils.enums.TaskStatus;
 
 import java.util.List;
 import java.util.Optional;

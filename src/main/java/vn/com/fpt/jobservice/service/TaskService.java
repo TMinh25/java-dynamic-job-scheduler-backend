@@ -9,15 +9,15 @@ import vn.com.fpt.jobservice.model.TaskModel;
 import java.util.List;
 
 public interface TaskService {
-    PagedResponse<Task> searchTasks(Pageable pageable, String searchQuery);
+    PagedResponse<Task> searchTasks(Pageable pageable, String searchQuery, String tenantId);
 
     PagedResponse<Task> readAllTasks(Pageable pageable);
 
     Task readTaskById(String id);
 
-    Task readTaskByTicketIdAndPhaseId(Long ticketId, Long phaseId) throws Exception;
+    Task readTaskByTicketIdAndPhaseIdAndTenantId(Long ticketId, Long phaseId, String tenantId) throws Exception;
 
-    Boolean readActiveByTicketIdAndPhaseId(Long ticketId, Long phaseId) throws Exception;
+    Boolean readActiveByTicketIdAndPhaseIdAndTenantId(Long ticketId, Long phaseId, String tenantId) throws Exception;
 
     Task readTaskByJobUUID(String jobUUID);
 

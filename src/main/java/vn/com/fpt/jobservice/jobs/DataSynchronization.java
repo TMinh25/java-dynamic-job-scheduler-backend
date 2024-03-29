@@ -31,6 +31,8 @@ public class DataSynchronization extends BaseJob {
 
     @Override
     public void executeInternal(JobExecutionContext context) throws JobExecutionException {
+        super.initializedData(context);
+
         // Declare data for job steps
         context.put("integrationServiceGrpc", integrationServiceGrpc);
         context.put("organizationServiceGrpc", organizationServiceGrpc);
