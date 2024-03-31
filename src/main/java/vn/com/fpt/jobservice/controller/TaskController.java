@@ -41,7 +41,7 @@ public class TaskController {
     }
 
     @GetMapping("/read-status")
-    public Boolean readStatusByTicketAndPhase(@RequestHeader(TENANT_ID_HEADER) String tenantId, @RequestParam(value = "ticketId", required = true) Long ticketId, @RequestParam(value = "phaseId", required = true) Long phaseId) throws Exception {
+    public Boolean readStatusByTicketAndPhase(@RequestHeader(SERVICE_TENANT_ID_HEADER) String tenantId, @RequestParam(value = "ticketId", required = true) Long ticketId, @RequestParam(value = "phaseId", required = true) Long phaseId) throws Exception {
         return taskService.readActiveByTicketIdAndPhaseIdAndTenantId(ticketId, phaseId, tenantId);
     }
 
