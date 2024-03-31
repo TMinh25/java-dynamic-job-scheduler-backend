@@ -46,6 +46,7 @@ public class TaskHistory {
     @Column(name = "ended_at")
     private Date endedAt;
 
+    @Lob
     @Column(name = "logs", columnDefinition = "TEXT")
     private String logs;
 

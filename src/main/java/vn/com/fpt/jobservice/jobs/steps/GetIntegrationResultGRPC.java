@@ -29,7 +29,7 @@ public class GetIntegrationResultGRPC extends BaseJobStep {
             logger("- method   : " + result.getItem().getMethod());
             logger("- structure: " + new JSONObject(result.getStructure()));
             ExecuteIntegrationResult res = integrationServiceGrpc.executeIntegration(result.getStructure(), task.getTenantId());
-            logger("Execute integration result: " + (Utils.isJsonArray(res.getResult()) ? new JSONArray(res.getResult()) : new JSONObject(res.getResult())));
+//            logger("Execute integration result: " + (Utils.isJsonArray(res.getResult()) ? new JSONArray(res.getResult()) : new JSONObject(res.getResult())));
             context.put("integrationResult", res.getResult());
         } catch (Exception e) {
             throw new JobExecutionException(e);
