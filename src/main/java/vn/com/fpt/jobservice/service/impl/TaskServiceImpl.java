@@ -231,6 +231,7 @@ public class TaskServiceImpl implements TaskService {
 
         if (taskDetails != null) {
             BeanUtils.copyProperties(taskDetails, task, Utils.getNullPropertyNames(taskDetails));
+            task.setMaxRetries(taskDetails.getMaxRetries());
             task = taskRepository.save(task);
         }
 
