@@ -1,7 +1,7 @@
 package vn.com.fpt.jobservice.service.impl;
 
-import com.fpt.fis.organization.grpc.DataSyncDepartmentRequest;
 import com.fpt.fis.organization.grpc.DataSyncResponse;
+import com.fpt.fis.organization.grpc.SyncOrgChartRequestMessage;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Service;
@@ -37,11 +37,11 @@ public class OrganizationServiceGrpc {
                 dataMappingList.add(dataMapping);
             });
 
-            DataSyncDepartmentRequest dataSyncRequest = DataSyncDepartmentRequest.newBuilder()
+            SyncOrgChartRequestMessage dataSyncRequest = SyncOrgChartRequestMessage.newBuilder()
                     .addAllDataMappings(dataMappingList)
                     .build();
 
-            DataSyncResponse response = organizationClient.executedForDataSyncDepartment(dataSyncRequest);
+            DataSyncResponse response = organizationClient.executeSyncOrgChart(dataSyncRequest);
             log.debug("Sync department response: {}", response);
 
         } catch (Exception e) {
